@@ -14,10 +14,13 @@ Thumbnail: cook/cook.png
 Demo: cook/cook.html
 File: cook.html|cook/cook.html
 ---
-Title: Logic Script
-Description: শুধুমাত্র ডাটা পার্সার লজিক (কোনো UI নেই)
-Tags: JavaScript, Logic
+Title: ইনফোগ্রাফী ওয়েবপেজ
+Description: গাণিতিক বিশ্লেষণ যুক্ত বিভিন্ন তথ্যমূলক ওয়েবসাইট
+Tags: html,txt
 Thumbnail:
-Demo:
-File: parser.js |cook.html logic/parser.js
+Demo:infography_research/music-bangla.html
+File:index.html|infography_research/index
+File:ads.txt|infography_research/ads.txt
+File:data.txt|infography_research/data.txt
+File: music-bangla.html|infography_research/music-bangla.html
 ---
