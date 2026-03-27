@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <title>ইনফোগ্রাফি v-1 | গাণিতিক বিশ্লেষণ</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Hind Siliguri', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        .glass-header { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.3); }
+        .glass-card { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07); }
+        .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.4); }
+
+        .ad-image { transition: opacity 0.5s ease-in-out; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen text-gray-800 pb-20 selection:bg-indigo-200">
+
+    <header class="glass-header sticky top-0 z-50 px-4 py-3 flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold shadow-md">
+                <i class="fa-solid fa-chart-pie"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-gray-900 leading-tight">ইনফোগ্রাফি v-1</h1>
+                <p class="text-xs text-indigo-600 font-medium">গাণিতিক বিশ্লেষণ</p>
+            </div>
+        </div>
+        <a href="https://chakra-login-app.vercel.app/" class="flex items-center gap-2 px-4 py-2 bg-white rounded-full text-sm font-semibold text-gray-700 shadow-sm border border-gray-200 hover:bg-gray-50 active:scale-95 transition-all">
+            <i class="fa-solid fa-arrow-left text-indigo-500"></i> Back
+        </a>
+    </header>
+
+    <div class="w-full max-w-4xl mx-auto px-4 mt-4 relative">
+        <div id="adLoading" class="w-full h-32 md:h-48 rounded-2xl bg-indigo-100 animate-pulse flex items-center justify-center text-indigo-400 font-bold">
+            <i class="fa-solid fa-spinner fa-spin mr-2"></i> Ad লোড হচ্ছে...
+        </div>
+        <div id="adError" class="hidden w-full h-32 md:h-48 rounded-2xl bg-red-100 border border-red-300 flex items-center justify-center text-red-500 font-bold text-sm text-center px-4">
+        </div>
+        <a id="adLink" href="#" class="hidden w-full h-32 md:h-48 rounded-2xl overflow-hidden relative shadow-md group">
+            <img id="adImage" src="" alt="Advertisement" class="w-full h-full object-cover ad-image group-hover:scale-105 transition-transform duration-700">
+            <div class="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm">AD</div>
+        </a>
+    </div>
+
+    <section class="py-8 px-4 text-center max-w-3xl mx-auto">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">ডিরেক্টরিতে স্বাগতম</h2>
+        <p class="text-gray-600 mb-6 text-sm md:text-base">এখানে আপনি বিভিন্ন গাণিতিক বিশ্লেষণ ও ইনফোগ্রাফিক কার্ডগুলো পাবেন। নির্দিষ্ট কার্ড খুঁজতে ID ব্যবহার করুন।</p>
+        
+        <div class="relative max-w-lg mx-auto">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <i class="fa-solid fa-search text-gray-400"></i>
+            </div>
+            <input type="text" id="searchInput" placeholder="ID লিখে সার্চ করুন (যেমন: 101)" class="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none transition-all text-gray-700 font-medium">
+        </div>
+    </section>
+
+    <main class="container mx-auto px-4 mb-10">
+        <div id="dataLoading" class="text-center py-10 text-indigo-600 font-bold text-lg flex flex-col items-center">
+            <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3"></i> ডেটা ফেচ করা হচ্ছে...
+        </div>
+        
+        <div id="dataError" class="hidden text-center py-8 px-4 bg-red-50 text-red-600 rounded-xl border border-red-200 font-medium max-w-2xl mx-auto">
+        </div>
+
+        <div id="data-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 hidden">
+            </div>
+
+        <div id="no-result" class="hidden text-center py-10 text-gray-500 font-medium bg-white rounded-xl shadow-sm border border-gray-100 max-w-xl mx-auto">
+            <i class="fa-regular fa-folder-open text-4xl mb-3 text-gray-300"></i>
+            <p>কোনো তথ্য পাওয়া যায়নি!</p>
+        </div>
+    </main>
+
+    <nav class="glass-nav fixed bottom-0 left-0 w-full md:hidden flex justify-around items-center py-3 pb-safe z-50">
+        <a href="#" class="flex flex-col items-center text-indigo-600 active:scale-95 transition-transform">
+            <i class="fa-solid fa-house text-xl mb-1"></i>
+            <span class="text-[10px] font-semibold">হোম</span>
+        </a>
+        <a href="#" onclick="document.getElementById('searchInput').focus()" class="flex flex-col items-center text-gray-400 hover:text-indigo-500 active:scale-95 transition-colors">
+            <i class="fa-solid fa-magnifying-glass text-xl mb-1"></i>
+            <span class="text-[10px] font-semibold">খুঁজুন</span>
+        </a>
+        <a href="#" class="flex flex-col items-center text-gray-400 hover:text-indigo-500 active:scale-95 transition-colors">
+            <i class="fa-solid fa-heart text-xl mb-1"></i>
+            <span class="text-[10px] font-semibold">ফেভারিট</span>
+        </a>
+    </nav>
+
+    <script>
+        // --- Cache Buster Helper ---
+        const applyCacheBuster = url => url.includes('?') ? `${url}&v=${new Date().getTime()}` : `${url}?v=${new Date().getTime()}`;
+
+        let allData = [];
+        let adsData = [];
+        let currentAdIndex = 0;
+        let adInterval;
+
+        // --- Custom Text Parser (No brackets/commas) ---
+        function parseTxtData(text) {
+            const blocks = text.split(/---+/).map(b => b.trim()).filter(b => b);
+            return blocks.map(block => {
+                let obj = {};
+                const lines = block.split('\n');
+                lines.forEach(line => {
+                    const colonIdx = line.indexOf(':');
+                    if (colonIdx !== -1) {
+                        const key = line.substring(0, colonIdx).trim().toLowerCase();
+                        const val = line.substring(colonIdx + 1).trim();
+                        obj[key] = val;
+                    }
+                });
+                return obj;
+            }).filter(obj => Object.keys(obj).length > 0);
+        }
+
+        // --- Fetch Setup & Error Handling ---
+        async function fetchAppFiles() {
+            // UI Elements
+            const adLoadUI = document.getElementById('adLoading');
+            const adErrUI = document.getElementById('adError');
+            const adLinkUI = document.getElementById('adLink');
+            
+            const dataLoadUI = document.getElementById('dataLoading');
+            const dataErrUI = document.getElementById('dataError');
+            const dataContainer = document.getElementById('data-container');
+            const noResultUI = document.getElementById('no-result');
+
+            try {
+                // Fetch Data File
+                const dataRes = await fetch(applyCacheBuster('data.txt'));
+                if (!dataRes.ok) throw new Error(`Data Fetch Error: ${dataRes.status}`);
+                const dataText = await dataRes.text();
+                allData = parseTxtData(dataText);
+                
+                dataLoadUI.classList.add('hidden');
+                
+                if (allData.length === 0) {
+                    noResultUI.classList.remove('hidden');
+                } else {
+                    dataContainer.classList.remove('hidden');
+                    renderData(allData);
+                }
+            } catch (error) {
+                dataLoadUI.classList.add('hidden');
+                dataErrUI.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-2"></i> ডেটা লোড করতে সমস্যা: ${error.message}`;
+                dataErrUI.classList.remove('hidden');
+            }
+
+            try {
+                // Fetch Ads File
+                const adsRes = await fetch(applyCacheBuster('ads.txt'));
+                if (!adsRes.ok) throw new Error(`Ads Fetch Error: ${adsRes.status}`);
+                const adsText = await adsRes.text();
+                adsData = parseTxtData(adsText);
+
+                adLoadUI.classList.add('hidden');
+
+                if (adsData.length > 0) {
+                    adLinkUI.classList.remove('hidden');
+                    adLinkUI.classList.add('block');
+                    startAdRotation();
+                } else {
+                    adErrUI.innerHTML = "কোনো অ্যাড পাওয়া যায়নি!";
+                    adErrUI.classList.remove('hidden');
+                }
+            } catch (error) {
+                adLoadUI.classList.add('hidden');
+                adErrUI.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> অ্যাড এরর: ${error.message}`;
+                adErrUI.classList.remove('hidden');
+            }
+        }
+
+        // --- Ad Banner Logic ---
+        function startAdRotation() {
+            const adImageEl = document.getElementById('adImage');
+            const adLinkEl = document.getElementById('adLink');
+            
+            const updateAd = () => {
+                const currentAd = adsData[currentAdIndex];
+                adImageEl.style.opacity = 0; 
+                setTimeout(() => {
+                    // Apply dynamic cache buster to external image link
+                    adImageEl.src = applyCacheBuster(currentAd.image);
+                    adLinkEl.href = currentAd.link || '#';
+                    adImageEl.style.opacity = 1; 
+                }, 500);
+            };
+
+            updateAd(); // Initial load
+            if(adsData.length > 1) {
+                adInterval = setInterval(() => {
+                    currentAdIndex = (currentAdIndex + 1) % adsData.length;
+                    updateAd();
+                }, 5000);
+            }
+        }
+
+        // --- Favorites Handling ---
+        let favorites = JSON.parse(localStorage.getItem('favApps')) || [];
+        window.toggleFav = function(id) {
+            const index = favorites.indexOf(id);
+            if (index > -1) favorites.splice(index, 1);
+            else favorites.push(id);
+            
+            localStorage.setItem('favApps', JSON.stringify(favorites));
+            renderData(allData, document.getElementById('searchInput').value.trim().toLowerCase());
+        };
+
+        // --- Render Content ---
+        function renderData(dataToRender, filterText = '') {
+            const container = document.getElementById('data-container');
+            const noResult = document.getElementById('no-result');
+            
+            // Apply Search Filter
+            let filtered = dataToRender;
+            if(filterText) {
+                filtered = dataToRender.filter(item => (item.id || '').toLowerCase().includes(filterText));
+            }
+
+            container.innerHTML = '';
+            if(filtered.length === 0) {
+                noResult.classList.remove('hidden');
+                container.classList.add('hidden');
+            } else {
+                noResult.classList.add('hidden');
+                container.classList.remove('hidden');
+                
+                filtered.forEach(item => {
+                    const isFav = favorites.includes(item.id);
+                    const cardId = item.id || 'N/A';
+                    const title = item.title || 'Untitled';
+                    const desc = item.desc || 'No description available.';
+                    const link = item.demo || '#';
+
+                    const card = `
+                        <div class="glass-card rounded-2xl p-5 hover:-translate-y-1 transition-transform duration-300 relative group flex flex-col h-full">
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full border border-indigo-200">
+                                    ID: ${cardId}
+                                </span>
+                                <button onclick="toggleFav('${cardId}')" class="text-xl active:scale-75 transition-transform ${isFav ? 'text-red-500' : 'text-gray-300 hover:text-red-400'}">
+                                    <i class="fa-solid fa-heart"></i>
+                                </button>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">${title}</h3>
+                            <p class="text-gray-600 text-sm mb-6 flex-grow leading-relaxed">${desc}</p>
+                            <a href="${link}" class="mt-auto block w-full text-center bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold py-3 rounded-xl shadow-md hover:shadow-lg active:scale-[0.98] transition-all">
+                                ডেমো দেখুন <i class="fa-solid fa-arrow-right ml-1 text-sm"></i>
+                            </a>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', card);
+                });
+            }
+        }
+
+        // --- Search Event ---
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            renderData(allData, e.target.value.trim().toLowerCase());
+        });
+
+        // Initialize Fetch
+        document.addEventListener('DOMContentLoaded', fetchAppFiles);
+
+    </script>
+</body>
+</html>
