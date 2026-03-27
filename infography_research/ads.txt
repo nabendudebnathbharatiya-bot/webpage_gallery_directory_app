@@ -1,0 +1,12 @@
+Image: https://via.placeholder.com/800x200/4f46e5/ffffff?text=Premium+Ad+Banner+1
+Link: https://example.com/ad1
+
+---
+
+Image: https://via.placeholder.com/800x200/ec4899/ffffff?text=Premium+Ad+Banner+2
+Link: https://example.com/ad2
+
+---
+
+Image: https://via.placeholder.com/800x200/10b981/ffffff?text=Premium+Ad+Banner+3
+Link: https://example.com/ad3
