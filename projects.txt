@@ -18,8 +18,8 @@ Title: ইনফোগ্রাফী ওয়েবপেজ
 Description: গাণিতিক বিশ্লেষণ যুক্ত বিভিন্ন তথ্যমূলক ওয়েবসাইট
 Tags: html,txt
 Thumbnail:
-Demo:index.html
-File:index.html|infography_research/index
+Demo: infography_research/index.html
+File:index.html|infography_research/index.html
 File:ads.txt|infography_research/ads.txt
 File:data.txt|infography_research/data.txt
 File: music-bangla.html|infography_research/music-bangla.html
