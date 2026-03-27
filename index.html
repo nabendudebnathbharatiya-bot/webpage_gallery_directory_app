@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Web App Exhibition | ডেমো গ্যালারি</title>
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style> 
+        body { font-family: 'Hind Siliguri', sans-serif; } 
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c7c7cc; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a0a0a5; }
+        
+        /* কাস্টম ট্যাব স্টাইল */
+        .tab-active { background-color: white; color: #4f46e5; border-top: 3px solid #4f46e5; border-bottom: none; }
+        .tab-inactive { background-color: #e5e7eb; color: #4b5563; border-bottom: 1px solid #d1d5db; }
+        .tab-inactive:hover { background-color: #d1d5db; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <nav class="bg-white shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-indigo-600">🚀 AI এক্সিবিশন</div>
+        </div>
+    </nav>
+
+    <header class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-center py-20 px-4">
+        <h1 class="text-4xl font-bold mb-4">ওয়েব অ্যাপ ডেমো গ্যালারি CHAKRADHAM</h1>
+        <p class="text-lg max-w-2xl mx-auto mb-8 text-indigo-100">
+            বিভিন্ন প্রজেক্টের কালেকশন এবং সোর্স কোড লাইব্রেরি।
+        </p>
+    </header>
+
+    <main class="container mx-auto px-4 py-10" id="projects">
+        
+        <div class="max-w-md mx-auto mb-10 relative">
+            <input type="text" id="searchInput" onkeyup="filterProjects()" placeholder="প্রোজেক্ট খুঁজুন..." class="w-full pl-10 pr-5 py-3 rounded-full shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-700">
+        </div>
+
+        <div id="loadingIndicator" class="text-center py-10 text-indigo-600 font-bold text-xl hidden">
+            লোড হচ্ছে... 
+        </div>
+        <div id="errorMessage" class="text-center py-10 text-red-600 font-bold text-xl hidden bg-red-100 rounded-lg max-w-2xl mx-auto border border-red-400">
+        </div>
+        <div id="noDataMessage" class="text-center py-10 text-gray-600 font-bold text-xl hidden">
+            কোনো প্রোজেক্ট পাওয়া যায়নি! 
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="projectGrid"></div>
+    </main>
+
+    <div id="codeModal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-5xl rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            
+            <div class="bg-gray-900 text-white px-6 py-4 flex justify-between items-center shrink-0">
+                <h3 class="font-bold text-lg" id="modalProjectTitle">সোর্স কোড</h3>
+                <div class="flex gap-3">
+                    <button onclick="copySourceCode()" id="copyBtn" class="bg-indigo-500 hover:bg-indigo-400 text-white px-5 py-2 rounded-lg text-sm transition-colors font-semibold">
+                        কপি করুন
+                    </button>
+                    <button onclick="closeModal()" class="bg-red-500 hover:bg-red-400 text-white px-5 py-2 rounded-lg text-sm transition-colors font-semibold">
+                        বন্ধ করুন
+                    </button>
+                </div>
+            </div>
+
+            <div id="fileTabs" class="flex overflow-x-auto bg-gray-200 shrink-0"></div>
+
+            <div class="p-6 overflow-y-auto bg-gray-50 flex-grow relative">
+                <div id="modalLoader" class="hidden absolute inset-0 bg-gray-50 bg-opacity-90 flex flex-col items-center justify-center text-indigo-600 font-bold z-10">
+                    <span class="animate-pulse mb-2">ফাইল লোড হচ্ছে...</span>
+                </div>
+                <pre><code id="codeBlock" class="text-sm font-mono text-gray-800 whitespace-pre-wrap word-break"></code></pre>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let allProjects = [];
+        let currentCodeContent = "";
+
+        const applyCacheBuster = url => url.includes('?') ? `${url}&v=${new Date().getTime()}` : `${url}?v=${new Date().getTime()}`;
+
+        document.addEventListener('DOMContentLoaded', fetchProjectsData);
+
+        async function fetchProjectsData() {
+            const grid = document.getElementById('projectGrid');
+            const loader = document.getElementById('loadingIndicator');
+            const errorEl = document.getElementById('errorMessage');
+            const noData = document.getElementById('noDataMessage');
+
+            grid.innerHTML = '';
+            errorEl.classList.add('hidden');
+            noData.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            try {
+                // JSON এর বদলে এখন .txt ফাইল ফেচ করা হচ্ছে
+                const response = await fetch(applyCacheBuster('projects.txt'));
+                
+                if (!response.ok) throw new Error(`সার্ভার এরর: ${response.status}`);
+
+                const textData = await response.text();
+                
+                // Text Parser কল করা হচ্ছে
+                allProjects = parseProjectsTxt(textData);
+
+                loader.classList.add('hidden');
+
+                if (allProjects.length === 0) {
+                    noData.classList.remove('hidden');
+                    return;
+                }
+
+                renderProjects(allProjects);
+
+            } catch (error) {
+                loader.classList.add('hidden');
+                errorEl.innerHTML = `<b>ডেটা লোড করতে সমস্যা হয়েছে!</b><br><span class="text-sm">${error.message}</span>`;
+                errorEl.classList.remove('hidden');
+            }
+        }
+
+        // 🟢 NEW: Text Parser for projects.txt 🟢
+        function parseProjectsTxt(text) {
+            const blocks = text.split(/---+/).map(b => b.trim()).filter(b => b);
+            
+            return blocks.map((block, index) => {
+                let project = {
+                    id: index,
+                    title: '',
+                    description: '',
+                    tags: [],
+                    thumbnail: '',
+                    demoLink: '',
+                    sourceFiles: []
+                };
+                
+                const lines = block.split('\n');
+                lines.forEach(line => {
+                    const cleanLine = line.trim();
+                    if (!cleanLine) return;
+
+                    const colonIdx = cleanLine.indexOf(':');
+                    if (colonIdx !== -1) {
+                        const key = cleanLine.substring(0, colonIdx).trim().toLowerCase();
+                        const val = cleanLine.substring(colonIdx + 1).trim();
+                        
+                        if (key === 'title') project.title = val;
+                        else if (key === 'description') project.description = val;
+                        else if (key === 'tags') project.tags = val.split(',').map(t => t.trim()).filter(t => t);
+                        else if (key === 'thumbnail') project.thumbnail = val;
+                        else if (key === 'demo') project.demoLink = val;
+                        else if (key === 'file') {
+                            // File format: name.html | url
+                            const parts = val.split('|').map(p => p.trim());
+                            if (parts.length >= 2) {
+                                project.sourceFiles.push({ name: parts[0], url: parts[1] });
+                            }
+                        }
+                    }
+                });
+                return project;
+            }).filter(p => p.title); // শুধুমাত্র সেই প্রোজেক্টগুলো নেবে যেগুলোর Title আছে
+        }
+
+        function renderProjects(projects) {
+            const grid = document.getElementById('projectGrid');
+            grid.innerHTML = '';
+
+            projects.forEach(project => {
+                const imageSrc = project.thumbnail ? applyCacheBuster(project.thumbnail) : 'https://via.placeholder.com/400x200?text=No+Image';
+
+                let tagsHtml = project.tags.map(tag => 
+                    `<span class="bg-indigo-100 text-indigo-600 text-xs px-2 py-1 rounded font-semibold">${tag}</span>`
+                ).join('');
+
+                let demoButtonHtml = '';
+                if (project.demoLink && project.demoLink.trim() !== '') {
+                    demoButtonHtml = `<a href="${project.demoLink}" target="_blank" class="flex-1 bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-600 hover:text-white text-center font-semibold py-2 px-4 rounded-lg transition-colors">রান করুন</a>`;
+                } else {
+                    demoButtonHtml = `<span title="কোনো HTML ফাইল নেই" class="flex-1 bg-gray-100 text-gray-400 border border-gray-200 text-center font-semibold py-2 px-4 rounded-lg cursor-not-allowed">রান হবে না</span>`;
+                }
+
+                const cardHtml = `
+                    <div class="project-card bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col">
+                        <div class="h-48 bg-gray-200 flex items-center justify-center border-b shrink-0">
+                            <img src="${imageSrc}" alt="${project.title}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/400x200?text=No+Image'">
+                        </div>
+                        <div class="p-5 flex flex-col flex-grow">
+                            <h3 class="font-bold text-xl mb-2 text-gray-800">${project.title}</h3>
+                            <p class="text-gray-600 text-sm mb-4 flex-grow">${project.description}</p>
+                            <div class="flex flex-wrap gap-2 mb-4">${tagsHtml}</div>
+                            <div class="flex gap-3 mt-auto">
+                                ${demoButtonHtml}
+                                <button onclick="openCodeViewer(${project.id})" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-center font-semibold py-2 px-4 rounded-lg transition-colors">কোড দেখুন</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += cardHtml;
+            });
+        }
+
+        function filterProjects() {
+            let input = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allProjects.filter(p => p.title.toLowerCase().includes(input));
+            
+            const noData = document.getElementById('noDataMessage');
+            if(filtered.length === 0) {
+                noData.classList.remove('hidden');
+                document.getElementById('projectGrid').innerHTML = '';
+            } else {
+                noData.classList.add('hidden');
+                renderProjects(filtered);
+            }
+        }
+
+        function openCodeViewer(projectId) {
+            const project = allProjects.find(p => p.id === projectId);
+            
+            if (!project || !project.sourceFiles || project.sourceFiles.length === 0) {
+                alert("দুঃখিত, এই প্রোজেক্টের কোনো কোড ফাইল যুক্ত করা নেই!");
+                return;
+            }
+
+            const modal = document.getElementById('codeModal');
+            const tabsContainer = document.getElementById('fileTabs');
+            
+            document.getElementById('modalProjectTitle').innerText = project.title + " (সোর্স কোড)";
+            modal.classList.remove('hidden');
+            tabsContainer.innerHTML = ''; 
+            document.getElementById('codeBlock').innerText = ''; 
+
+            project.sourceFiles.forEach((file, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'tab-btn px-6 py-3 text-sm font-semibold whitespace-nowrap border-r border-gray-300 transition-colors tab-inactive';
+                btn.innerText = file.name;
+                btn.onclick = () => loadFileContent(file.url, btn);
+                tabsContainer.appendChild(btn);
+            });
+
+            if (tabsContainer.firstChild) {
+                tabsContainer.firstChild.click();
+            }
+        }
+
+        async function loadFileContent(fileUrl, activeBtn) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.classList.add('tab-inactive');
+            });
+            activeBtn.classList.remove('tab-inactive');
+            activeBtn.classList.add('tab-active');
+
+            const codeBlock = document.getElementById('codeBlock');
+            const modalLoader = document.getElementById('modalLoader');
+            const copyBtn = document.getElementById('copyBtn');
+
+            codeBlock.innerText = '';
+            currentCodeContent = '';
+            copyBtn.innerText = 'কপি করুন';
+            copyBtn.classList.replace('bg-green-500', 'bg-indigo-500'); 
+            modalLoader.classList.remove('hidden');
+
+            try {
+                const response = await fetch(applyCacheBuster(fileUrl));
+                if (!response.ok) throw new Error("ফাইলটি সার্ভারে খুঁজে পাওয়া যায়নি!");
+                
+                const text = await response.text();
+                currentCodeContent = text;
+                codeBlock.textContent = text;
+            } catch (error) {
+                codeBlock.innerText = "এরর: " + error.message;
+            } finally {
+                modalLoader.classList.add('hidden');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('codeModal').classList.add('hidden');
+        }
+
+        function copySourceCode() {
+            if (!currentCodeContent) return;
+            
+            navigator.clipboard.writeText(currentCodeContent).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.innerText = 'কপি হয়েছে!';
+                btn.classList.replace('bg-indigo-500', 'bg-green-500'); 
+                
+                setTimeout(() => { 
+                    btn.innerText = 'কপি করুন'; 
+                    btn.classList.replace('bg-green-500', 'bg-indigo-500');
+                }, 2000);
+            }).catch(err => {
+                alert("কপি করতে সমস্যা হয়েছে!");
+            });
+        }
+    </script>
+</body>
+</html>
