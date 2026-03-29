@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Audio & Video Studio</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: #f1f5f9; color: #1e293b; padding: 15px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
+        .container { background: #ffffff; width: 100%; max-width: 550px; padding: 25px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); text-align: left; }
+        
+        h2 { font-size: 22px; margin-bottom: 5px; color: #0f172a; text-align: center; }
+        .subtitle { font-size: 13px; color: #64748b; text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0; }
+        
+        .section-box { background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px; border-radius: 12px; margin-bottom: 15px; position: relative; }
+        .section-title { font-size: 14px; font-weight: bold; color: #334155; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+        .optional-badge { font-size: 11px; background: #e2e8f0; padding: 2px 8px; border-radius: 12px; color: #475569; font-weight: bold; }
+
+        input[type="file"], select, input[type="number"] { width: 100%; padding: 10px; border: 2px dashed #94a3b8; border-radius: 8px; font-size: 14px; background: #fff; outline: none; transition: 0.3s; cursor: pointer; font-weight: bold; color: #334155; }
+        select, input[type="number"] { border-style: solid; }
+        
+        .video-input { border-color: #ef4444 !important; background: #fef2f2 !important; }
+        .audio-input { border-color: #10b981 !important; background: #ecfdf5 !important; }
+
+        .checkbox-group { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; font-weight: 600; color: #475569; cursor: pointer; }
+        .checkbox-group input { width: 16px; height: 16px; cursor: pointer; accent-color: #3b82f6; }
+
+        button { width: 100%; padding: 16px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; background: #3b82f6; color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); margin-top: 5px; }
+        button:disabled { background: #94a3b8; box-shadow: none; cursor: not-allowed; transform: scale(1); }
+        button:active:not(:disabled) { transform: scale(0.98); }
+        
+        #statusMessage { margin-top: 15px; font-size: 14px; font-weight: bold; padding: 12px; border-radius: 8px; text-align: center; display: none; }
+        
+        #downloadSection { display: none; margin-top: 15px; text-align: center; }
+        .download-link { display: inline-block; width: 100%; padding: 15px; background: #10b981; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+
+        #processingArea { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🎛️ প্রো মিক্সার স্টুডিও</h2>
+    <div class="subtitle">ভিডিও/অডিও মিক্স করুন এবং MP3 বা MP4 হিসেবে সেভ করুন</div>
+
+    <div class="section-box" style="background: #eff6ff; border-color: #bfdbfe;">
+        <div class="section-title">ডাউনলোড ফরম্যাট সিলেক্ট করুন</div>
+        <select id="outputFormat">
+            <option value="mp4">🎬 MP4 (ভিডিও ফাইল)</option>
+            <option value="mp3">🎵 MP3 (শুধুমাত্র অডিও ফাইল)</option>
+        </select>
+    </div>
+
+    <div class="section-box">
+        <div class="section-title">১. মূল ভিডিও <span class="optional-badge">ঐচ্ছিক (Optional)</span></div>
+        <input type="file" id="videoFile" class="video-input" accept="video/mp4, video/webm, video/quicktime">
+        <label class="checkbox-group">
+            <input type="checkbox" id="keepOriginalAudio" checked>
+            ভিডিওর আসল সাউন্ড রাখুন (Keep Original Audio)
+        </label>
+    </div>
+
+    <div class="section-box" id="durationBox">
+        <div class="section-title">ফাইলটি কত সেকেন্ডের হবে? <span class="optional-badge">যেহেতু ভিডিও নেই</span></div>
+        <input type="number" id="customDuration" value="15" min="1" max="300">
+    </div>
+
+    <div class="section-box">
+        <div class="section-title">২. প্রথম অডিও (ভয়েস বা গান)</div>
+        <input type="file" id="audioFile1" class="audio-input" accept="audio/*">
+        <label class="checkbox-group">
+            <input type="checkbox" id="loopAudio1">
+            অডিওটি বারবার বাজান (Loop)
+        </label>
+    </div>
+
+    <div class="section-box">
+        <div class="section-title">৩. দ্বিতীয় অডিও (ব্যাকগ্রাউন্ড মিউজিক) <span class="optional-badge">ঐচ্ছিক</span></div>
+        <input type="file" id="audioFile2" class="audio-input" accept="audio/*">
+        <label class="checkbox-group">
+            <input type="checkbox" id="loopAudio2">
+            অডিওটি বারবার বাজান (Loop)
+        </label>
+    </div>
+
+    <button id="mergeBtn">⚙️ প্রসেস শুরু করুন</button>
+    
+    <div id="statusMessage"></div>
+    
+    <div id="downloadSection">
+        <a id="downloadLink" class="download-link" href="#">⬇️ ফাইলটি ডাউনলোড করুন</a>
+    </div>
+
+    <div id="processingArea">
+        <video id="sourceVideo" playsinline></video>
+        <canvas id="renderCanvas" width="1280" height="720"></canvas>
+    </div>
+</div>
+
+<script>
+    const videoFile = document.getElementById('videoFile');
+    const durationBox = document.getElementById('durationBox');
+    const mergeBtn = document.getElementById('mergeBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const downloadSection = document.getElementById('downloadSection');
+    const downloadLink = document.getElementById('downloadLink');
+    const outputFormat = document.getElementById('outputFormat');
+    
+    const sourceVideo = document.getElementById('sourceVideo');
+    const canvas = document.getElementById('renderCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let isProcessRunning = false;
+    let animationId;
+    let recorder;
+
+    // ভিডিও দিলে Duration Box হাইড হয়ে যাবে
+    videoFile.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            durationBox.style.display = 'none';
+        } else {
+            durationBox.style.display = 'block';
+        }
+    });
+
+    function showStatus(msg, type) {
+        statusMessage.style.display = 'block';
+        statusMessage.innerText = msg;
+        statusMessage.style.backgroundColor = type === 'error' ? '#fee2e2' : (type === 'progress' ? '#e0f2fe' : '#dcfce3');
+        statusMessage.style.color = type === 'error' ? '#ef4444' : (type === 'progress' ? '#0284c7' : '#16a34a');
+    }
+
+    mergeBtn.addEventListener('click', async () => {
+        const vFile = videoFile.files[0];
+        const aFile1 = document.getElementById('audioFile1').files[0];
+        const aFile2 = document.getElementById('audioFile2').files[0];
+        
+        if (!vFile && !aFile1 && !aFile2) {
+            showStatus("❌ অনুগ্রহ করে অন্তত একটি ভিডিও অথবা অডিও ফাইল সিলেক্ট করুন!", "error");
+            return;
+        }
+
+        const format = outputFormat.value; // 'mp4' or 'mp3'
+        const keepAudio = document.getElementById('keepOriginalAudio').checked;
+        const customDuration = parseInt(document.getElementById('customDuration').value) || 15;
+
+        mergeBtn.disabled = true;
+        downloadSection.style.display = 'none';
+        isProcessRunning = true;
+        showStatus("⏳ সিস্টেম রেডি হচ্ছে... (পেজটি কাটবেন না)", "progress");
+
+        try {
+            // Web Audio API
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const audioDest = audioCtx.createMediaStreamDestination();
+            
+            // স্পিকারে প্লে হওয়া বন্ধ করার জন্য একটি মিউট নোড
+            const muteNode = audioCtx.createGain();
+            muteNode.gain.value = 0;
+            muteNode.connect(audioCtx.destination);
+
+            let audio1Element, audio2Element;
+
+            // ১. ভিডিও লোড এবং প্রসেস
+            if (vFile) {
+                sourceVideo.src = URL.createObjectURL(vFile);
+                sourceVideo.crossOrigin = "anonymous";
+                
+                await new Promise(resolve => {
+                    sourceVideo.onloadedmetadata = () => {
+                        canvas.width = sourceVideo.videoWidth;
+                        canvas.height = sourceVideo.videoHeight;
+                        resolve();
+                    };
+                });
+
+                if (keepAudio) {
+                    const videoAudioSource = audioCtx.createMediaElementSource(sourceVideo);
+                    videoAudioSource.connect(audioDest);
+                } else {
+                    sourceVideo.muted = true;
+                }
+            } else {
+                // ভিডিও না থাকলে ডিফল্ট ক্যানভাস
+                canvas.width = 1280;
+                canvas.height = 720;
+            }
+
+            // ২. অডিওগুলো লোড করা
+            if (aFile1) {
+                audio1Element = new Audio(URL.createObjectURL(aFile1));
+                audio1Element.loop = document.getElementById('loopAudio1').checked;
+                const src1 = audioCtx.createMediaElementSource(audio1Element);
+                src1.connect(audioDest);
+            }
+            if (aFile2) {
+                audio2Element = new Audio(URL.createObjectURL(aFile2));
+                audio2Element.loop = document.getElementById('loopAudio2').checked;
+                const src2 = audioCtx.createMediaElementSource(audio2Element);
+                src2.connect(audioDest);
+            }
+
+            let processor, mp3encoder, mp3Data = [];
+
+            // ================== MP4 (Video) এক্সপোর্ট ==================
+            if (format === 'mp4') {
+                const canvasStream = canvas.captureStream(30); 
+                const combinedTracks = [...canvasStream.getVideoTracks(), ...audioDest.stream.getAudioTracks()];
+                const combinedStream = new MediaStream(combinedTracks);
+
+                let mimeType = MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm';
+                recorder = new MediaRecorder(combinedStream, { mimeType: mimeType, videoBitsPerSecond: 5000000 });
+                const chunks = [];
+
+                recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+                recorder.onstop = () => finalizeDownload(new Blob(chunks, { type: mimeType }), mimeType.includes('mp4') ? 'mp4' : 'webm');
+                
+                recorder.start();
+            } 
+            // ================== MP3 (Audio) এক্সপোর্ট ==================
+            else if (format === 'mp3') {
+                const sourceNode = audioCtx.createMediaStreamSource(audioDest.stream);
+                processor = audioCtx.createScriptProcessor(16384, 1, 1);
+                mp3encoder = new lamejs.Mp3Encoder(1, audioCtx.sampleRate, 128); // 128 kbps MP3
+                
+                processor.onaudioprocess = function(e) {
+                    if(!isProcessRunning) return;
+                    const inputData = e.inputBuffer.getChannelData(0);
+                    const samples = new Int16Array(inputData.length);
+                    for (let i = 0; i < inputData.length; i++) {
+                        let s = Math.max(-1, Math.min(1, inputData[i]));
+                        samples[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+                    }
+                    const mp3buf = mp3encoder.encodeBuffer(samples);
+                    if (mp3buf.length > 0) mp3Data.push(mp3buf);
+                };
+                
+                sourceNode.connect(processor);
+                processor.connect(muteNode); // মিউট করে প্রসেস হচ্ছে
+            }
+
+            // ৩. প্লেব্যাক শুরু
+            if (vFile) await sourceVideo.play();
+            if (audio1Element) await audio1Element.play();
+            if (audio2Element) await audio2Element.play();
+
+            showStatus(`🎥 প্রসেস চলছে... ${format.toUpperCase()} ফাইল রেন্ডার হচ্ছে।`, "progress");
+
+            // ক্যানভাস ড্রয়িং লুপ (MP4 এর জন্য কাজে লাগবে)
+            function drawFrame() {
+                if (!isProcessRunning) return;
+                
+                if (vFile && !sourceVideo.paused && !sourceVideo.ended) {
+                    ctx.drawImage(sourceVideo, 0, 0, canvas.width, canvas.height);
+                } else if (!vFile) {
+                    // ভিডিও না থাকলে একটি সুন্দর স্ক্রিন দেখাবে
+                    ctx.fillStyle = '#0f172a';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#3b82f6';
+                    ctx.font = 'bold 50px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText("🎵 অডিও প্রসেসিং চলছে...", canvas.width/2, canvas.height/2);
+                }
+                animationId = requestAnimationFrame(drawFrame);
+            }
+            drawFrame();
+
+            // ৪. প্রসেস থামানোর লজিক
+            function stopProcess() {
+                isProcessRunning = false;
+                cancelAnimationFrame(animationId);
+                
+                if (vFile) sourceVideo.pause();
+                if (audio1Element) audio1Element.pause();
+                if (audio2Element) audio2Element.pause();
+
+                if (format === 'mp4') {
+                    recorder.stop();
+                } else if (format === 'mp3') {
+                    processor.disconnect();
+                    const mp3buf = mp3encoder.flush();
+                    if (mp3buf.length > 0) mp3Data.push(mp3buf);
+                    finalizeDownload(new Blob(mp3Data, { type: 'audio/mp3' }), 'mp3');
+                }
+            }
+
+            // ভিডিও থাকলে ভিডিও শেষ হলে থামবে, না থাকলে কাস্টম সময় পর থামবে
+            if (vFile) {
+                sourceVideo.onended = stopProcess;
+            } else {
+                setTimeout(stopProcess, customDuration * 1000);
+            }
+
+            // ফাইল ডাউনলোড ও ক্লিনআপ
+            function finalizeDownload(blob, ext) {
+                downloadLink.href = URL.createObjectURL(blob);
+                downloadLink.download = `Mixed_Studio_File.${ext}`;
+                downloadSection.style.display = 'block';
+                showStatus(`✅ ${ext.toUpperCase()} ফাইল সফলভাবে রেডি হয়েছে! ডাউনলোড করুন।`, "success");
+                mergeBtn.disabled = false;
+            }
+
+        } catch (error) {
+            console.error(error);
+            showStatus("❌ কোনো সমস্যা হয়েছে! দয়া করে রিফ্রেশ করে আবার চেষ্টা করুন।", "error");
+            mergeBtn.disabled = false;
+        }
+    });
+</script>
+
+</body>
+</html>
