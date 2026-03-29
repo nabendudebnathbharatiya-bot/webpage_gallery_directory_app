@@ -22,6 +22,27 @@
         .tab-active { background-color: white; color: #4f46e5; border-top: 3px solid #4f46e5; border-bottom: none; }
         .tab-inactive { background-color: #e5e7eb; color: #4b5563; border-bottom: 1px solid #d1d5db; }
         .tab-inactive:hover { background-color: #d1d5db; }
+
+        /* ব্যানার অ্যাডের স্টাইল */
+        #adBannerContainer {
+            width: 100%;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border-bottom: 1px solid #e5e7eb;
+            height: 110px; /* মোবাইলের জন্য ডিফল্ট হাইট */
+        }
+        #adBannerContainer img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.4s ease;
+        }
+        @media(min-width: 768px) {
+            #adBannerContainer { height: 160px; } /* ডেস্কটপের জন্য হাইট */
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -38,6 +59,12 @@
             বিভিন্ন প্রজেক্টের কালেকশন এবং সোর্স কোড লাইব্রেরি।
         </p>
     </header>
+
+    <div id="adBannerContainer" class="shadow-sm">
+        <a id="adLink" href="#" target="_blank" class="w-full h-full block">
+            <img id="adImage" src="" alt="Advertisement">
+        </a>
+    </div>
 
     <main class="container mx-auto px-4 py-10" id="projects">
         
@@ -85,12 +112,93 @@
     </div>
 
     <script>
+        // ========================================================
+        // 🌟 GLOBAL AD MANAGEMENT LOGIC 🌟
+        // ========================================================
+        let adData = [];
+        let currentAdIndex = 0;
+        const GITHUB_BASE = 'https://atiya-bot.github.io/ad-manage/';
+
+        async function initGlobalAds() {
+            try {
+                
+                // ১. ad_switch.txt থেকে মোড চেক করা
+const switchRes = await fetch(applyCacheBuster(GITHUB_BASE + 'ad_switch.txt'));
+let mode = 'regular'; // ডিফল্ট মোড
+if(switchRes.ok) {
+    const text = await switchRes.text();
+    const lines = text.split('\n');
+    
+    // লাইনগুলো চেক করবে এবং কমেন্ট স্কিপ করবে
+    for (let line of lines) {
+        let trimmed = line.trim().toLowerCase();
+        if (trimmed !== '' && !trimmed.startsWith('//') && !trimmed.startsWith('#')) {
+            mode = trimmed; // প্রথম সঠিক কমান্ডটি পেয়ে গেলে সেটাই মোড হিসেবে নেবে
+            break; 
+        }
+    }
+}
+
+                // মোড অনুযায়ী ফাইলের নাম সিলেক্ট করা
+                let adFileName = (mode === 'special') ? 'ads1.txt' : 'ads.txt';
+                console.log(`Ad System: Running in '${mode}' mode. Loading ${adFileName}`);
+                
+                // ২. ব্যানার অ্যাড লোড করা
+                const adRes = await fetch(applyCacheBuster(GITHUB_BASE + adFileName));
+                if(adRes.ok) {
+                    const adText = await adRes.text();
+                    const lines = adText.split('\n');
+                    lines.forEach(line => {
+                        const trimmedLine = line.trim();
+                        if(trimmedLine !== '' && !trimmedLine.startsWith('//') && !trimmedLine.startsWith('#')) {
+                            const parts = trimmedLine.split('|');
+                            if(parts.length >= 2) {
+                                adData.push({ img: parts[0].trim(), link: parts[1].trim() });
+                            }
+                        }
+                    });
+
+                    // যদি অ্যাড পাওয়া যায়, তবে চালু করা
+                    if(adData.length > 0) {
+                        updateAd();
+                        setInterval(updateAd, 5000);
+                    } else {
+                        document.getElementById('adBannerContainer').style.display = 'none';
+                    }
+                }
+            } catch(e) {
+                console.error("Ad system error:", e);
+                document.getElementById('adBannerContainer').style.display = 'none';
+            }
+        }
+
+        function updateAd() {
+            const adImg = document.getElementById('adImage');
+            const adLnk = document.getElementById('adLink');
+            if(!adImg || adData.length === 0) return;
+
+            adImg.style.opacity = 0.5;
+            setTimeout(() => {
+                adImg.src = adData[currentAdIndex].img;
+                adLnk.href = adData[currentAdIndex].link;
+                adImg.style.opacity = 1;
+                currentAdIndex = (currentAdIndex + 1) % adData.length;
+            }, 200);
+        }
+
+
+        // ========================================================
+        // 🌟 ORIGINAL PROJECT GALLERY LOGIC 🌟
+        // ========================================================
         let allProjects = [];
         let currentCodeContent = "";
 
         const applyCacheBuster = url => url.includes('?') ? `${url}&v=${new Date().getTime()}` : `${url}?v=${new Date().getTime()}`;
 
-        document.addEventListener('DOMContentLoaded', fetchProjectsData);
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchProjectsData(); // অরিজিনাল গ্যালারি ডেটা লোড
+            initGlobalAds();     // নতুন গ্লোবাল অ্যাড লোড
+        });
 
         async function fetchProjectsData() {
             const grid = document.getElementById('projectGrid');
@@ -104,14 +212,11 @@
             loader.classList.remove('hidden');
 
             try {
-                // JSON এর বদলে এখন .txt ফাইল ফেচ করা হচ্ছে
                 const response = await fetch(applyCacheBuster('projects.txt'));
                 
                 if (!response.ok) throw new Error(`সার্ভার এরর: ${response.status}`);
 
                 const textData = await response.text();
-                
-                // Text Parser কল করা হচ্ছে
                 allProjects = parseProjectsTxt(textData);
 
                 loader.classList.add('hidden');
@@ -130,7 +235,6 @@
             }
         }
 
-        // 🟢 NEW: Text Parser for projects.txt 🟢
         function parseProjectsTxt(text) {
             const blocks = text.split(/---+/).map(b => b.trim()).filter(b => b);
             
@@ -161,7 +265,6 @@
                         else if (key === 'thumbnail') project.thumbnail = val;
                         else if (key === 'demo') project.demoLink = val;
                         else if (key === 'file') {
-                            // File format: name.html | url
                             const parts = val.split('|').map(p => p.trim());
                             if (parts.length >= 2) {
                                 project.sourceFiles.push({ name: parts[0], url: parts[1] });
@@ -170,7 +273,7 @@
                     }
                 });
                 return project;
-            }).filter(p => p.title); // শুধুমাত্র সেই প্রোজেক্টগুলো নেবে যেগুলোর Title আছে
+            }).filter(p => p.title);
         }
 
         function renderProjects(projects) {
