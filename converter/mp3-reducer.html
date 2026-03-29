@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio to MP3 Converter (With Size Info)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background-color: #f4f7f6; 
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+        .container {
+            background: #fff;
+            width: 100%;
+            max-width: 400px;
+            padding: 25px 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        h2 { font-size: 22px; margin-bottom: 20px; color: #2c3e50; }
+        
+        .form-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; font-size: 14px; margin-bottom: 8px; font-weight: 600; color: #555; }
+        
+        input[type="file"], select {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #f8fafc;
+            outline: none;
+        }
+        select { border-style: solid; border-color: #e2e8f0; cursor: pointer; }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:disabled { background: #94a3b8; cursor: not-allowed; }
+        
+        #statusMessage { margin-top: 15px; font-size: 14px; font-weight: 600; }
+
+        /* নতুন যোগ করা সাইজ ইনফো বক্সের ডিজাইন */
+        #sizeInfoBox {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+            font-size: 15px;
+        }
+        .size-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .old-size { color: #64748b; }
+        .new-size { color: #10b981; font-weight: bold; }
+
+        #downloadSection { display: none; margin-top: 15px; }
+        .download-btn {
+            display: inline-block;
+            width: 100%;
+            padding: 14px;
+            background: #10b981;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>MP3 কনভার্টার ও রিডিউসার</h2>
+
+    <div class="form-group">
+        <label for="audioFile">যেকোনো অডিও ফাইল দিন:</label>
+        <input type="file" id="audioFile" accept="audio/*">
+    </div>
+
+    <div class="form-group">
+        <label for="bitrate">সাইজ/কোয়ালিটি কমান:</label>
+        <select id="bitrate">
+            <option value="128">Standard (128 kbps)</option>
+            <option value="64">Low (64 kbps)</option>
+            <option value="32">Very Low (32 kbps)</option>
+        </select>
+    </div>
+
+    <button id="convertBtn">কনভার্ট করুন</button>
+    <div id="statusMessage"></div>
+
+    <div id="sizeInfoBox">
+        <div class="size-row old-size">
+            <span>অরিজিনাল সাইজ:</span>
+            <span id="oldSizeText">0 MB</span>
+        </div>
+        <div class="size-row new-size">
+            <span>নতুন MP3 সাইজ:</span>
+            <span id="newSizeText">0 MB</span>
+        </div>
+    </div>
+
+    <div id="downloadSection">
+        <a id="downloadLink" class="download-btn" href="#" download="converted_audio.mp3">⬇️ MP3 ডাউনলোড করুন</a>
+    </div>
+</div>
+
+<script>
+    const convertBtn = document.getElementById('convertBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const downloadSection = document.getElementById('downloadSection');
+    const sizeInfoBox = document.getElementById('sizeInfoBox');
+
+    // বাইট (Bytes) থেকে KB বা MB তে কনভার্ট করার ফাংশন
+    function formatBytes(bytes, decimals = 2) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    // Float32 থেকে Int16 কনভার্ট করার ফাংশন
+    function floatTo16BitPCM(input) {
+        let output = new Int16Array(input.length);
+        for (let i = 0; i < input.length; i++) {
+            let s = Math.max(-1, Math.min(1, input[i]));
+            output[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+        }
+        return output;
+    }
+
+    convertBtn.addEventListener('click', async () => {
+        const fileInput = document.getElementById('audioFile');
+        const bitrate = parseInt(document.getElementById('bitrate').value);
+
+        if (fileInput.files.length === 0) {
+            alert("অনুগ্রহ করে একটি অডিও ফাইল সিলেক্ট করুন!");
+            return;
+        }
+
+        const file = fileInput.files[0];
+        
+        // আগের অরিজিনাল সাইজটি সেভ করে রাখছি
+        const originalSize = file.size;
+
+        convertBtn.disabled = true;
+        downloadSection.style.display = 'none';
+        sizeInfoBox.style.display = 'none';
+        
+        statusMessage.innerText = "ফাইল রিড করা হচ্ছে...";
+        statusMessage.style.color = "#d97706";
+
+        const reader = new FileReader();
+        
+        reader.onload = async function(e) {
+            try {
+                statusMessage.innerText = "অডিও প্রসেস করা হচ্ছে... অপেক্ষা করুন।";
+                
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const audioBuffer = await audioContext.decodeAudioData(e.target.result);
+
+                const channels = 1; 
+                const sampleRate = audioBuffer.sampleRate;
+                const mp3encoder = new lamejs.Mp3Encoder(channels, sampleRate, bitrate);
+                const mp3Data = [];
+
+                const leftChannel = audioBuffer.getChannelData(0); 
+                const samples = floatTo16BitPCM(leftChannel);
+
+                const sampleBlockSize = 1152;
+
+                for (let i = 0; i < samples.length; i += sampleBlockSize) {
+                    const sampleChunk = samples.subarray(i, i + sampleBlockSize);
+                    const mp3buf = mp3encoder.encodeBuffer(sampleChunk);
+                    if (mp3buf.length > 0) {
+                        mp3Data.push(mp3buf);
+                    }
+                }
+
+                const mp3buf = mp3encoder.flush();
+                if (mp3buf.length > 0) {
+                    mp3Data.push(mp3buf);
+                }
+
+                // কনভার্ট করা নতুন MP3 ফাইল তৈরি
+                const blob = new Blob(mp3Data, { type: 'audio/mp3' });
+                const url = window.URL.createObjectURL(blob);
+                
+                // নতুন ফাইলের সাইজ বের করা
+                const newSize = blob.size;
+
+                // স্ক্রিনে সাইজগুলো দেখানো
+                document.getElementById('oldSizeText').innerText = formatBytes(originalSize);
+                document.getElementById('newSizeText').innerText = formatBytes(newSize);
+                sizeInfoBox.style.display = 'block';
+                
+                document.getElementById('downloadLink').href = url;
+                downloadSection.style.display = 'block';
+                
+                statusMessage.innerText = "✅ কনভার্ট সফল হয়েছে!";
+                statusMessage.style.color = "#10b981";
+
+            } catch (error) {
+                console.error(error);
+                statusMessage.innerText = "❌ প্রসেস করতে সমস্যা হয়েছে!";
+                statusMessage.style.color = "#ef4444";
+            } finally {
+                convertBtn.disabled = false;
+            }
+        };
+
+        reader.readAsArrayBuffer(file);
+    });
+</script>
+
+</body>
+</html>
