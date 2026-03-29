@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Trimmer & MP4 Converter</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background-color: #f4f7f6; 
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+        .container {
+            background: #fff;
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        h2 { font-size: 20px; margin-bottom: 15px; color: #2c3e50; }
+        
+        .form-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; font-size: 14px; margin-bottom: 5px; font-weight: 600; color: #555; }
+        
+        input[type="file"], select {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+            background: #f8fafc;
+            outline: none;
+        }
+        select { border-style: solid; }
+        
+        /* Video Player */
+        #videoPreview {
+            width: 100%;
+            max-height: 250px;
+            background: #000;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        /* Slider Controls */
+        .slider-container {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+        }
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .start-text { color: #3b82f6; } /* নীল রঙ */
+        .end-text { color: #ef4444; } /* লাল রঙ */
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: #cbd5e1;
+            border-radius: 5px;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        /* কাস্টম স্লাইডার থাম্ব (মোবাইলের জন্য বড় করা হয়েছে) */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        #endSlider::-webkit-slider-thumb { background: #ef4444; }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-preview { background: #f59e0b; }
+        .btn-convert { background: #10b981; }
+        button:disabled { background: #cbd5e1; cursor: not-allowed; }
+        
+        #statusMessage { margin-top: 10px; font-size: 13px; font-weight: 600; }
+
+        #downloadSection { display: none; margin-top: 15px; }
+        .download-btn {
+            display: inline-block;
+            width: 100%;
+            padding: 12px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>✂️ স্মার্ট ভিডিও ট্রিমার</h2>
+
+    <div class="form-group">
+        <label for="mediaFile">ভিডিও সিলেক্ট করুন:</label>
+        <input type="file" id="mediaFile" accept="video/*">
+    </div>
+
+    <video id="videoPreview" controls playsinline></video>
+
+    <div class="slider-container" id="sliderSection" style="display: none;">
+        <div class="slider-header start-text">
+            <span>শুরু: <span id="startText">0.0</span> সেকেন্ড</span>
+        </div>
+        <input type="range" id="startSlider" min="0" value="0" step="0.1">
+
+        <div class="slider-header end-text" style="margin-top: 15px;">
+            <span>শেষ: <span id="endText">0.0</span> সেকেন্ড</span>
+        </div>
+        <input type="range" id="endSlider" min="0" value="0" step="0.1">
+    </div>
+
+    <div class="form-group">
+        <label for="quality">ভিডিওর সাইজ/কোয়ালিটি কমান:</label>
+        <select id="quality">
+            <option value="2500000">Standard (Medium Size)</option>
+            <option value="1000000">Low Quality (Small Size)</option>
+            <option value="500000">Very Low (Smallest Size)</option>
+        </select>
+    </div>
+
+    <button id="previewBtn" class="btn-preview" disabled>▶️ শুধু ট্রিম করা অংশ প্লে করুন</button>
+    <button id="convertBtn" class="btn-convert" disabled>⚙️ কনভার্ট ও সেভ করুন (MP4)</button>
+    
+    <div id="statusMessage"></div>
+
+    <div id="downloadSection">
+        <a id="downloadLink" class="download-btn" href="#">⬇️ MP4 ডাউনলোড করুন</a>
+    </div>
+</div>
+
+<script>
+    const mediaFile = document.getElementById('mediaFile');
+    const videoPreview = document.getElementById('videoPreview');
+    
+    const sliderSection = document.getElementById('sliderSection');
+    const startSlider = document.getElementById('startSlider');
+    const endSlider = document.getElementById('endSlider');
+    const startText = document.getElementById('startText');
+    const endText = document.getElementById('endText');
+
+    const qualitySelect = document.getElementById('quality');
+    const previewBtn = document.getElementById('previewBtn');
+    const convertBtn = document.getElementById('convertBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const downloadSection = document.getElementById('downloadSection');
+    const downloadLink = document.getElementById('downloadLink');
+
+    let isProcessing = false;
+    let mediaRecorder;
+    let recordedChunks = [];
+    let animationFrameId;
+
+    // ফাইল সিলেক্ট করলে ভিডিও লোড হবে
+    mediaFile.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const fileURL = URL.createObjectURL(file);
+            videoPreview.src = fileURL;
+            videoPreview.style.display = 'block';
+            sliderSection.style.display = 'block';
+            
+            videoPreview.onloadedmetadata = function() {
+                const duration = videoPreview.duration;
+                
+                // স্লাইডারের ম্যাক্সিমাম ভ্যালু সেট করা
+                startSlider.max = duration;
+                endSlider.max = duration;
+                
+                // ডিফল্ট ভ্যালু সেট করা
+                startSlider.value = 0;
+                endSlider.value = duration;
+                
+                startText.innerText = "0.0";
+                endText.innerText = duration.toFixed(1);
+                
+                previewBtn.disabled = false;
+                convertBtn.disabled = false;
+            };
+        }
+    });
+
+    // Start Slider টানলে ভিডিও সেই ফ্রেমে চলে যাবে
+    startSlider.addEventListener('input', function() {
+        let startVal = parseFloat(this.value);
+        let endVal = parseFloat(endSlider.value);
+        
+        // Start যেন End কে পার হয়ে না যায়
+        if (startVal >= endVal) {
+            startVal = endVal - 0.5; // আধা সেকেন্ড গ্যাপ রাখছি
+            this.value = startVal;
+        }
+        
+        startText.innerText = startVal.toFixed(1);
+        videoPreview.currentTime = startVal; // ভিডিও প্রিভিউ আপডেট
+    });
+
+    // End Slider টানলে ভিডিও সেই ফ্রেমে চলে যাবে
+    endSlider.addEventListener('input', function() {
+        let endVal = parseFloat(this.value);
+        let startVal = parseFloat(startSlider.value);
+        
+        // End যেন Start এর আগে না চলে আসে
+        if (endVal <= startVal) {
+            endVal = startVal + 0.5;
+            this.value = endVal;
+        }
+        
+        endText.innerText = endVal.toFixed(1);
+        videoPreview.currentTime = endVal; // ভিডিও প্রিভিউ আপডেট
+    });
+
+    // ট্রিম করা অংশ প্রিভিউ করা
+    previewBtn.addEventListener('click', () => {
+        let start = parseFloat(startSlider.value);
+        let end = parseFloat(endSlider.value);
+        
+        videoPreview.currentTime = start;
+        videoPreview.play();
+
+        videoPreview.ontimeupdate = function() {
+            if (!isProcessing && videoPreview.currentTime >= end) {
+                videoPreview.pause();
+                videoPreview.ontimeupdate = null; 
+            }
+        };
+    });
+
+    // কনভার্ট ও সেভ করা
+    convertBtn.addEventListener('click', () => {
+        let start = parseFloat(startSlider.value);
+        let end = parseFloat(endSlider.value);
+        let targetBitrate = parseInt(qualitySelect.value);
+
+        isProcessing = true;
+        previewBtn.disabled = true;
+        convertBtn.disabled = true;
+        downloadSection.style.display = 'none';
+        recordedChunks = [];
+
+        let mimeType = 'video/webm;codecs=vp9,opus';
+        if (MediaRecorder.isTypeSupported('video/mp4')) {
+            mimeType = 'video/mp4';
+        }
+
+        const stream = videoPreview.captureStream();
+        
+        try {
+            mediaRecorder = new MediaRecorder(stream, {
+                mimeType: mimeType,
+                videoBitsPerSecond: targetBitrate 
+            });
+
+            mediaRecorder.ondataavailable = function(e) {
+                if (e.data.size > 0) {
+                    recordedChunks.push(e.data);
+                }
+            };
+
+            mediaRecorder.onstop = function() {
+                const blob = new Blob(recordedChunks, { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                
+                downloadLink.href = url;
+                let ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+                downloadLink.download = `trimmed_video.${ext}`;
+                
+                downloadSection.style.display = 'block';
+                statusMessage.innerText = "✅ ভিডিও সফলভাবে সেভ হয়েছে!";
+                statusMessage.style.color = "#10b981";
+                
+                isProcessing = false;
+                previewBtn.disabled = false;
+                convertBtn.disabled = false;
+                videoPreview.muted = false; 
+            };
+
+            videoPreview.muted = true;
+            videoPreview.currentTime = start;
+            videoPreview.play();
+            mediaRecorder.start();
+
+            statusMessage.innerText = "⏳ প্রসেস হচ্ছে... (ভিডিও প্লে হওয়া পর্যন্ত সময় লাগবে)";
+            statusMessage.style.color = "#d97706";
+
+            function checkTime() {
+                if (videoPreview.currentTime >= end && isProcessing) {
+                    videoPreview.pause();
+                    mediaRecorder.stop();
+                    cancelAnimationFrame(animationFrameId);
+                } else {
+                    animationFrameId = requestAnimationFrame(checkTime);
+                }
+            }
+            checkTime();
+
+        } catch (error) {
+            console.error(error);
+            alert("আপনার ব্রাউজারে এই কোয়ালিটিতে কনভার্ট সাপোর্ট করছে না। অন্য ব্রাউজার চেষ্টা করুন।");
+            isProcessing = false;
+            previewBtn.disabled = false;
+            convertBtn.disabled = false;
+        }
+    });
+</script>
+
+</body>
+</html>
