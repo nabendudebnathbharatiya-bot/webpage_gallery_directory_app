@@ -1,0 +1,48 @@
+#BOT_START
+Name: চক্রধাম অ্যাসিস্ট্যান্ট
+Image: 🌿
+Theme: bg-teal-50
+Welcome: নমস্কার! 🙏 <b>চক্রধাম কসমিক হিলিং সেন্টারে</b> আপনাকে স্বাগত জানাই। বিনা ঔষধে প্রাকৃতিক আরোগ্যের পথে এটি আপনার প্রথম ধাপ। আপনি কি আমাদের সেন্টারে অ্যাপয়েন্টমেন্ট বুক করতে চান, নাকি আপনার শারীরিক সমস্যা জানাবেন?<br><br><div class="grid grid-cols-2 gap-2 mt-2"><button onclick="document.getElementById('user-input').value='ফর্ম শুরু'; handleUserMessage();" class="bg-teal-100 border border-teal-300 text-teal-800 px-2 py-2 rounded-lg font-bold shadow-sm transition-transform active:scale-95">অ্যাপয়েন্টমেন্ট নেব ➔</button><button onclick="document.getElementById('user-input').value='সমস্যা জানাব'; handleUserMessage();" class="bg-teal-100 border border-teal-300 text-teal-800 px-2 py-2 rounded-lg font-bold shadow-sm transition-transform active:scale-95">সমস্যা জানাব ➔</button></div>
+Brain: patient.json
+
+// ---- ফ্লো ১: সাধারণ অ্যাপয়েন্টমেন্ট (নাম -> বয়স -> সমস্যা -> ফোন) ----
+Trigger: ফর্ম শুরু | অ্যাপয়েন্টমেন্ট নেব | ডাক্তার দেখাব
+Response: ঠিক আছে, অ্যাপয়েন্টমেন্টের জন্য অনুগ্রহ করে রোগীর <b>সম্পূর্ণ নামটি</b> টাইপ করে পাঠান। [SAVE:p_name|✅ নাম সেভ হয়েছে।<br><br><button onclick="document.getElementById('user-input').value='ধাপ বয়স'; handleUserMessage();" class="bg-teal-100 border border-teal-300 text-teal-800 px-4 py-2 rounded-lg mt-2 font-bold shadow-sm w-full transition-transform active:scale-95">পরবর্তী ধাপ (বয়স) ➔</button>]
+
+Trigger: ধাপ বয়স
+Response: রোগীর <b>বয়স</b> কত? (শুধু সংখ্যায় লিখুন, যেমন: ৪৫) [SAVE:p_age|✅ বয়স সেভ হয়েছে।<br><br><button onclick="document.getElementById('user-input').value='ধাপ সমস্যা'; handleUserMessage();" class="bg-teal-100 border border-teal-300 text-teal-800 px-4 py-2 rounded-lg mt-2 font-bold shadow-sm w-full transition-transform active:scale-95">পরবর্তী ধাপ (সমস্যা) ➔</button>]
+
+Trigger: ধাপ সমস্যা
+Response: রোগীর <b>প্রধান শারীরিক সমস্যাটি কী</b> এবং সেটি <b>কত সময় ধরে চলছে?</b><br><i>(যেমন: "গ্যাস্ট্রিক, ৩ মাস ধরে" - এভাবে নিচে টাইপ করে পাঠান)</i> [SAVE:p_problem|✅ সমস্যা সেভ হয়েছে।<br><br><button onclick="document.getElementById('user-input').value='ধাপ ফোন'; handleUserMessage();" class="bg-teal-100 border border-teal-300 text-teal-800 px-4 py-2 rounded-lg mt-2 font-bold shadow-sm w-full transition-transform active:scale-95">পরবর্তী ধাপ (ফোন নম্বর) ➔</button>]
+
+Trigger: ধাপ ফোন
+Response: যোগাযোগের জন্য আপনার <b>সক্রিয় হোয়াটসঅ্যাপ নম্বরটি</b> লিখুন। [SAVE:p_phone|✅ নম্বর সেভ হয়েছে।<br><br><button onclick="document.getElementById('user-input').value='সাবমিট'; handleUserMessage();" class="bg-emerald-600 text-white px-4 py-3 rounded-lg mt-2 font-bold shadow-sm w-full hover:bg-emerald-700 transition-colors">ফর্ম কমপ্লিট করুন ✨</button>]
+
+// ---- ফ্লো ২: সমস্যা জানাব (সমস্যা -> নাম -> বয়স -> ফোন) ----
+Trigger: সমস্যা জানাব | সমস্যা নিয়ে কথা বলব
+Response: আপনার <b>প্রধান শারীরিক সমস্যাটি কী</b> এবং সেটি <b>কত সময় ধরে চলছে?</b> (নিচে বিস্তারিত টাইপ করে মেসেজ পাঠান) [SAVE:p_problem|✅ সমস্যা সেভ হয়েছে।<br><br><button onclick="document.getElementById('user-input').value='শর্টকাট নাম'; handleUserMessage();" class="bg-teal-100 border border-teal-300 text-teal-800 px-4 py-2 rounded-lg mt-2 font-bold shadow-sm w-full transition-transform active:scale-95">পরবর্তী ধাপ (নাম) ➔</button>]
+
+Trigger: শর্টকাট নাম
+Response: অ্যাপয়েন্টমেন্টের জন্য অনুগ্রহ করে রোগীর <b>সম্পূর্ণ নামটি</b> টাইপ করুন। [SAVE:p_name|✅ নাম সেভ হয়েছে।<br><br><button onclick="document.getElementById('user-input').value='শর্টকাট বয়স'; handleUserMessage();" class="bg-teal-100 border border-teal-300 text-teal-800 px-4 py-2 rounded-lg mt-2 font-bold shadow-sm w-full transition-transform active:scale-95">পরবর্তী ধাপ (বয়স) ➔</button>]
+
+Trigger: শর্টকাট বয়স
+Response: রোগীর <b>বয়স</b> কত? (শুধু সংখ্যায় লিখুন, যেমন: ৪৫) [SAVE:p_age|✅ বয়স সেভ হয়েছে।<br><br><button onclick="document.getElementById('user-input').value='ধাপ ফোন'; handleUserMessage();" class="bg-teal-100 border border-teal-300 text-teal-800 px-4 py-2 rounded-lg mt-2 font-bold shadow-sm w-full transition-transform active:scale-95">পরবর্তী ধাপ (ফোন নম্বর) ➔</button>]
+
+// ---- স্পেশাল ব্রাঞ্চিং (হার্নিয়া) ----
+Trigger: হার্নিয়া | হারনিয়া | hernia | আমার হার্নিয়ার সমস্যা
+Response: আপনার ঠিক কোথায় হার্নিয়া হয়েছে? 'অন্ত্রে' নাকি 'ফুসফুসে'?<br><br><div class="grid grid-cols-2 gap-2 mt-2"><button onclick="document.getElementById('user-input').value='অন্ত্রে হার্নিয়া'; handleUserMessage();" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-2 py-2 rounded-lg font-bold shadow-sm">অন্ত্রে হার্নিয়া</button><button onclick="document.getElementById('user-input').value='ফুসফুসে হার্নিয়া'; handleUserMessage();" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-2 py-2 rounded-lg font-bold shadow-sm">ফুসফুসে হার্নিয়া</button></div>
+
+Trigger: অন্ত্রে | অন্ত্রে হার্নিয়া | ফুসফুসে | ফুসফুসে হার্নিয়া
+Response: বুঝতে পেরেছি। আপনার সমস্যাটি কনফার্ম করতে নিচের বাটনে ক্লিক করুন। [SAVE:p_problem|✅ সমস্যা সেভ হয়েছে।<br><br><button onclick="document.getElementById('user-input').value='শর্টকাট নাম'; handleUserMessage();" class="bg-teal-100 border border-teal-300 text-teal-800 px-4 py-2 rounded-lg mt-2 font-bold shadow-sm w-full transition-transform active:scale-95">পরবর্তী ধাপ (নাম) ➔</button>]<br><br><button onclick="document.getElementById('user-input').value='আমি কনফার্ম করছি'; handleUserMessage();" class="bg-emerald-100 border border-emerald-400 text-emerald-800 px-4 py-2 rounded-lg mt-2 font-bold shadow-sm w-full">হ্যাঁ, কনফার্ম করুন ✅</button>
+
+// ---- Catch-All for any disease entered unprompted ----
+// ---- Catch-All for any disease entered unprompted ----
+Trigger: গ্যাস্ট্রিক | গ্যাস্ট্রিকের | ক্যান্সার | ক্যান্সারের | টিউমার | থাইরয়েড | থাইরয়েডের | থাইরয়েড এর | জ্বর | জ্বরে | ব্যথা | ব্যথায় | রোগ | রোগে | সমস্যা | সমস্যায় | কষ্ট | সুগার | প্রেশার | ডায়াবেটিস | ডায়াবেটিসের | মাথা | পেট | হাত | পা | কোমর | বুক | অন্যান্য | সর্দি | কাশি | দুর্বলতা | এলার্জি | চুলকানি | সমস্যা হচ্ছে | সমস্যা আছে | আমার আছে | ভুগছি | হচ্ছে
+Response: আপনার শারীরিক সমস্যার কথা শুনলাম। আমাদের কসমিক হিলিং সেন্টারে এর চমৎকার চিকিৎসা রয়েছে। অ্যাপয়েন্টমেন্ট বুক করার জন্য, অনুগ্রহ করে আপনার <b>সমস্যাটি আরেকবার সংক্ষেপে লিখুন</b> (যাতে আমরা সঠিকভাবে নোট করতে পারি)। [SAVE:p_problem|✅ সমস্যা সেভ হয়েছে।<br><br><button onclick="document.getElementById('user-input').value='শর্টকাট নাম'; handleUserMessage();" class="bg-teal-100 border border-teal-300 text-teal-800 px-4 py-2 rounded-lg mt-2 font-bold shadow-sm w-full transition-transform active:scale-95">পরবর্তী ধাপ (নাম) ➔</button>]
+
+
+// ---- ফাইনাল সাবমিট ----
+Trigger: হোয়াটসঅ্যাপ সাবমিট | সাবমিট | submit
+Response: 📋 <b>আপনার ফর্মটি প্রস্তুত!</b><br><hr class="my-2 border-gray-300"><br>👤 <b>নাম:</b> {p_name}<br>🎂 <b>বয়স:</b> {p_age} বছর<br>🩺 <b>সমস্যা:</b> {p_problem}<br>📞 <b>ফোন:</b> {p_phone}<br><br>অ্যাপয়েন্টমেন্টটি চূড়ান্ত করতে নিচের সবুজ বাটনে ক্লিক করে তথ্যগুলো আমাদের হোয়াটসঅ্যাপে পাঠিয়ে দিন:<br><br><a href="https://wa.me/916296378080?text=নমস্কার,%20আমি%20চক্রধাম%20সেন্টারে%20অ্যাপয়েন্টমেন্ট%20বুক%20করতে%20চাই।%0A%0A👤%20নাম:%20{p_name}%0A🎂%20বয়স:%20{p_age}%20বছর%0A🩺%20সমস্যা:%20{p_problem}%0A📞%20ফোন:%20{p_phone}" target="_blank" class="bg-[#25D366] hover:bg-[#128C7E] text-white px-4 py-3 rounded-full font-bold flex justify-center items-center gap-2 shadow-md transition-colors" style="text-decoration:none;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg> WhatsApp-এ পাঠান</a>
+
+#BOT_END
