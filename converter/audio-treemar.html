@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chakra MP3 Multi-Trimmer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+    <style>
+        body { background-color: #0f172a; color: white; font-family: sans-serif; }
+        .glass-panel { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .segment-row { animation: slideDown 0.3s ease-out; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+    <div class="w-full max-w-3xl glass-panel rounded-2xl p-6 md:p-8 shadow-2xl">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-teal-400 mb-2">Chakra MP3 Multi-Trimmer</h1>
+            <p class="text-gray-400 text-sm md:text-base">একটি MP3 ফাইল থেকে একসাথে একাধিক অংশ কেটে বের করুন!</p>
+        </div>
+
+        <div class="mb-8 p-6 border-2 border-dashed border-teal-500/50 rounded-xl text-center bg-teal-500/5 hover:bg-teal-500/10 transition">
+            <input type="file" id="audio-file" accept="audio/mp3, audio/wav, audio/mpeg" class="hidden" onchange="handleFileSelect(event)">
+            <label for="audio-file" class="cursor-pointer flex flex-col items-center gap-3">
+                <svg class="w-12 h-12 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+                <span id="file-name" class="text-lg font-medium text-white">ক্লিক করে MP3 ফাইল নির্বাচন করুন</span>
+            </label>
+        </div>
+
+        <div class="mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-white">কাটার অংশসমূহ (Segments)</h2>
+                <button onclick="addSegment()" class="bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> নতুন অংশ যোগ করুন
+                </button>
+            </div>
+            
+            <div id="segments-container" class="flex flex-col gap-3">
+                </div>
+        </div>
+
+        <button id="trim-btn" onclick="processTrimming()" class="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-black font-extrabold text-lg py-4 rounded-xl shadow-[0_0_15px_rgba(20,184,166,0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-4">
+            ✂️ একসাথে সব ট্রিম করুন
+        </button>
+
+        <div id="status-msg" class="text-center mt-4 text-teal-300 font-medium hidden animate-pulse">
+            অডিও প্রসেস হচ্ছে... দয়া করে অপেক্ষা করুন।
+        </div>
+
+        <div id="results-container" class="mt-8 hidden">
+            <h3 class="text-lg font-bold text-white mb-4 border-b border-gray-700 pb-2">ডাউনলোড লিংকসমূহ:</h3>
+            <div id="download-list" class="flex flex-col gap-3"></div>
+        </div>
+    </div>
+
+    <script>
+        let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let audioBuffer = null;
+        let segmentCount = 0;
+        let fileName = "audio";
+
+        // Initialize with one segment
+        window.onload = () => addSegment();
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            fileName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+            document.getElementById("file-name").innerText = file.name;
+            document.getElementById("status-msg").innerText = "ফাইল লোড হচ্ছে...";
+            document.getElementById("status-msg").classList.remove("hidden");
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const arrayBuffer = e.target.result;
+                    audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                    document.getElementById("status-msg").innerText = `ফাইল লোড সফল! (দৈর্ঘ্য: ${formatTime(audioBuffer.duration)})`;
+                    document.getElementById("status-msg").classList.remove("animate-pulse");
+                } catch (err) {
+                    alert("অডিও ফাইলটি পড়তে সমস্যা হয়েছে। অন্য একটি ফাইল চেষ্টা করুন।");
+                    document.getElementById("status-msg").classList.add("hidden");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function addSegment() {
+            segmentCount++;
+            const container = document.getElementById("segments-container");
+            const id = `seg-${Date.now()}`;
+            
+            const div = document.createElement("div");
+            div.id = id;
+            div.className = "segment-row flex flex-col md:flex-row gap-4 items-center bg-black/40 p-4 rounded-lg border border-gray-700";
+            
+            div.innerHTML = `
+                <div class="w-full md:w-auto font-bold text-gray-400">পার্ট ${segmentCount}</div>
+                <div class="flex-1 flex gap-2 w-full">
+                    <input type="text" placeholder="শুরু (ex: 00:15 বা 15)" class="start-time w-1/2 bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white outline-none focus:border-teal-500">
+                    <input type="text" placeholder="শেষ (ex: 01:30 বা 90)" class="end-time w-1/2 bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white outline-none focus:border-teal-500">
+                </div>
+                <button onclick="document.getElementById('${id}').remove()" class="text-red-400 hover:text-red-300 p-2 bg-red-400/10 rounded-lg w-full md:w-auto">
+                    <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
+        // Parse Time (supports both 120 and 02:00 formats)
+        function parseTime(timeStr) {
+            if (!timeStr) return 0;
+            const parts = timeStr.toString().trim().split(':');
+            if (parts.length === 2) {
+                return parseInt(parts[0]) * 60 + parseFloat(parts[1]);
+            }
+            return parseFloat(timeStr);
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        async function processTrimming() {
+            if (!audioBuffer) {
+                alert("প্রথমে একটি MP3 ফাইল সিলেক্ট করুন!");
+                return;
+            }
+
+            const segments = [];
+            document.querySelectorAll('.segment-row').forEach((row, i) => {
+                const startVal = row.querySelector('.start-time').value;
+                const endVal = row.querySelector('.end-time').value;
+                if(startVal && endVal) {
+                    segments.push({
+                        part: i + 1,
+                        start: parseTime(startVal),
+                        end: parseTime(endVal)
+                    });
+                }
+            });
+
+            if (segments.length === 0) {
+                alert("দয়া করে অন্তত একটি অংশের শুরু এবং শেষের সময় দিন!");
+                return;
+            }
+
+            const status = document.getElementById("status-msg");
+            const btn = document.getElementById("trim-btn");
+            const resultsDiv = document.getElementById("results-container");
+            const listDiv = document.getElementById("download-list");
+            
+            status.innerText = "অডিও কাটা এবং MP3 তৈরি হচ্ছে... একটু সময় লাগতে পারে!";
+            status.classList.remove("hidden");
+            status.classList.add("animate-pulse");
+            btn.disabled = true;
+            listDiv.innerHTML = "";
+            resultsDiv.classList.add("hidden");
+
+            // Process segments one by one
+            setTimeout(async () => {
+                try {
+                    for (let seg of segments) {
+                        const blob = createMp3Slice(audioBuffer, seg.start, seg.end);
+                        const url = URL.createObjectURL(blob);
+                        
+                        // Create Download Button
+                        const item = document.createElement("div");
+                        item.className = "flex justify-between items-center bg-gray-800 p-4 rounded-lg border border-gray-700";
+                        item.innerHTML = `
+                            <div>
+                                <div class="font-bold text-teal-400">পার্ট ${seg.part}</div>
+                                <div class="text-xs text-gray-400">${formatTime(seg.start)} থেকে ${formatTime(seg.end)}</div>
+                            </div>
+                            <a href="${url}" download="${fileName}_part${seg.part}.mp3" class="bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded-lg font-bold text-sm transition shadow-lg">
+                                ডাউনলোড MP3
+                            </a>
+                        `;
+                        listDiv.appendChild(item);
+                    }
+
+                    status.innerText = "সম্পূর্ণ হয়েছে! নিচে থেকে ডাউনলোড করে নিন।";
+                    status.classList.remove("animate-pulse");
+                    resultsDiv.classList.remove("hidden");
+                } catch (e) {
+                    console.error(e);
+                    status.innerText = "একটি সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।";
+                }
+                btn.disabled = false;
+            }, 100);
+        }
+
+        // Float32 to Int16 converter
+        function floatTo16BitPCM(input) {
+            const output = new Int16Array(input.length);
+            for (let i = 0; i < input.length; i++) {
+                const s = Math.max(-1, Math.min(1, input[i]));
+                output[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+            }
+            return output;
+        }
+
+        // Core MP3 Trimming & Encoding Logic
+        function createMp3Slice(buffer, startTime, endTime) {
+            const sampleRate = buffer.sampleRate;
+            const channels = buffer.numberOfChannels;
+            
+            // Calculate start and end samples
+            const startSample = Math.floor(startTime * sampleRate);
+            let endSample = Math.floor(endTime * sampleRate);
+            if (endSample > buffer.length) endSample = buffer.length;
+
+            // Extract channels and convert to 16-bit PCM
+            const leftData = buffer.getChannelData(0).slice(startSample, endSample);
+            const leftPCM = floatTo16BitPCM(leftData);
+            
+            let rightPCM = leftPCM; // default to mono if right is missing
+            if (channels > 1) {
+                const rightData = buffer.getChannelData(1).slice(startSample, endSample);
+                rightPCM = floatTo16BitPCM(rightData);
+            }
+
+            // Initialize LameJS Encoder (Stereo, sampleRate, 128 kbps)
+            const mp3enc = new lamejs.Mp3Encoder(channels, sampleRate, 128);
+            const mp3Data = [];
+            const sampleBlockSize = 1152; // Lame expects chunks of 1152
+
+            for (let i = 0; i < leftPCM.length; i += sampleBlockSize) {
+                const leftChunk = leftPCM.subarray(i, i + sampleBlockSize);
+                let rightChunk = rightPCM.subarray(i, i + sampleBlockSize);
+                
+                let mp3buf;
+                if (channels === 2) mp3buf = mp3enc.encodeBuffer(leftChunk, rightChunk);
+                else mp3buf = mp3enc.encodeBuffer(leftChunk);
+                
+                if (mp3buf.length > 0) mp3Data.push(mp3buf);
+            }
+
+            const mp3Final = mp3enc.flush();
+            if (mp3Final.length > 0) mp3Data.push(mp3Final);
+
+            return new Blob(mp3Data, { type: 'audio/mp3' });
+        }
+    </script>
+</body>
+</html>
