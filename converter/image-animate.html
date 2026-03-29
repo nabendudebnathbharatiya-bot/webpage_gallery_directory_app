@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freedom Fighters Tribute Animator</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background-color: #f4f7f6; 
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+        .container {
+            background: #fff;
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        h2 { font-size: 20px; margin-bottom: 15px; color: #2c3e50; }
+        
+        .form-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; font-size: 14px; margin-bottom: 5px; font-weight: 600; color: #555; }
+        
+        input[type="file"], select {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+            background: #f8fafc;
+            outline: none;
+        }
+        select { border-style: solid; border-color: #cbd5e1; }
+        
+        .canvas-container {
+            width: 100%;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        canvas { width: 100%; display: block; }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 10px;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-record { background: #ea580c; } /* ত্যাগের প্রতীক হিসেবে কমলা/লাল রঙের বাটন */
+        button:disabled { background: #cbd5e1; cursor: not-allowed; }
+        
+        #statusMessage { margin-top: 10px; font-size: 13px; font-weight: 600; }
+        #downloadSection { display: none; margin-top: 15px; }
+        .download-btn {
+            display: inline-block;
+            width: 100%;
+            padding: 12px;
+            background: #138808; /* তেরঙ্গার সবুজ রঙ */
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🇮🇳 ঐতিহাসিক ছবি অ্যানিমেটর</h2>
+
+    <div class="form-group">
+        <label for="imageFile">স্বাধীনতা সংগ্রামীর ছবি দিন:</label>
+        <input type="file" id="imageFile" accept="image/*">
+    </div>
+
+    <div class="form-group">
+        <label for="effectSelect">শ্রদ্ধাঞ্জলি ইফেক্ট বেছে নিন:</label>
+        <select id="effectSelect">
+            <option value="none">শুধু ছবি (কোনো ইফেক্ট নেই)</option>
+            <option value="sparks">🔥 অগ্নিস্ফুলিঙ্গ (বিপ্লবের প্রতীক)</option>
+            <option value="tricolor">🇮🇳 তেরঙ্গা কণা (দেশপ্রেম)</option>
+            <option value="vintage">🎞️ পুরনো সিনেমা (ঐতিহাসিক রূপ)</option>
+            <option value="zoom">🎥 সিনেমাটিক জুম (Ken Burns)</option>
+            <option value="rain">🌧️ বৃষ্টি (Rain Effect)</option>
+        </select>
+    </div>
+
+    <div class="canvas-container" id="canvasContainer">
+        <canvas id="animCanvas"></canvas>
+    </div>
+
+    <button id="recordBtn" class="btn-record" disabled>🔴 ৫ সেকেন্ডের ভিডিও তৈরি করুন</button>
+    
+    <div id="statusMessage"></div>
+
+    <div id="downloadSection">
+        <a id="downloadLink" class="download-btn" href="#">⬇️ ভিডিও ডাউনলোড করুন</a>
+    </div>
+</div>
+
+<script>
+    const imageFile = document.getElementById('imageFile');
+    const effectSelect = document.getElementById('effectSelect');
+    const canvasContainer = document.getElementById('canvasContainer');
+    const canvas = document.getElementById('animCanvas');
+    const ctx = canvas.getContext('2d');
+    const recordBtn = document.getElementById('recordBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const downloadSection = document.getElementById('downloadSection');
+    const downloadLink = document.getElementById('downloadLink');
+
+    let uploadedImg = new Image();
+    let isImageLoaded = false;
+    let animationFrameId;
+    let particles = [];
+    let scale = 1.0;
+    let scaleDirection = 1;
+    let vintageTime = 0;
+
+    const CANVAS_WIDTH = 600;
+    
+    // তেরঙ্গার রঙ (গেরুয়া, সাদা, সবুজ)
+    const tricolorPalette = ['rgba(255, 153, 51, 0.8)', 'rgba(255, 255, 255, 0.8)', 'rgba(19, 136, 8, 0.8)'];
+    // আগুনের রঙ (লাল, কমলা, হলুদ)
+    const firePalette = ['rgba(255, 69, 0, 0.9)', 'rgba(255, 140, 0, 0.9)', 'rgba(255, 215, 0, 0.8)'];
+
+    imageFile.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                uploadedImg.onload = function() {
+                    const ratio = uploadedImg.height / uploadedImg.width;
+                    canvas.width = CANVAS_WIDTH;
+                    canvas.height = CANVAS_WIDTH * ratio;
+                    
+                    isImageLoaded = true;
+                    canvasContainer.style.display = 'block';
+                    recordBtn.disabled = false;
+                    
+                    if(animationFrameId) cancelAnimationFrame(animationFrameId);
+                    initParticles();
+                    animate();
+                };
+                uploadedImg.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    effectSelect.addEventListener('change', () => {
+        initParticles();
+        scale = 1.0; 
+    });
+
+    function initParticles() {
+        particles = [];
+        const effect = effectSelect.value;
+        
+        let count = 0;
+        if(effect === 'rain') count = 100;
+        if(effect === 'sparks') count = 80;
+        if(effect === 'tricolor') count = 60;
+
+        for (let i = 0; i < count; i++) {
+            let p = {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                angle: Math.random() * Math.PI * 2
+            };
+
+            if (effect === 'rain') {
+                p.speed = Math.random() * 10 + 10;
+                p.length = Math.random() * 20 + 10;
+                p.drift = 1;
+            } else if (effect === 'sparks') {
+                p.y = canvas.height + Math.random() * 100; // নিচ থেকে উঠবে
+                p.speed = Math.random() * 2 + 1;
+                p.radius = Math.random() * 3 + 1;
+                p.color = firePalette[Math.floor(Math.random() * firePalette.length)];
+            } else if (effect === 'tricolor') {
+                p.speed = Math.random() * 1 + 0.5;
+                p.radius = Math.random() * 4 + 2;
+                p.color = tricolorPalette[Math.floor(Math.random() * tricolorPalette.length)];
+                p.drift = Math.random() * 2 - 1;
+            }
+            particles.push(p);
+        }
+    }
+
+    function animate() {
+        if (!isImageLoaded) return;
+        const effect = effectSelect.value;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // ছবি ড্র ও জুম
+        ctx.save();
+        if (effect === 'zoom') {
+            scale += 0.0005 * scaleDirection;
+            if (scale > 1.15) scaleDirection = -1;
+            if (scale < 1.0) scaleDirection = 1;
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.scale(scale, scale);
+            ctx.translate(-canvas.width / 2, -canvas.height / 2);
+        }
+        ctx.drawImage(uploadedImg, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
+
+        // ভিনটেজ ইফেক্ট (ঐতিহাসিক রূপ)
+        if (effect === 'vintage') {
+            vintageTime++;
+            // সেপিয়া টোন (হালকা বাদামী আস্তরণ)
+            ctx.fillStyle = 'rgba(112, 66, 20, 0.35)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // পুরনো সিনেমার স্ক্র্যাচ
+            if (Math.random() > 0.6) {
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.lineWidth = Math.random() * 2;
+                let xPos = Math.random() * canvas.width;
+                ctx.beginPath();
+                ctx.moveTo(xPos, 0);
+                ctx.lineTo(xPos, canvas.height);
+                ctx.stroke();
+            }
+        }
+
+        // পার্টিকেল ড্র করা
+        if (effect === 'rain') {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.lineWidth = 1.5;
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x - p.drift, p.y + p.length);
+                ctx.stroke();
+                p.y += p.speed;
+                p.x -= p.drift;
+                if (p.y > canvas.height) { p.y = -p.length; p.x = Math.random() * canvas.width; }
+            });
+        } 
+        else if (effect === 'sparks') {
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.fillStyle = p.color;
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                p.y -= p.speed; // ওপরের দিকে যাবে
+                p.x += Math.sin(p.angle) * 1.5; // আঁকাবাঁকা হয়ে উঠবে
+                p.angle += 0.1;
+                // ওপরে গেলে মিলিয়ে যাবে এবং নিচে আবার তৈরি হবে
+                if (p.y < 0) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
+            });
+        }
+        else if (effect === 'tricolor') {
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.fillStyle = p.color;
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                p.y -= p.speed; // ধীরে ওপরের দিকে
+                p.x += Math.sin(p.angle) * 0.5; 
+                p.angle += 0.05;
+                if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
+            });
+        }
+
+        animationFrameId = requestAnimationFrame(animate);
+    }
+
+    // ভিডিও রেকর্ডিং লজিক (আগের মতোই)
+    recordBtn.addEventListener('click', () => {
+        const stream = canvas.captureStream(30); 
+        let mimeType = 'video/webm';
+        
+        if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
+            mimeType = 'video/webm;codecs=vp9';
+        } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+            mimeType = 'video/mp4';
+        }
+
+        const recorder = new MediaRecorder(stream, { mimeType: mimeType });
+        let chunks = [];
+
+        recorder.ondataavailable = e => chunks.push(e.data);
+        
+        recorder.onstop = () => {
+            const blob = new Blob(chunks, { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            
+            downloadLink.href = url;
+            let ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+            downloadLink.download = `freedom_fighter_tribute.${ext}`;
+            
+            downloadSection.style.display = 'block';
+            statusMessage.innerText = "✅ ভিডিও সফলভাবে তৈরি হয়েছে! জয় হিন্দ 🇮🇳";
+            statusMessage.style.color = "#10b981";
+            
+            recordBtn.innerText = "🔴 আবার রেকর্ড করুন";
+            recordBtn.disabled = false;
+        };
+
+        recorder.start();
+        recordBtn.disabled = true;
+        downloadSection.style.display = 'none';
+        
+        let timeLeft = 5;
+        statusMessage.style.color = "#ea580c";
+        
+        const timer = setInterval(() => {
+            statusMessage.innerText = `ভিডিও তৈরি হচ্ছে... (${timeLeft} সেকেন্ড বাকি)`;
+            timeLeft--;
+            if (timeLeft < 0) {
+                clearInterval(timer);
+                recorder.stop();
+            }
+        }, 1000);
+    });
+</script>
+
+</body>
+</html>
