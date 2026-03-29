@@ -44,3 +44,18 @@ File: audio treemar| audio-treemar.html
 File: pending file
 
 ---
+
+Title: ad nanagement pro
+Description: ad manage করুন সর্বত্র লাইভ করুন
+Tags: Tailwind, HTML,JS,CSS
+Thumbnail:
+Demo: ad-manage/ad_bridge.html
+File: ad_bridge-one |ad-manage/ad_bridge-one.html
+File: ad_bridge|ad-manage/ad_bridge.html
+File: ad_data |ad-manage/ad_data.txt
+File: ad_switch|ad-manage/ad_switch.txt
+File: ad1_data |ad-manage/ad1_data.txt
+File: ads.txt |ad-manage/ads.txt
+File: ads1| ad-manage/ads1.txt
+
+---
