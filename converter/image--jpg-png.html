@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Advanced Image Tool</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background-color: #f4f7f6; 
+            color: #333;
+            padding: 15px;
+            text-align: center;
+        }
+        .container {
+            background: #fff;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        h2 { font-size: 20px; margin-bottom: 15px; color: #2c3e50; }
+        
+        /* Image Upload & Container */
+        .file-input-wrapper { margin-bottom: 15px; }
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+
+        /* Cropper Container - Important to limit height */
+        .img-container {
+            width: 100%;
+            height: 300px; /* মোবাইলের জন্য ফিক্সড হাইট */
+            background-color: #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            display: none; /* ছবি আপলোডের আগে লুকানো থাকবে */
+        }
+        #imageToCrop { max-width: 100%; }
+
+        /* Aspect Ratio Control Buttons */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .ratio-btn {
+            padding: 8px;
+            font-size: 13px;
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .ratio-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        /* Conversion Settings */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        label { font-size: 13px; font-weight: 600; color: #555; display: block; margin-bottom: 5px; }
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+
+        /* Action Buttons */
+        .main-btn {
+            width: 100%;
+            padding: 14px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .main-btn:disabled { background: #94a3b8; }
+
+        /* Result Section */
+        #resultSection { display: none; margin-top: 20px; border-top: 2px dashed #e2e8f0; padding-top: 20px; }
+        #finalImage {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        .download-btn {
+            display: inline-block;
+            width: 100%;
+            padding: 14px;
+            background: #10b981;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>ইমেজ ক্রপার ও কনভার্টার</h2>
+
+    <div class="file-input-wrapper">
+        <input type="file" id="imageInput" accept="image/*">
+    </div>
+
+    <div class="img-container" id="imgContainer">
+        <img id="imageToCrop" src="">
+    </div>
+
+    <div class="controls-grid">
+        <button class="ratio-btn active" data-ratio="NaN">Free</button>
+        <button class="ratio-btn" data-ratio="1">Square (1:1)</button>
+        <button class="ratio-btn" data-ratio="0.6667">Portrait (2:3)</button>
+        <button class="ratio-btn" data-ratio="1.5">Landscape (3:2)</button>
+    </div>
+
+    <div class="settings-grid">
+        <div>
+            <label for="formatSelect">ফরম্যাট:</label>
+            <select id="formatSelect">
+                <option value="image/jpeg">JPG</option>
+                <option value="image/png">PNG</option>
+            </select>
+        </div>
+        <div>
+            <label for="qualitySelect">সাইজ/কোয়ালিটি (শুধু JPG):</label>
+            <select id="qualitySelect">
+                <option value="0.9">High (Standard)</option>
+                <option value="0.7" selected>Medium (Reduced)</option>
+                <option value="0.5">Low (Small Size)</option>
+            </select>
+        </div>
+    </div>
+
+    <button id="cropBtn" class="main-btn" disabled>✂️ ক্রপ করুন ও প্রিভিউ দেখুন</button>
+
+    <div id="resultSection">
+        <h3>প্রিভিউ:</h3>
+        <img id="finalImage" src="">
+        <a id="downloadLink" class="download-btn" href="#">⬇️ ইমেজ ডাউনলোড করুন</a>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+<script>
+    const imageInput = document.getElementById('imageInput');
+    const imgContainer = document.getElementById('imgContainer');
+    const imageToCrop = document.getElementById('imageToCrop');
+    const cropBtn = document.getElementById('cropBtn');
+    const resultSection = document.getElementById('resultSection');
+    const finalImage = document.getElementById('finalImage');
+    const downloadLink = document.getElementById('downloadLink');
+    const formatSelect = document.getElementById('formatSelect');
+    const qualitySelect = document.getElementById('qualitySelect');
+    const ratioButtons = document.querySelectorAll('.ratio-btn');
+
+    let cropper; // Cropper.js এর ইনস্ট্যান্স রাখার জন্য
+
+    // ১. ইমেজ ফাইল লোড করা
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                // আগের ক্রপার থাকলে ধ্বংস করা
+                if (cropper) {
+                    cropper.destroy();
+                }
+                
+                imageToCrop.src = event.target.result;
+                imgContainer.style.display = 'block';
+                resultSection.style.display = 'none';
+
+                // নতুন Cropper চালু করা
+                cropper = new Cropper(imageToCrop, {
+                    viewMode: 1, // ইমেজ কন্টেইনারের বাইরে যাবে না
+                    dragMode: 'move', // ছবি মুভ/জুম করা যাবে
+                    aspectRatio: NaN, // শুরুতে Free ক্রপ
+                    autoCropArea: 0.8,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                });
+                cropBtn.disabled = false;
+                resetRatioButtons();
+                document.querySelector('[data-ratio="NaN"]').classList.add('active');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // ২. অ্যাসপেক্ট রেশিও (Portrait/Square) পরিবর্তন করা
+    ratioButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!cropper) return;
+            
+            resetRatioButtons();
+            this.classList.add('active');
+            
+            const ratio = parseFloat(this.getAttribute('data-ratio'));
+            cropper.setAspectRatio(ratio);
+        });
+    });
+
+    function resetRatioButtons() {
+        ratioButtons.forEach(btn => btn.classList.remove('active'));
+    }
+
+    // ৩. ক্রপ করা, কনভার্ট করা এবং ডাউনলোড রেডি করা
+    cropBtn.addEventListener('click', function() {
+        if (!cropper) return;
+
+        const format = formatSelect.value;
+        const quality = parseFloat(qualitySelect.value);
+
+        // ক্রপ করা অংশকে ক্যানভাসে নেওয়া
+        // (বড় ইমেজের জন্য maxWidth সেট করা ভালো যাতে ব্রাউজার ক্র্যাশ না করে)
+        const canvas = cropper.getCroppedCanvas({
+            maxWidth: 2048,
+            maxHeight: 2048,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high',
+        });
+
+        // ক্যানভাস থেকে ডেটা URL তৈরি (এখানেই কনভার্ট এবং সাইজ রিডিউস হয়)
+        const finalDataUrl = canvas.toDataURL(format, quality);
+
+        // প্রিভিউ এবং ডাউনলোড লিংক আপডেট করা
+        finalImage.src = finalDataUrl;
+        resultSection.style.display = 'block';
+
+        const ext = format === 'image/jpeg' ? 'jpg' : 'png';
+        downloadLink.href = finalDataUrl;
+        downloadLink.download = `cropped_image.${ext}`;
+
+        // রেজাল্ট সেকশনে স্ক্রল করে নেওয়া
+        resultSection.scrollIntoView({ behavior: 'smooth' });
+    });
+</script>
+
+</body>
+</html>
