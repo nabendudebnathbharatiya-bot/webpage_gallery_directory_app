@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Video Merger Studio</title>
+    <style>
+        /* আপনার স্টাইল অপরিবর্তিত রাখা হয়েছে */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: #f8fafc; color: #1e293b; padding: 15px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background: #ffffff; width: 100%; max-width: 550px; padding: 25px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); text-align: left; }
+        h2 { font-size: 24px; margin-bottom: 5px; color: #0f172a; text-align: center; }
+        .subtitle { font-size: 13px; color: #64748b; text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0; }
+        .settings-box { background: #eff6ff; padding: 15px; border-radius: 10px; border: 1px solid #bfdbfe; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .settings-box label { font-size: 14px; font-weight: bold; color: #1e40af; }
+        .settings-box select { padding: 8px; border-radius: 6px; border: 1px solid #93c5fd; outline: none; font-weight: bold; }
+        #videoList { display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px; }
+        .video-item { background: #fdfbf7; border: 1px solid #cbd5e1; padding: 15px; border-radius: 10px; border-left: 5px solid #ef4444; position: relative; }
+        .video-item-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; font-size: 14px; color: #334155; }
+        .remove-btn { color: #ef4444; background: none; border: none; cursor: pointer; font-size: 13px; font-weight: bold; }
+        input[type="file"] { width: 100%; padding: 10px; border: 2px dashed #94a3b8; border-radius: 8px; font-size: 13px; background: #fff; cursor: pointer; }
+        button { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 10px;}
+        .btn-add { background: #e2e8f0; color: #0f172a; }
+        .btn-merge { background: #10b981; color: white; margin-top: 20px;}
+        #statusMessage { margin-top: 15px; font-size: 14px; font-weight: bold; padding: 12px; border-radius: 8px; text-align: center; display: none; }
+        #downloadSection { display: none; margin-top: 15px; text-align: center; }
+        .download-link { display: inline-block; width: 100%; padding: 15px; background: #3b82f6; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; }
+        #renderCanvas { display: none; } /* প্রসেসিং এর সময় ক্যানভাস দেখানোর দরকার নেই */
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🔗 CHAKRADHAM ভিডিও মার্জার</h2>
+    <div class="subtitle">সহজেই ভিডিও ক্লিপগুলো জোড়া দিন</div>
+
+    <div class="settings-box">
+        <label>ভিডিও ফরম্যাট:</label>
+        <select id="videoFormat">
+            <option value="landscape">Landscape (16:9)</option>
+            <option value="portrait">Portrait (9:16)</option>
+        </select>
+    </div>
+
+    <div id="videoList">
+        <div class="video-item">
+            <div class="video-item-header"><span>ভিডিও ১</span></div>
+            <input type="file" class="v-file" accept="video/*">
+        </div>
+        <div class="video-item">
+            <div class="video-item-header">
+                <span>ভিডিও ২</span>
+                <button class="remove-btn" onclick="this.parentElement.parentElement.remove()">❌</button>
+            </div>
+            <input type="file" class="v-file" accept="video/*">
+        </div>
+    </div>
+
+    <button id="addVideoBtn" class="btn-add">➕ আরও ভিডিও যোগ করুন</button>
+    <button id="mergeBtn" class="btn-merge">⚙️ মার্জ শুরু করুন</button>
+
+    <div id="statusMessage"></div>
+    
+    <div id="downloadSection">
+        <video id="outputVideo" controls style="width: 100%; border-radius: 8px; margin-bottom: 10px;"></video>
+        <a id="downloadLink" class="download-link" href="#">⬇️ ডাউনলোড করুন</a>
+    </div>
+
+    <canvas id="renderCanvas"></canvas>
+</div>
+
+<script>
+    const videoList = document.getElementById('videoList');
+    const addVideoBtn = document.getElementById('addVideoBtn');
+    const mergeBtn = document.getElementById('mergeBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const downloadSection = document.getElementById('downloadSection');
+    const canvas = document.getElementById('renderCanvas');
+    const ctx = canvas.getContext('2d');
+
+    addVideoBtn.onclick = () => {
+        const div = document.createElement('div');
+        div.className = 'video-item';
+        div.innerHTML = `
+            <div class="video-item-header">
+                <span>নতুন ভিডিও</span>
+                <button class="remove-btn" onclick="this.parentElement.parentElement.remove()">❌</button>
+            </div>
+            <input type="file" class="v-file" accept="video/*">
+        `;
+        videoList.appendChild(div);
+    };
+
+    function showStatus(msg, type) {
+        statusMessage.style.display = 'block';
+        statusMessage.innerText = msg;
+        statusMessage.style.backgroundColor = type === 'error' ? '#fee2e2' : '#e0f2fe';
+        statusMessage.style.color = type === 'error' ? '#ef4444' : '#0284c7';
+    }
+
+    async function processVideo(file, audioCtx, audioDest) {
+        return new Promise((resolve, reject) => {
+            const video = document.createElement('video');
+            video.src = URL.createObjectURL(file);
+            video.muted = false; 
+            video.crossOrigin = "anonymous";
+
+            video.onloadedmetadata = () => {
+                const source = audioCtx.createMediaElementSource(video);
+                source.connect(audioDest);
+                video.play();
+            };
+
+            const drawLoop = () => {
+                if (!video.paused && !video.ended) {
+                    // Aspect Ratio Logic
+                    const vRatio = video.videoWidth / video.videoHeight;
+                    const cRatio = canvas.width / canvas.height;
+                    let dw, dh, sx, sy;
+
+                    if (vRatio > cRatio) {
+                        dw = canvas.width; dh = dw / vRatio;
+                        sx = 0; sy = (canvas.height - dh) / 2;
+                    } else {
+                        dh = canvas.height; dw = dh * vRatio;
+                        sy = 0; sx = (canvas.width - dw) / 2;
+                    }
+
+                    ctx.fillStyle = "black";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(video, sx, sy, dw, dh);
+                    requestAnimationFrame(drawLoop);
+                }
+            };
+
+            video.onplay = drawLoop;
+            video.onended = () => {
+                URL.revokeObjectURL(video.src);
+                resolve();
+            };
+            video.onerror = () => reject("Error loading video");
+        });
+    }
+
+    mergeBtn.onclick = async () => {
+        const inputs = document.querySelectorAll('.v-file');
+        const files = Array.from(inputs).map(i => i.files[0]).filter(f => f);
+
+        if (files.length < 2) return showStatus("কমপক্ষে ২টি ভিডিও সিলেক্ট করুন", "error");
+
+        mergeBtn.disabled = true;
+        showStatus("প্রসেসিং শুরু হচ্ছে...", "progress");
+
+        // Setup Canvas & Audio
+        const isPortrait = document.getElementById('videoFormat').value === 'portrait';
+        canvas.width = isPortrait ? 720 : 1280;
+        canvas.height = isPortrait ? 1280 : 720;
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const audioDest = audioCtx.createMediaStreamDestination();
+        const stream = canvas.captureStream(30);
+        audioDest.stream.getAudioTracks().forEach(track => stream.addTrack(track));
+
+        const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus' });
+        const chunks = [];
+
+        recorder.ondataavailable = e => chunks.push(e.data);
+        recorder.onstop = () => {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            document.getElementById('outputVideo').src = url;
+            document.getElementById('downloadLink').href = url;
+            document.getElementById('downloadLink').download = "merged-video.webm";
+            downloadSection.style.display = 'block';
+            showStatus("সফলভাবে সম্পন্ন হয়েছে!", "success");
+            mergeBtn.disabled = false;
+        };
+
+        recorder.start();
+
+        for (const file of files) {
+            await processVideo(file, audioCtx, audioDest);
+        }
+
+        recorder.stop();
+    };
+</script>
+</body>
+</html>
