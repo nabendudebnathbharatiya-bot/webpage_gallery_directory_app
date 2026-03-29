@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Guide - Chakra AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        .code-block { font-family: 'Courier New', Courier, monospace; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 min-h-screen custom-scrollbar selection:bg-indigo-200">
+
+    <header class="bg-slate-900 text-white shadow-xl sticky top-0 z-50 border-b border-indigo-500">
+        <div class="max-w-6xl mx-auto px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="text-3xl bg-slate-800 p-2.5 rounded-xl border border-slate-700 shadow-inner">👨‍💻</div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Chakra AI Developer Guide</h1>
+                    <p class="text-slate-400 text-sm mt-0.5">কীভাবে ডাটাবেস (.txt) ফাইল সাজাবেন এবং সিস্টেম ট্যাগ ব্যবহার করবেন</p>
+                </div>
+            </div>
+            <button onclick="history.back()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-all shadow-md flex items-center gap-2">
+                <span>🔙</span> ফিরে যান
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden col-span-1 lg:col-span-2">
+            <div class="bg-slate-100 px-6 py-4 border-b border-slate-200">
+                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">📄 ১. ডাটাবেস ফাইলের মূল গঠন (Basic Structure)</h2>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-slate-600 mb-4">প্রতিটি বটের ডাটাবেস একটি নির্দিষ্ট নিয়মে শুরু এবং শেষ করতে হয়। এর ভেতরে বটের নাম, ছবি এবং অন্যান্য সেটিংস থাকে।</p>
+                <div class="bg-slate-900 text-green-400 p-5 rounded-xl code-block text-sm overflow-x-auto border border-slate-700 shadow-inner">
+                    <span class="text-indigo-400">#BOT_START</span><br>
+                    <span class="text-yellow-300">Name:</span> চক্র গাইড<br>
+                    <span class="text-yellow-300">Image:</span> 🌀 (অথবা Lottie link)<br>
+                    <span class="text-yellow-300">Theme:</span> bg-indigo-50<br>
+                    <span class="text-yellow-300">Welcome:</span> নমস্কার! কীভাবে সাহায্য করতে পারি?<br><br>
+                    <span class="text-slate-500">// আপনার ট্রিগার এবং রেসপন্স এখানে থাকবে</span><br>
+                    <span class="text-cyan-300">Trigger:</span> হ্যালো | হাই | hello<br>
+                    <span class="text-pink-300">Response:</span> নমস্কার! বলুন কী জানতে চান?<br><br>
+                    <span class="text-indigo-400">#BOT_END</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="bg-indigo-50 px-6 py-4 border-b border-indigo-100">
+                <h2 class="text-lg font-bold text-indigo-900 flex items-center gap-2">🎬 ২. মিডিয়া ও অ্যানিমেশন (Media Tags)</h2>
+            </div>
+            <div class="p-6 space-y-6">
+                <div>
+                    <p class="font-bold text-slate-800 mb-1">Lottie Animation:</p>
+                    <p class="text-xs text-slate-500 mb-2">মেসেজের ভেতরে জীবন্ত অ্যানিমেশন দেখাতে।</p>
+                    <code class="block bg-slate-100 text-pink-600 p-3 rounded-lg text-sm mb-2 border border-slate-200">[LOTTIE:https://lottie.host/.../file.json]</code>
+                    <p class="text-sm"><span class="font-bold text-indigo-600">ফলাফল:</span> চ্যাট বাবলের নিচে সুন্দর অ্যানিমেশন প্লে হবে।</p>
+                </div>
+                <div>
+                    <p class="font-bold text-slate-800 mb-1">YouTube Video:</p>
+                    <p class="text-xs text-slate-500 mb-2">নির্দিষ্ট সময় থেকে নির্দিষ্ট সময় পর্যন্ত ভিডিও চালাতে।</p>
+                    <code class="block bg-slate-100 text-pink-600 p-3 rounded-lg text-sm mb-2 border border-slate-200">[YT:ভিডিও_আইডি|শুরুর_সেকেন্ড|শেষের_সেকেন্ড]</code>
+                    <p class="text-sm"><span class="font-bold text-indigo-600">ফলাফল:</span> চ্যাটের ভেতরেই ইউটিউব প্লেয়ার ওপেন হবে।</p>
+                </div>
+                <div>
+                    <p class="font-bold text-slate-800 mb-1">Image & Link:</p>
+                    <code class="block bg-slate-100 text-pink-600 p-3 rounded-lg text-sm mb-2 border border-slate-200">[IMG:ছবির_লিংক]<br>[LINK:ওয়েবসাইট_লিংক|দেখানোর_টেক্সট]</code>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="bg-emerald-50 px-6 py-4 border-b border-emerald-100">
+                <h2 class="text-lg font-bold text-emerald-900 flex items-center gap-2">🧠 ৩. লজিক ও ডায়নামিক ফিচার (Logic Tags)</h2>
+            </div>
+            <div class="p-6 space-y-6">
+                <div>
+                    <p class="font-bold text-slate-800 mb-1">Gamification (স্কোর দেওয়া):</p>
+                    <p class="text-xs text-slate-500 mb-2">ইউজারকে নির্দিষ্ট উত্তরের জন্য পয়েন্ট দিতে।</p>
+                    <code class="block bg-slate-100 text-emerald-600 p-3 rounded-lg text-sm mb-2 border border-slate-200">সঠিক উত্তর! [SCORE:10]</code>
+                    <p class="text-sm"><span class="font-bold text-indigo-600">ফলাফল:</span> ইউজারের মোট স্কোরে ১০ পয়েন্ট যোগ হবে এবং একটি সুন্দর ব্যাজ দেখাবে।</p>
+                </div>
+                <div>
+                    <p class="font-bold text-slate-800 mb-1">Data Save & Print (ডায়নামিক ভেরিয়েবল):</p>
+                    <p class="text-xs text-slate-500 mb-2">ইউজারের কাছ থেকে তথ্য নিয়ে সেভ করতে এবং পরে তা ব্যবহার করতে।</p>
+                    <code class="block bg-slate-100 text-emerald-600 p-3 rounded-lg text-sm mb-2 border border-slate-200">
+                        Response: আপনার বয়স কত? [SAVE:age|ধন্যবাদ, বয়স সেভ হলো!]<br><br>
+                        Response: আপনার বয়স হলো {age} বছর।
+                    </code>
+                    <p class="text-sm"><span class="font-bold text-indigo-600">ফলাফল:</span> বট বয়স সেভ করে নেবে এবং পরের কোনো লাইনে `{age}` লিখলে সেই বয়সটি প্রিন্ট করবে।</p>
+                </div>
+                <div>
+                    <p class="font-bold text-slate-800 mb-1">Chain Reaction (অটোমেটিক ট্রিগার):</p>
+                    <p class="text-xs text-slate-500 mb-2">একটি উত্তর শেষ হওয়ার পর নিজে থেকেই আরেকটি প্রশ্ন ট্রিগার করতে।</p>
+                    <code class="block bg-slate-100 text-emerald-600 p-3 rounded-lg text-sm mb-2 border border-slate-200">Response: চলুন কুইজ খেলি! [FIRE:কুইজ ধরো]</code>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden col-span-1 lg:col-span-2">
+            <div class="bg-amber-50 px-6 py-4 border-b border-amber-100">
+                <h2 class="text-lg font-bold text-amber-900 flex items-center gap-2">🎯 ৪. স্মার্ট কনটেক্সট এবং ফরম্যাটিং (Context & UI)</h2>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <p class="font-bold text-slate-800 mb-2">সিঙ্গেল কোটেশন ('...') ম্যাজিক:</p>
+                    <p class="text-sm text-slate-600 mb-3">উত্তরের মাঝে কোনো শব্দকে সিঙ্গেল কোটেশনের ভেতরে রাখলে বট সেটি মেমোরিতে সেভ করে নেয়।</p>
+                    <div class="bg-slate-900 text-green-400 p-4 rounded-xl code-block text-sm border border-slate-700">
+                        Response: আপনি কি 'বিজ্ঞান' নাকি 'ইতিহাস' পড়বেন?
+                    </div>
+                    <p class="text-sm mt-3"><span class="font-bold text-indigo-600">ফলাফল:</span> এর উত্তরে ইউজার যদি শুধু "হ্যাঁ" বা "১" লেখে, তবে বট নিজে থেকেই বুঝে নেবে যে ইউজার "বিজ্ঞান" বা প্রথম অপশনটি বেছে নিয়েছে।</p>
+                </div>
+                
+                <div>
+                    <p class="font-bold text-slate-800 mb-2">HTML ফরম্যাটিং:</p>
+                    <p class="text-sm text-slate-600 mb-3">উত্তরের ভেতরে সাধারণ HTML ট্যাগ ব্যবহার করে টেক্সট সাজানো যায়।</p>
+                    <ul class="text-sm space-y-2 text-slate-700">
+                        <li><code class="bg-slate-100 px-2 py-0.5 rounded text-pink-600">&lt;br&gt;</code> - লাইন ব্রেক বা প্যারাগ্রাফ করতে।</li>
+                        <li><code class="bg-slate-100 px-2 py-0.5 rounded text-pink-600">&lt;b&gt;টেক্সট&lt;/b&gt;</code> - লেখাকে বোল্ড (Bold) বা মোটা করতে।</li>
+                        <li><code class="bg-slate-100 px-2 py-0.5 rounded text-pink-600">&lt;i&gt;টেক্সট&lt;/i&gt;</code> - লেখাকে ইটালিক (Italic) বা বাঁকা করতে।</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </main>
+    
+    <footer class="text-center py-8 text-sm font-medium text-slate-500">
+        Chakra AI Master Engine - Developer Console
+    </footer>
+
+</body>
+</html>
