@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chakra Chat Bot - Command Guide</title>
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* কাস্টম অ্যানিমেশন */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-card {
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+        /* কার্ডগুলোর লোডিং ডিলে (Staggered effect) */
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+        .delay-6 { animation-delay: 0.6s; }
+        .delay-7 { animation-delay: 0.7s; }
+        .delay-8 { animation-delay: 0.8s; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen flex flex-col selection:bg-indigo-200 text-base md:text-lg">
+
+    <header class="bg-indigo-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="text-3xl bg-white/20 p-2 rounded-lg backdrop-blur-sm">🤖</div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-wide">কমান্ড গাইড</h1>
+                    <p class="text-indigo-200 text-sm mt-0.5">CHAKRADHAM ONLINE - সিক্রেট পাওয়ার</p>
+                </div>
+            </div>
+            <button onclick="history.back()" class="bg-white/10 hover:bg-white/20 border border-white/30 px-4 py-2 rounded-full text-base font-medium transition-all backdrop-blur-sm flex items-center gap-2">
+                <span>🔙</span> চ্যাটে ফিরুন
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-5xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-6 w-full custom-scrollbar">
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow animate-card delay-1 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-yellow-500"></div>
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-3">🔢 স্মার্ট অপশন নেভিগেশন</h2>
+            <p class="text-base text-gray-600 mb-2">বট যখন কোনো লিস্ট থেকে বেছে নিতে বলবে, তখন পুরো নাম টাইপ করার প্রয়োজন নেই!</p>
+            <div class="bg-yellow-50 p-4 rounded-lg text-base text-yellow-800 border border-yellow-200">
+                শুধুমাত্র অপশনের <b>নম্বরটি</b> (যেমন: <span class="font-mono bg-white px-2 py-0.5 rounded border">১</span> বা <span class="font-mono bg-white px-2 py-0.5 rounded border">২</span>) টাইপ করে সেন্ড করুন। বট নিজেই বুঝে নেবে!
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow animate-card delay-1 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-cyan-500"></div>
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-3">🔘 কুইক বাটন (Quick Buttons)</h2>
+            <p class="text-base text-gray-600 mb-3">দ্রুত চ্যাট করার জন্য বট আপনাকে কিছু সাজেশন বাটন দেয়:</p>
+            <div class="bg-cyan-50 p-4 rounded-lg text-base text-cyan-800 border border-cyan-200 leading-relaxed">
+                আপনাকে কষ্ট করে টাইপ করতে হবে না! মেসেজ বক্সের ঠিক ওপরে আসা <b>বিভিন্ন রঙের বাটনগুলোতে</b> সরাসরি ক্লিক করলেই আপনার কমান্ড সেন্ড হয়ে যাবে। 
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow animate-card delay-2 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-teal-500"></div>
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-3">💾 মেমোরি ভল্ট</h2>
+            <p class="text-base text-gray-600 mb-3">আপনার নিজস্ব তথ্য বটের মাথায় সেভ করুন:</p>
+            <div class="bg-gray-50 p-4 rounded-lg text-base font-mono text-teal-700 mb-3 border border-gray-100 leading-relaxed">
+                <span class="font-bold text-gray-800">সেভ করতে:</span> মেমোরি [আপনার তথ্য]<br>
+                <span class="font-bold text-gray-800">লিস্ট দেখতে:</span> মেমোরি লিস্ট বা show memory<br>
+                <span class="font-bold text-gray-800">ডিলিট করতে:</span> মেমোরি ডিলিট ১ (লিস্টের নম্বর)
+            </div>
+            <p class="text-sm text-gray-500"><b>নোট:</b> এটি গ্লোবাল মেমোরি, সব বট এটি মনে রাখবে।</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow animate-card delay-2 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-3">🧠 মেমোরি কুইজ</h2>
+            <p class="text-base text-gray-600 mb-3">আপনার সেভ করা মেমোরি থেকে নিজেকে যাচাই করুন:</p>
+            <div class="bg-gray-50 p-4 rounded-lg text-base font-mono text-indigo-700 mb-3 border border-gray-100 leading-relaxed">
+                <span class="font-bold text-gray-800">র‍্যান্ডম কুইজ:</span> মেমোরি কুইজ<br>
+                <span class="font-bold text-gray-800">নির্দিষ্ট কুইজ:</span> মেমোরি কুইজ ১ (নম্বর দিন)<br>
+                <span class="font-bold text-red-600">বন্ধ করতে:</span> স্টপ কুইজ
+            </div>
+            <p class="text-sm text-gray-500"><b>নোট:</b> সঠিক উত্তর দিলে আপনার অ্যাকাউন্টে স্কোর যোগ হবে।</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow animate-card delay-3 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-3">👤 নাম সেটআপ</h2>
+            <p class="text-base text-gray-600 mb-3">বটকে আপনার নাম মনে রাখতে নির্দেশ দিন:</p>
+            <div class="bg-gray-50 p-4 rounded-lg text-base font-mono text-blue-700 mb-3 border border-gray-100">
+                • আমার নাম রহমান<br>• my name is Rahman
+            </div>
+            <p class="text-sm text-gray-500"><b>নোট:</b> প্রথম শব্দটি নাম হিসেবে মেমোরিতে লক হবে।</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow animate-card delay-3 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-3">🗑️ চ্যাট ডিলিট</h2>
+            <p class="text-base text-gray-600 mb-3">বর্তমান বটের সম্পূর্ণ চ্যাট হিস্ট্রি মুছতে লিখুন:</p>
+            <div class="bg-gray-50 p-4 rounded-lg text-base font-mono text-red-600 mb-3 border border-gray-100">
+                • ডিলিট চ্যাট<br>• চ্যাট ডিলিট<br>• delete chat
+            </div>
+            <p class="text-sm text-gray-500"><b>কনফার্মেশন:</b> বট জানতে চাইলে 'হ্যাঁ' লিখলে ডিলিট হবে।</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow animate-card delay-4 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-purple-500"></div>
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-3">🧮 সেফ ক্যালকুলেটর</h2>
+            <p class="text-base text-gray-600 mb-3">যেকোনো জটিল অঙ্কের দ্রুত সমাধান পেতে লিখুন:</p>
+            <div class="bg-gray-50 p-4 rounded-lg text-base font-mono text-purple-700 mb-3 border border-gray-100">
+                • my cal 10+5<br>• মাই ক্যাল (10+5)*2
+            </div>
+            <p class="text-sm text-gray-500"><b>সাপোর্ট:</b> +, -, *, /, (), এবং দশমিক।</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow animate-card delay-4 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-orange-500"></div>
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-3">⏱️ রিমাইন্ডার ও টাইমার</h2>
+            <p class="text-base text-gray-600 mb-3">নির্দিষ্ট সময় পর অ্যালার্ম পেতে লিখুন:</p>
+            <div class="bg-gray-50 p-4 rounded-lg text-base font-mono text-orange-700 mb-3 border border-gray-100">
+                • chat stop 5 min<br>• চ্যাট স্টপ ৫ মিনিট<br>• stop chat 10 sec
+            </div>
+            <p class="text-sm text-gray-500"><b>ইউনিট:</b> sec/সেকেন্ড, min/মিনিট, hour/ঘন্টা।</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow animate-card delay-5 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-emerald-500"></div>
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-3">📋 এক ক্লিকে কপি</h2>
+            <p class="text-base text-gray-600 mb-3">বটের দেওয়া বড় কোনো বার্তা সম্মিলিত গাইড বা তথ্য বা text কপি করতে:</p>
+            <div class="bg-emerald-50 p-4 rounded-lg text-base text-emerald-800 border border-emerald-200 leading-relaxed">
+                বটের যেকোনো মেসেজের ডানদিকের ওপরের কোণায় একটি <b>কপি আইকন</b> থাকে (মাউস রাখলে বা মোবাইলে মেসেজটিতে টাচ করলে দেখা যাবে ডানদিকে কপি আইকন)। সেখানে ক্লিক করলেই এক সেকেন্ডে পুরো মেসেজটি কপি হয়ে যাবে!
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow animate-card delay-5 md:col-span-2 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-4">💬 স্মার্ট কনটেক্সট (হ্যাঁ / না)</h2>
+            <p class="text-base text-gray-600 mb-4">বট যখন আপনাকে কোনো কাজের সাজেশন দেবে, তখন দ্রুত উত্তর দিতে নিচের শব্দগুলো ব্যবহার করতে পারেন:</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="bg-green-50 p-4 rounded-xl border border-green-200 shadow-sm">
+                    <p class="text-sm font-bold text-green-800 mb-2 uppercase tracking-wider">✅ হ্যাঁ বোঝাতে:</p>
+                    <p class="text-base text-green-700 font-medium leading-relaxed">হ্যাঁ, yes, ok, ঠিক আছে, চাই, অবশ্যই, দিন, করুন, প্রস্তুত</p>
+                </div>
+                <div class="bg-red-50 p-4 rounded-xl border border-red-200 shadow-sm">
+                    <p class="text-sm font-bold text-red-800 mb-2 uppercase tracking-wider">❌ না বোঝাতে:</p>
+                    <p class="text-base text-red-700 font-medium leading-relaxed">না, no, এখন না, থাক, বাদ, দরকার নেই, স্টপ, নেক্সট</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow animate-card delay-6 md:col-span-2 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-pink-500"></div>
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-4">⚡ কুইক টুলস ও স্টপওয়াচ</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm">
+                    <p class="text-base font-bold text-gray-800 mb-1">🏆 স্কোর দেখা</p>
+                    <p class="text-sm text-gray-600">লিখুন: <span class="font-mono text-indigo-600 font-bold">স্কোর</span></p>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm">
+                    <p class="text-base font-bold text-gray-800 mb-1">⌚ সময়</p>
+                    <p class="text-sm text-gray-600">লিখুন: <span class="font-mono text-indigo-600 font-bold">কটা বাজে</span></p>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm">
+                    <p class="text-base font-bold text-gray-800 mb-1">🌗 থিম</p>
+                    <p class="text-sm text-gray-600">লিখুন: <span class="font-mono text-indigo-600 font-bold">ডার্ক মোড</span></p>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm">
+                    <p class="text-base font-bold text-gray-800 mb-1">⏳ কাউন্টার</p>
+                    <p class="text-sm text-gray-600"><span class="font-mono text-indigo-600 font-bold">কাউন্ট টাইম</span> এবং <span class="font-mono text-indigo-600 font-bold">শো কাউন্ট</span></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow animate-card delay-6 md:col-span-2 relative overflow-hidden mt-2">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-rose-500"></div>
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-4">🗂️ ডাটা স্টোরেজ ও প্রাইভেসি</h2>
+            <p class="text-base text-gray-600 mb-4">আপনার সমস্ত চ্যাট এবং তথ্য আপনার নিজের ডিভাইসের ব্রাউজারেই (Local Storage) সম্পূর্ণ সুরক্ষিত থাকে। আপনার ডাটা কীভাবে কাজ করে তা নিচে দেওয়া হলো:</p>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="bg-rose-50 p-4 rounded-xl border border-rose-200 shadow-sm">
+                    <p class="text-sm font-bold text-rose-800 mb-2 uppercase tracking-wider">🌍 গ্লোবাল ডাটা (সব বটের জন্য):</p>
+                    <ul class="text-base text-rose-700 font-medium leading-relaxed list-disc list-inside space-y-1">
+                        <li><b>আপনার নাম:</b> (একবার সেট করলে সব বট আপনাকে চিনবে)</li>
+                        <li><b>মেমোরি ভল্ট:</b> (আপনার সেভ করা সব তথ্য)</li>
+                    </ul>
+                    <p class="text-sm text-rose-600 mt-3 font-medium"><i>💡 বট পরিবর্তন করলেও এই তথ্যগুলো মুছে যাবে না।</i></p>
+                </div>
+                
+                <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200 shadow-sm">
+                    <p class="text-sm font-bold text-indigo-800 mb-2 uppercase tracking-wider">🔒 লোকাল ডাটা (নির্দিষ্ট বটের জন্য):</p>
+                    <ul class="text-base text-indigo-700 font-medium leading-relaxed list-disc list-inside space-y-1">
+                        <li><b>চ্যাট হিস্ট্রি:</b> (প্রতিটি বটের চ্যাট আলাদা থাকে)</li>
+                        <li><b>ফর্মের তথ্য:</b> (বয়স, ফোন নম্বর, রোগের বিবরণ)</li>
+                        <li><b>স্কোর:</b> (প্রতিটি বটের কুইজ বা গেমের পয়েন্ট)</li>
+                    </ul>
+                    <p class="text-sm text-indigo-600 mt-3 font-medium"><i>💡 এক বটের চ্যাট বা ফর্মের ব্যক্তিগত তথ্য অন্য বট দেখতে পায় না।</i></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-900 rounded-2xl shadow-lg border border-slate-800 p-6 hover:shadow-xl transition-all animate-card delay-7 md:col-span-2 relative overflow-hidden group mt-4">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-cyan-400"></div>
+            
+            <div class="absolute -right-10 -top-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-all"></div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-5 relative z-10">
+                <div>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2 mb-2">👨‍💻 ডেভেলপার গাইড (Dev Console)</h2>
+                    <p class="text-slate-400 text-base">কীভাবে বটের .txt ডাটাবেস সাজাবেন এবং অ্যাডভান্সড ট্যাগ ব্যবহার করবেন, তার সম্পূর্ণ গাইডলাইন।</p>
+                </div>
+                <a href="chatbot_dev.html" class="whitespace-nowrap bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-md transform hover:scale-105 active:scale-95 transition-all flex items-center gap-2 border border-cyan-400/30">
+                    <span>গাইড ওপেন করুন</span> 🚀
+                </a>
+            </div>
+        </div>
+
+    </main>
+    
+    <footer class="text-center py-8 text-base font-medium text-gray-500 animate-card delay-8">
+        Powering the Next-Gen Assistant 🚀 <br>
+        <span class="text-sm font-bold mt-1 block">CHAKRADHAM ONLINE</span>
+    </footer>
+
+</body>
+</html>
