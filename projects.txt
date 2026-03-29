@@ -26,11 +26,21 @@ File: music-bangla.html|infography_research/music-bangla.html
 ---
 
 Title: কনভার্টার প্লাস
-Description: এই স্ট্রাকচার অনুযায়ী PROJECTS TXT FILE সাজান
-Tags: React, Tailwind, API, HTML,JS,CSS, ইত্যাদি ট্যাগ করুন
-Thumbnail: DEMO/DEMO.jpg
-Demo:
-File: এখানে ফাইলের নাম (পাইপের পাশে লিখুন লিংক| projects.txt
-File: রিসার্চ ওয়েব গ্যালারি(index.html)| index.html
+Description: vedio,image ও অডিও কনভার্ট টুল
+Tags: Tailwind CSS, HTML,JS
+Thumbnail:
+Demo: converter/audio-treemar.html
+File: audio treemar| audio-treemar.html
+File:pending
+
+---
+
+Title: chatbot
+Description: chatbot tool apps
+Tags: Tailwind, HTML,JS,CSS
+Thumbnail:
+Demo: chakra-robot/index.html
+File: audio treemar| audio-treemar.html
+File: pending file
 
 ---
