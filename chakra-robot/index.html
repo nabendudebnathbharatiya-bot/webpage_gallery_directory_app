@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <title>Chakra AI - Ultimate Master Engine 🧠</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="https://unpkg.com/brain.js"></script>
+
+    <style>
+    /* =========================================
+   UNIVERSAL BOT GLOW (সব বটের জন্য উপযুক্ত)
+========================================= */
+@keyframes universalGlow {
+    0%, 75% {
+        /* শান্ত অবস্থা */
+        box-shadow: 0 0 0 0 rgba(156, 163, 175, 0); 
+        transform: scale(1);
+    }
+    82% {
+        /* প্রথম বড় গ্লো (স্নিগ্ধ সিলভার/গ্লাস এফেক্ট) */
+        box-shadow: 0 0 20px 6px rgba(156, 163, 175, 0.55);
+        transform: scale(1.08);
+    }
+    89% {
+        box-shadow: 0 0 0 0 rgba(156, 163, 175, 0);
+        transform: scale(1);
+    }
+    96% {
+        /* দ্বিতীয় ছোট পালস */
+        box-shadow: 0 0 12px 3px rgba(156, 163, 175, 0.35);
+        transform: scale(1.05);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(156, 163, 175, 0);
+        transform: scale(1);
+    }
+}
+
+.chakra-universal-glow {
+    animation: universalGlow 8s infinite;
+    border-radius: 50%;
+    transition: all 0.3s ease-in-out;
+}
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .typing-dot { animation: typing 1.8s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col justify-center items-center p-4 font-sans text-gray-800 transition-colors duration-500" id="main-body">
+
+    <div id="bot-container" class="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[92vh] border border-gray-200 transition-colors duration-500">
+        
+        <div class="p-3 flex flex-col gap-2 shadow-sm bg-white/50 backdrop-blur-sm z-10 border-b border-gray-200">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <div class="text-2xl bg-white shadow-sm p-1.5 rounded-full border border-gray-100 chakra-universal-glow" id="bot-avatar">⚙️</div>
+            <div>
+                <h2 class="text-lg font-bold tracking-wide" id="bot-name">Chakra Chat Bot</h2>
+                <p class="text-[10px] text-green-600 font-medium flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> LIVE
+                </p>
+            </div>
+        </div>
+        
+        <button onclick="window.location.href='help.html'" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-2 rounded-full shadow-sm transition-transform hover:scale-110 active:scale-95 border border-indigo-200 chakra-universal-glow" title="কমান্ড গাইড">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+            </svg>
+        </button>
+    </div>
+    
+    <select id="bot-selector" onchange="changeBot()" class="w-full bg-white border border-gray-300 text-xs rounded-md focus:ring-blue-500 focus:border-blue-500 block p-1.5 outline-none cursor-pointer shadow-sm">
+        <option>ডেটা লোড হচ্ছে... ⏳</option>
+    </select>
+</div>
+
+        <div id="chat-box" class="flex-1 p-4 overflow-y-auto flex flex-col gap-4 custom-scrollbar"></div>
+        <div id="quick-replies" class="px-4 py-2 bg-gray-50/50 border-t border-gray-100 flex flex-wrap justify-center gap-2 max-h-32 overflow-y-auto custom-scrollbar hidden"></div>
+
+        <div id="typing-indicator" class="hidden px-4 pb-2">
+            <div class="bg-gray-100 border border-gray-200 w-16 p-3 rounded-2xl rounded-tl-none flex justify-center gap-1">
+                <div class="w-2 h-2 bg-gray-500 rounded-full typing-dot"></div>
+                <div class="w-2 h-2 bg-gray-500 rounded-full typing-dot"></div>
+                <div class="w-2 h-2 bg-gray-500 rounded-full typing-dot"></div>
+            </div>
+        </div>
+
+        <div class="p-3 bg-white border-t border-gray-200 flex items-center gap-2">
+            <input type="text" id="user-input" placeholder="আপনার কথা লিখুন..." class="flex-1 bg-gray-50 border border-gray-300 rounded-full px-5 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner" onkeypress="handleKeyPress(event)">
+            <button onclick="handleUserMessage()" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-3 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+<script>
+    // --- গ্লোবাল ভেরিয়েবলস ---
+    let allBots = [];
+    let currentBot = null;
+    let lastSuggestedKeyword = null; 
+    let currentTopic = null; 
+    let currentOptions = []; 
+    let caseStartTime = null; 
+    let pendingDelete = false; 
+    let lastContextActive = false; 
+    let pendingQuizAnswer = null; 
+
+    // 💡 ডায়নামিক ফর্ম ফিলিং
+    let pendingSaveKey = null; 
+    let pendingConfirmText = ""; 
+    
+    let userScore = 0;
+    let userName = localStorage.getItem('chakra_userName') || ""; 
+
+    // 🧠 AI Brain Variables
+    let aiBrain = new brain.recurrent.LSTM(); 
+    let isAiReady = false; 
+
+    const b2e = s => s.replace(/[০-৯]/g, d => "০১২৩৪৫৬৭৮৯".indexOf(d));
+
+    const chatBox = document.getElementById('chat-box');
+    const userInput = document.getElementById('user-input');
+    const botAvatar = document.getElementById('bot-avatar');
+    const botName = document.getElementById('bot-name');
+    const botContainer = document.getElementById('bot-container');
+    const botSelector = document.getElementById('bot-selector');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const quickRepliesDiv = document.getElementById('quick-replies');
+
+    function copyBotMessage(buttonElement, rawText) {
+        if (!rawText || !navigator.clipboard) return;
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = rawText;
+        const cleanText = tempDiv.textContent || tempDiv.innerText || "";
+        
+        navigator.clipboard.writeText(cleanText).then(() => {
+            const originalIcon = buttonElement.innerHTML;
+            buttonElement.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-green-600"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>`;
+            buttonElement.disabled = true;
+            setTimeout(() => { buttonElement.innerHTML = originalIcon; buttonElement.disabled = false; }, 3000); 
+        }).catch(err => {
+            console.error('কপি করতে ব্যর্থ: ', err); buttonElement.title = 'কপি করতে ব্যর্থ!';
+        });
+    }
+
+    const getScoreKey = (botName) => `chakra_userScore_${encodeURIComponent(botName)}`;
+    function loadBotScore() { if (!currentBot) { userScore = 0; return 0; } userScore = parseInt(localStorage.getItem(getScoreKey(currentBot.name))) || 0; return userScore; }
+    function saveBotScore() { if (!currentBot) return; localStorage.setItem(getScoreKey(currentBot.name), String(userScore)); }
+
+    function safeCalc(rawExpr) {
+        if (!rawExpr) throw new Error("Empty expression");
+        let expr = b2e(rawExpr);
+        expr = expr.replace(/[^0-9+\-*/().\s]/g, '');
+        if (expr.length > 200) throw new Error("Expression too long");
+        
+        const tokens = []; let i = 0;
+        function isDigit(ch) { return ch >= '0' && ch <= '9'; }
+        while (i < expr.length) {
+            const ch = expr[i];
+            if (ch === ' ' || ch === '\t' || ch === '\n') { i++; continue; }
+            if (isDigit(ch) || ch === '.') {
+                let numStr = ''; let dotCount = 0;
+                while (i < expr.length && (isDigit(expr[i]) || expr[i] === '.')) {
+                    if (expr[i] === '.') dotCount++;
+                    if (dotCount > 1) throw new Error("Invalid number");
+                    numStr += expr[i]; i++;
+                }
+                if (numStr === '.' || numStr === '') throw new Error("Invalid number");
+                tokens.push({ type: 'num', value: parseFloat(numStr) });
+                continue;
+            }
+            if ('+-*/()'.includes(ch)) { tokens.push({ type: 'op', value: ch }); i++; continue; }
+            throw new Error("Invalid character");
+        }
+
+        const output = []; const ops = [];
+        function precedence(op) { if (op === 'u-') return 3; if (op === '*' || op === '/') return 2; if (op === '+' || op === '-') return 1; return 0; }
+        function isLeftAssoc(op) { return op !== 'u-'; }
+
+        let prev = null;
+        for (let t of tokens) {
+            if (t.type === 'num') { output.push(t); prev = t; continue; }
+            const v = t.value;
+            if (v === '(') { ops.push('('); prev = t; continue; }
+            if (v === ')') {
+                while (ops.length && ops[ops.length - 1] !== '(') output.push({ type: 'op', value: ops.pop() });
+                if (!ops.length) throw new Error("Mismatched parentheses");
+                ops.pop(); prev = t; continue;
+            }
+            let op = v;
+            const prevIsOpOrStart = (!prev) || (prev.type === 'op' && prev.value !== ')') || (prev.type === 'op' && prev.value === '(');
+            if (op === '-' && prevIsOpOrStart) op = 'u-';
+            while (ops.length) {
+                const top = ops[ops.length - 1];
+                if (top === '(') break;
+                const pTop = precedence(top); const pOp = precedence(op);
+                if ((isLeftAssoc(op) && pOp <= pTop) || (!isLeftAssoc(op) && pOp < pTop)) output.push({ type: 'op', value: ops.pop() });
+                else break;
+            }
+            ops.push(op); prev = t;
+        }
+        while (ops.length) {
+            const op = ops.pop();
+            if (op === '(') throw new Error("Mismatched parentheses");
+            output.push({ type: 'op', value: op });
+        }
+
+        const stack = [];
+        for (let t of output) {
+            if (t.type === 'num') { stack.push(t.value); continue; }
+            const op = t.value;
+            if (op === 'u-') {
+                if (stack.length < 1) throw new Error("Invalid expression");
+                stack.push(-stack.pop()); continue;
+            }
+            if (stack.length < 2) throw new Error("Invalid expression");
+            const b = stack.pop(); const a = stack.pop(); let res = 0;
+            if (op === '+') res = a + b; else if (op === '-') res = a - b; else if (op === '*') res = a * b;
+            else if (op === '/') { if (b === 0) throw new Error("Division by zero"); res = a / b; }
+            else throw new Error("Unknown operator");
+            stack.push(res);
+        }
+        if (stack.length !== 1) throw new Error("Invalid expression");
+        const result = stack[0];
+        if (!Number.isFinite(result)) throw new Error("Invalid result");
+        return Math.round((result + Number.EPSILON) * 1e10) / 1e10;
+    }
+
+    async function loadBotData() {
+        try {
+            const ts = new Date().getTime(); 
+            const indexResponse = await fetch('bot_list.txt?v=' + ts);
+            if (!indexResponse.ok) throw new Error("মাস্টার ফাইল (bot_list.txt) পাওয়া যায়নি।");
+            
+            const indexText = await indexResponse.text();
+            const botDataFiles = indexText.split('\n').map(line => line.trim()).filter(line => line.length > 0 && !line.startsWith('//'));
+            
+            if (botDataFiles.length === 0) throw new Error("bot_list.txt ফাইলে কোনো বটের নাম নেই।");
+            
+            let combinedText = "";
+            const fetchPromises = botDataFiles.map(file => fetch(file + '?v=' + ts));
+            const responses = await Promise.all(fetchPromises);
+            
+            let hasValidData = false;
+            for (let i = 0; i < responses.length; i++) {
+                if (!responses[i].ok) { console.warn(`⚠️ Warning: ${botDataFiles[i]} ফাইলটি পাওয়া যায়নি।`); continue; }
+                const text = await responses[i].text();
+                combinedText += text + "\n";
+                hasValidData = true;
+            }
+            
+            if (!hasValidData || !combinedText.trim()) throw new Error("কোনো বৈধ ডেটা ফাইল খুঁজে পাওয়া যায়নি।");
+            parseData(combinedText);
+        } catch (error) {
+            botSelector.innerHTML = '<option>ডেটা লোড ব্যর্থ!</option>';
+            chatBox.innerHTML = `<div class="p-4 text-red-600 bg-red-100 rounded-lg text-sm text-center font-medium mx-4 mt-4 shadow-sm border border-red-200">⚠️ ডেটা লোড করতে সমস্যা হয়েছে:<br>${error.message}</div>`;
+        }
+    }
+
+    function parseData(text) {
+        const blocks = text.split('#BOT_START');
+        allBots = [];
+        blocks.forEach(block => {
+            if(!block.includes('#BOT_END')) return;
+            const botStr = block.split('#BOT_END')[0];
+            const bot = { triggers: [], prefixes: [], buttons: [], greetingMorning: [], greetingAfternoon: [], greetingEvening: [], greetingNight: [] };
+            let currentTrigger = null;
+            const lines = botStr.split('\n');
+            lines.forEach(line => {
+                const tLine = line.trim();
+                if(tLine.startsWith('Name:')) bot.name = tLine.replace('Name:', '').trim();
+                else if(tLine.startsWith('Image:')) bot.image = tLine.replace('Image:', '').trim();
+                else if(tLine.startsWith('Theme:')) bot.theme = tLine.replace('Theme:', '').trim();
+                else if(tLine.startsWith('Welcome:')) bot.welcome = tLine.replace('Welcome:', '').trim();
+                else if(tLine.startsWith('Brain:')) bot.brainFile = tLine.replace('Brain:', '').trim(); // 🧠 AI Brain File Parser
+                else if(tLine.startsWith('Buttons:')) bot.buttons = tLine.replace('Buttons:', '').split('|').map(s=>s.trim()).filter(Boolean);
+                else if(tLine.startsWith('Prefix:')) bot.prefixes = tLine.replace('Prefix:', '').split('|').map(s=>s.trim()).filter(Boolean);
+                else if(tLine.startsWith('GreetingMorning:')) bot.greetingMorning = tLine.replace('GreetingMorning:', '').split('|').map(s=>s.trim()).filter(Boolean);
+                else if(tLine.startsWith('GreetingAfternoon:')) bot.greetingAfternoon = tLine.replace('GreetingAfternoon:', '').split('|').map(s=>s.trim()).filter(Boolean);
+                else if(tLine.startsWith('GreetingEvening:')) bot.greetingEvening = tLine.replace('GreetingEvening:', '').split('|').map(s=>s.trim()).filter(Boolean);
+                else if(tLine.startsWith('GreetingNight:')) bot.greetingNight = tLine.replace('GreetingNight:', '').split('|').map(s=>s.trim()).filter(Boolean);
+                else if(tLine.startsWith('Trigger:')) {
+                    currentTrigger = tLine.replace('Trigger:', '').split('|').map(s=>s.trim().toLowerCase()).filter(Boolean);
+                }
+                else if(tLine.startsWith('Response:') && currentTrigger) {
+                    bot.triggers.push({ keywords: currentTrigger, responses: tLine.replace('Response:', '').split('||').map(s=>s.trim()).filter(Boolean) });
+                    currentTrigger = null;
+                }
+            });
+            if(bot.name) allBots.push(bot);
+        });
+        
+        if(allBots.length === 0) {
+            botSelector.innerHTML = '<option>ডেটা নেই</option>';
+            chatBox.innerHTML = `<div class="p-4 text-yellow-700 bg-yellow-100 rounded-lg text-sm text-center mx-4 mt-4 border border-yellow-200">কোনো ডেটা পাওয়া যায়নি।</div>`;
+            return;
+        }
+        setupBotSelector();
+    }
+
+    function setupBotSelector() {
+        botSelector.innerHTML = '';
+        allBots.forEach((bot, index) => {
+            const option = document.createElement('option');
+            option.value = index; option.text = bot.image + " " + bot.name;
+            botSelector.appendChild(option);
+        });
+        if(allBots.length > 0) changeBot();
+    }
+
+    function getBotSpecificGreeting() {
+        const h = new Date().getHours();
+        let arr = h>=5&&h<12 ? currentBot.greetingMorning : h>=12&&h<17 ? currentBot.greetingAfternoon : h>=17&&h<20 ? currentBot.greetingEvening : currentBot.greetingNight;
+        return (arr && arr.length>0) ? arr[Math.floor(Math.random()*arr.length)] : ""; 
+    }
+
+    // ==========================================
+    // 🧠 AI Brain Fetcher (Dynamic JSON Loader)
+    // ==========================================
+    async function loadAIBrain(fileName) {
+        isAiReady = false; 
+        try {
+            console.log(`🧠 AI Brain Loading: ${fileName}...`);
+            const response = await fetch(fileName + '?v=' + new Date().getTime());
+            if (!response.ok) throw new Error("Brain file not found!");
+            
+            const brainData = await response.json();
+            aiBrain.fromJSON(brainData); // কোনো হ্যাং ছাড়া সরাসরি ব্রেন বসানো
+            isAiReady = true;
+            console.log(`✅ AI Brain Loaded Successfully for ${currentBot.name}!`);
+        } catch (error) {
+            console.warn(`⚠️ AI Brain load failed: ${error.message}`);
+            isAiReady = false; 
+        }
+    }
+
+    function changeBot() {
+        const idx = botSelector.value;
+        currentBot = allBots[idx];
+        loadBotScore();
+        lastSuggestedKeyword = null; pendingDelete = false; lastContextActive = false;
+        pendingSaveKey = null; window.activeQuizState = null; pendingQuizAnswer = null; 
+        botName.innerText = currentBot.name; botAvatar.innerText = currentBot.image;
+        botContainer.className = `w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[650px] border border-gray-200 transition-colors duration-500 ${currentBot.theme || 'bg-white'}`;
+        chatBox.innerHTML = '';
+        
+        let savedChat = JSON.parse(localStorage.getItem(`chakra_chat_${currentBot.name}`)) || [];
+        
+        if (savedChat.length > 0) {
+    savedChat.forEach(msg => appendMessageUI(msg.text, msg.sender));
+} else {
+    let greet = getBotSpecificGreeting();
+    let rawWelcome = currentBot.welcome || "";
+    let finalWelcomeMessage = "";
+    
+    if (userName) {
+        // ১. যদি ইউজারের নাম আগে থেকে সেভ করা থাকে
+        if (rawWelcome.includes('[USER_NAME]')) {
+            rawWelcome = rawWelcome.replace(/\[USER_NAME\]/g, userName);
+            finalWelcomeMessage = greet ? `${greet} ${rawWelcome}` : rawWelcome;
+        } else {
+            // txt ফাইলে [USER_NAME] ট্যাগ না থাকলেও নিজে থেকে নাম যুক্ত করে নেবে
+            finalWelcomeMessage = greet ? `${greet} ${userName}, ${rawWelcome}` : `${userName}, ${rawWelcome}`;
+        }
+    } else {
+        // ২. যদি নাম সেভ করা না থাকে
+        rawWelcome = rawWelcome.replace(/\[USER_NAME\]\s*/g, '');
+        finalWelcomeMessage = greet ? `${greet} ${rawWelcome}` : rawWelcome;
+        // নামের জন্য প্রম্পট যুক্ত করা হলো
+        finalWelcomeMessage += "<br><br><span class='text-sm text-gray-500'>💡 <i>আপনার নাম আমার জানা নেই, আপনি কী নামটি বলবেন? লিখুন <b>আমার নাম ____</b> (অথবা <b>'শুরু'</b> লিখে এগিয়ে যান)</i></span>";
+    }
+    
+    appendMessage(finalWelcomeMessage, 'bot');
+}
+        showQuickReplies();
+
+        // 🧠 Load new Brain if available
+        if (currentBot.brainFile) {
+            loadAIBrain(currentBot.brainFile);
+        } else {
+            isAiReady = false; 
+        }
+    }
+
+    function showQuickReplies() {
+        quickRepliesDiv.innerHTML = '';
+        if (currentBot.buttons && currentBot.buttons.length > 0) {
+            currentBot.buttons.forEach(t => {
+                const btn = document.createElement('button');
+                btn.onclick = () => { userInput.value = t; handleUserMessage(); };
+                btn.className = "whitespace-nowrap bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-medium px-4 py-2 rounded-full border border-blue-200 shadow-sm";
+                btn.innerText = t; quickRepliesDiv.appendChild(btn);
+            });
+            quickRepliesDiv.classList.remove('hidden');
+        } else quickRepliesDiv.classList.add('hidden');
+    }
+
+    function handleKeyPress(e) { if (e.key === 'Enter') handleUserMessage(); }
+
+    function appendMessageUI(text, sender, isTyping = false) {
+        const isUser = sender === 'user';
+        const div = document.createElement('div');
+        div.className = `flex items-start gap-2 ${isUser ? 'justify-end' : ''}`;
+        
+        let fmt = String(text).replace(/\[IMG:(.*?)\]/g, '<img src="$1" class="w-full max-w-[200px] mt-2 rounded-lg border shadow-sm">');
+        
+        const messageBubble = document.createElement('div');
+        messageBubble.className = `p-3 text-sm max-w-[85%] shadow-sm leading-relaxed overflow-hidden ${isUser ? 'bg-blue-600 text-white rounded-2xl rounded-tr-none' : 'bg-white border text-gray-800 rounded-2xl rounded-tl-none'}`;
+
+        let copyBtn = null;
+        if (isUser) { 
+            div.appendChild(messageBubble); 
+        } else {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'relative group'; 
+            
+            copyBtn = document.createElement('button');
+            copyBtn.className = `absolute top-1.5 right-1.5 p-1 rounded-full bg-gray-50 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-gray-200 active:scale-95 ${isTyping ? 'hidden' : ''}`;
+            copyBtn.title = 'কপি করুন';
+            copyBtn.onclick = () => copyBotMessage(copyBtn, text);
+            copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a2.25 2.25 0 01-2.25 2.25H9.75A2.25 2.25 0 017.5 4.5v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" /></svg>`;
+            wrapper.appendChild(messageBubble); wrapper.appendChild(copyBtn); div.appendChild(wrapper);
+        }
+        chatBox.appendChild(div);
+
+        if (!isUser && isTyping) {
+            messageBubble.innerHTML = "";
+            let temp = document.createElement("div"); temp.innerHTML = fmt;
+            let nodes = Array.from(temp.childNodes);
+            
+            function typeNode(node, parent, done) {
+                if (node.nodeType === 3) { 
+                    let txt = node.textContent; let i = 0; let tNode = document.createTextNode(""); parent.appendChild(tNode);
+                    let timer = setInterval(() => {
+                        if (i < txt.length) { tNode.textContent += txt[i++]; chatBox.scrollTop = chatBox.scrollHeight; } 
+                        else { clearInterval(timer); done(); }
+                    }, 30); // 💡 Typing speed
+                } else if (node.nodeType === 1) { 
+                    let clone = node.cloneNode(false); parent.appendChild(clone);
+                    if (['IFRAME', 'VIDEO', 'IMG', 'BR'].includes(clone.tagName)) { chatBox.scrollTop = chatBox.scrollHeight; done(); return; }
+                    let childs = Array.from(node.childNodes); let j = 0;
+                    function nextC() { if (j < childs.length) typeNode(childs[j++], clone, nextC); else done(); }
+                    nextC();
+                } else done();
+            }
+            
+            let cur = 0;
+            function nextN() { if (cur < nodes.length) { typeNode(nodes[cur++], messageBubble, nextN); } else { if (copyBtn) copyBtn.classList.remove('hidden'); } }
+            nextN();
+        } else {
+            messageBubble.innerHTML = fmt; chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    }
+
+    function appendMessage(text, sender, save = true, isTyping = false) {
+        appendMessageUI(text, sender, isTyping);
+        if (!save) return;
+        let saved = JSON.parse(localStorage.getItem(`chakra_chat_${currentBot.name}`)) || [];
+        saved.push({ text: text, sender: sender });
+        localStorage.setItem(`chakra_chat_${currentBot.name}`, JSON.stringify(saved));
+    }
+    
+    function handleUserMessage() {
+        const text = userInput.value.trim();
+        if (!text || !currentBot) return;
+        appendMessage(text, 'user');
+        userInput.value = '';
+        quickRepliesDiv.classList.add('hidden'); typingIndicator.classList.remove('hidden'); chatBox.scrollTop = chatBox.scrollHeight;
+        
+        setTimeout(() => {
+            typingIndicator.classList.add('hidden');
+            const reply = generateBotResponse(text);
+            if (reply && reply.resetToWelcome) { changeBot(); return; }
+            if (reply && reply.text) { appendMessage(reply.text, 'bot', reply.save !== false,true); }
+            if (reply && reply.showButtons) showQuickReplies(); else chatBox.scrollTop = chatBox.scrollHeight;
+        }, 1000); // 💡 Thinking Delay
+    }
+
+    function generateBotResponse(userText) {
+        let cleanText = userText.replace(/\s+/g, ' ').trim();
+        let searchText = cleanText.toLowerCase(); 
+        let finalResponse = "";
+
+        // 🛡️ সেফটি গার্ড: খালি মেসেজ দিলে কাজ করবে না
+        if (!searchText) return null;
+
+        // =========================
+        // 🧠 ডায়নামিক ফর্ম ফিলিং (System Tool)
+        // =========================
+        let botDataKey = `chakra_userData_${currentBot.name}`;
+        let userData = JSON.parse(localStorage.getItem(botDataKey)) || {};
+
+        if (pendingSaveKey) {
+            if (/(কেন|কী জন্য|কি জন্য|বলব না|না|why|no|what)/i.test(searchText)) {
+                pendingSaveKey = null; 
+            } else {
+                userData[pendingSaveKey] = cleanText;
+                localStorage.setItem(botDataKey, JSON.stringify(userData));
+                let reply = pendingConfirmText; pendingSaveKey = null;
+                return { text: reply, showButtons: true };
+            }
+        }
+
+        // =========================
+        // 🛠️ Tools & Commands (সিস্টেম কমান্ডস)
+        // =========================
+        let nameMatch = searchText.match(/(?:আমার নাম|my name(?: is)?)\s+([a-zA-Z\u0980-\u09FF]+)/i);
+        if (nameMatch) {
+            userName = nameMatch[1].trim(); localStorage.setItem('chakra_userName', userName); 
+            return { text: `দারুণ নাম! আমি মেমোরিতে লক করে নিলাম, ${userName}। এবার বলুন, কীভাবে সাহায্য করব?`, showButtons: true };
+        }
+
+        if (/(মেমোরি লিস্ট|memory list|লিস্ট দেখাও)/i.test(searchText)) {
+            let memories = JSON.parse(localStorage.getItem('chakra_memories') || '[]');
+            if (memories.length === 0) return { text: "আপনার মেমোরিতে কোনো তথ্য নেই! আগে কিছু সেভ করুন।", showButtons: true };
+            let listHtml = memories.map((m, i) => { let firstLine = m.split(/[।.?\n]/)[0].trim(); if(firstLine.length > 50) firstLine = firstLine.substring(0, 50) + "..."; return `<b>${i + 1}.</b> ${firstLine}`; }).join('<br><br>');
+            return { text: `📋 <b>আপনার মেমোরি লিস্ট:</b><br><br>${listHtml}<br><br>💡 <i>নির্দিষ্ট মেমোরি ডিলিট করতে লিখুন: <b>মেমোরি ডিলিট ১</b></i>`, showButtons: true };
+        }
+        
+        let memDeleteMatch = searchText.match(/(?:মেমোরি ডিলিট|memory delete)\s+([0-9০-৯]+)/i);
+        if (memDeleteMatch) {
+            let memories = JSON.parse(localStorage.getItem('chakra_memories') || '[]');
+            if (memories.length === 0) return { text: "আপনার মেমোরিতে কোনো তথ্যই সেভ করা নেই।", showButtons: true };
+            let num = parseInt(b2e(memDeleteMatch[1])); let idx = num - 1;
+            if (idx < 0 || idx >= memories.length) return { text: `দুঃখিত! <b>${num}</b> নম্বরে কোনো মেমোরি খুঁজে পাওয়া যায়নি।`, showButtons: true };
+            const deletedMemory = memories.splice(idx, 1); localStorage.setItem('chakra_memories', JSON.stringify(memories));
+            let firstLine = deletedMemory[0].split(/[।.?\n]/)[0].trim(); if(firstLine.length > 40) firstLine = firstLine.substring(0, 40) + "...";
+            return { text: `✅ আপনার <b>${num}</b> নম্বর মেমোরি ("<i>${firstLine}</i>") সফলভাবে ডিলিট করা হয়েছে।`, showButtons: true };
+        }
+
+        if (/(স্টপ কুইজ|stop quiz|কুইজ বন্ধ|কুইজ স্টপ|stop)/i.test(searchText) && (window.activeQuizState || pendingQuizAnswer)) {
+            let sessionPts = window.activeQuizState ? window.activeQuizState.sessionScore : 0; let totalQ = window.activeQuizState ? window.activeQuizState.totalQuestions : 0;
+            window.activeQuizState = null; pendingQuizAnswer = null;
+            return { text: `🛑 <b>কুইজ সেশন বন্ধ করা হলো!</b><br><br>📊 এই সেশনে আপনি <b>${totalQ}</b> টি প্রশ্নের উত্তর দিয়ে <b>${sessionPts}</b> পয়েন্ট অর্জন করেছেন!`, showButtons: true };
+        }
+
+        if (pendingQuizAnswer) {
+            let correctAnswer = pendingQuizAnswer.toLowerCase(); let isCorrect = searchText.includes(correctAnswer); pendingQuizAnswer = null; 
+            let resultHtml = ""; if (!window.activeQuizState) window.activeQuizState = { sessionScore: 0, totalQuestions: 0, isSequential: false }; window.activeQuizState.totalQuestions++; 
+            if (isCorrect) { let pts = 10; userScore += pts; window.activeQuizState.sessionScore += pts; saveBotScore(); resultHtml = `🎉 <b>সঠিক উত্তর!</b> <span class="text-green-700 bg-green-100 px-2 py-0.5 rounded text-xs">+${pts} পয়েন্ট</span>`; } 
+            else { resultHtml = `❌ <b>ভুল!</b> সঠিক শব্দটি ছিল: <b class="text-red-600">${correctAnswer}</b>`; }
+            let memories = JSON.parse(localStorage.getItem('chakra_memories') || '[]'); let state = window.activeQuizState;
+            
+            if (state.isSequential) {
+                state.sentIdx++;
+                if (state.sentIdx >= state.sentences.length) {
+                    state.memIdx++; 
+                    if (state.memIdx >= memories.length) { let finalScore = state.sessionScore; let totalQ = state.totalQuestions; window.activeQuizState = null; return { text: `${resultHtml}<br><br>🌟 <b>দুর্দান্ত!</b> আপনার সেভ করা সব মেমোরি শেষ হয়ে গেছে!<br>এই সেশনের স্কোর: <b>${finalScore}</b> (মোট প্রশ্ন: ${totalQ}টি)`, showButtons: true }; } 
+                    else { let nextMem = memories[state.memIdx]; state.sentences = nextMem.split(/[।.?\n]/).map(s => s.trim()).filter(s => s.length > 8); state.sentIdx = 0; }
+                }
+            } else {
+                let randomMem = memories[Math.floor(Math.random() * memories.length)]; state.sentences = randomMem.split(/[।.?\n]/).map(s => s.trim()).filter(s => s.length > 8);
+                if(state.sentences.length === 0) state.sentences = [randomMem]; state.sentIdx = Math.floor(Math.random() * state.sentences.length);
+            }
+            let sentence = state.sentences[state.sentIdx] || memories[0]; let cleanWords = sentence.replace(/[.,?!।]/g, '').split(' ').filter(w => w.length > 2); if(cleanWords.length === 0) cleanWords = ["মেমোরি"]; 
+            let targetWord = cleanWords[Math.floor(Math.random() * cleanWords.length)]; pendingQuizAnswer = targetWord; let maskedMem = sentence.replace(new RegExp(targetWord, 'gi'), '______');
+            let allWords = memories.join(' ').replace(/[.,?!।]/g, '').split(' ').filter(w => w.length > 2 && w.toLowerCase() !== targetWord.toLowerCase()); let fallbackWords = ["পাহাড়ে", "বই", "গল্প", "ঢাকা", "খেলা", "গান", "ছবি", "সময়", "বন্ধু", "প্রাচীর"];
+            let wrongWord = allWords.length > 0 ? allWords[Math.floor(Math.random() * allWords.length)] : fallbackWords[Math.floor(Math.random() * fallbackWords.length)]; let options = [targetWord, wrongWord].sort(() => Math.random() - 0.5);
+            let btnHtml = options.map(opt => `<button onclick="document.getElementById('user-input').value='${opt}'; handleUserMessage();" class="mt-2 w-full text-left bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-3 rounded-lg border border-indigo-200 transition-colors font-medium shadow-sm">🔹 ${opt}</button>`).join('');
+            let prefix = `${resultHtml}<br><br><hr class="my-2 border-gray-200"><br>`; let qTitle = state.isSequential ? `🧠 <b>মেমোরি ${state.memIdx + 1} (লাইন ${state.sentIdx + 1}):</b>` : `🧠 <b>পরের কুইজ:</b>`;
+            return { text: `${prefix}${qTitle}<br>📝 "<i>${maskedMem}</i>"<br><br>${btnHtml}<br><br><div class="text-center"><button onclick="document.getElementById('user-input').value='স্টপ কুইজ'; handleUserMessage();" class="text-xs text-red-500 hover:text-red-700 mt-3 font-bold transition-all">🛑 স্টপ কুইজ</button></div>`, showButtons: false, save: false };
+        }
+
+        let specificQuizMatch = searchText.match(/(?:মেমোরি কুইজ|memory quiz)\s*([0-9০-৯]+)/i);
+        if (specificQuizMatch || /(মেমোরি কুইজ|memory quiz|মেমোরি থেকে কুইজ|কুইজ ধরো)$/i.test(searchText)) {
+            let memories = JSON.parse(localStorage.getItem('chakra_memories') || '[]');
+            if (memories.length === 0) return { text: "আপনার মেমোরিতে কোনো তথ্য নেই! আগে কিছু সেভ করুন।", showButtons: true };
+            let idx = 0; let isSeq = false;
+            if (specificQuizMatch) { let num = parseInt(b2e(specificQuizMatch[1])); idx = num - 1; if (idx < 0 || idx >= memories.length) return { text: `দুঃখিত! ${num} নম্বরে কোনো মেমোরি নেই।`, showButtons: true }; isSeq = true; } 
+            else { idx = Math.floor(Math.random() * memories.length); }
+            let targetMem = memories[idx]; let sentences = targetMem.split(/[।.?\n]/).map(s => s.trim()).filter(s => s.length > 8); if (sentences.length === 0) sentences = [targetMem];
+            window.activeQuizState = { memIdx: idx, sentIdx: 0, sentences: sentences, sessionScore: 0, totalQuestions: 0, isSequential: isSeq };
+            let sentence = sentences[0]; let cleanWords = sentence.replace(/[.,?!।]/g, '').split(' ').filter(w => w.length > 2); if(cleanWords.length === 0) cleanWords = ["মেমোরি"];
+            let targetWord = cleanWords[Math.floor(Math.random() * cleanWords.length)]; pendingQuizAnswer = targetWord; let maskedMem = sentence.replace(new RegExp(targetWord, 'gi'), '______');
+            let allWords = memories.join(' ').replace(/[.,?!।]/g, '').split(' ').filter(w => w.length > 2 && w.toLowerCase() !== targetWord.toLowerCase()); let fallbackWords = ["পাহাড়ে", "বই", "গল্প", "ঢাকা", "খেলা", "গান", "ছবি", "সময়", "বন্ধু", "প্রাচীর"];
+            let wrongWord = allWords.length > 0 ? allWords[Math.floor(Math.random() * allWords.length)] : fallbackWords[Math.floor(Math.random() * fallbackWords.length)]; let options = [targetWord, wrongWord].sort(() => Math.random() - 0.5);
+            let btnHtml = options.map(opt => `<button onclick="document.getElementById('user-input').value='${opt}'; handleUserMessage();" class="mt-2 w-full text-left bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-3 rounded-lg border border-indigo-200 transition-colors font-medium shadow-sm">🔹 ${opt}</button>`).join('');
+            let intro = isSeq ? `🎯 <b>${idx + 1} নং মেমোরি থেকে কুইজ শুরু!</b>` : `🎯 <b>মেমোরি কুইজ শুরু হলো!</b>`;
+            return { text: `${intro}<br><i>পরপর প্রশ্ন আসতে থাকবে, বন্ধ করতে চাইলে <b>'স্টপ কুইজ'</b> বাটনে চাপবেন।</i><br><br><hr class="my-2 border-gray-200"><br>🧠 <b>প্রথম প্রশ্ন:</b><br>📝 "<i>${maskedMem}</i>"<br><br>${btnHtml}<br><br><div class="text-center"><button onclick="document.getElementById('user-input').value='স্টপ কুইজ'; handleUserMessage();" class="text-xs text-red-500 hover:text-red-700 mt-3 font-bold transition-all">🛑 স্টপ কুইজ</button></div>`, showButtons: false, save: false };
+        }
+
+        if (pendingDelete) {
+            if (/(হ্যাঁ|OK|হ্যা|yes|ok|জি|করুন)/i.test(searchText)) { pendingDelete = false; localStorage.removeItem(`chakra_chat_${currentBot.name}`); return { resetToWelcome: true }; } 
+            else if (/(না|no|থাক|বাদ)/i.test(searchText)) { pendingDelete = false; return { text: "ঠিক আছে, চ্যাট ডিলিট বাতিল করা হলো।", showButtons: true }; } 
+            else { return { text: "আপনি কি চ্যাট ডিলিট করতে চান? (হ্যাঁ / না)", showButtons: false }; }
+        }
+        if (/(ডিলিট চ্যাট|delete chat|চ্যাট ডিলিট)/i.test(searchText)) { pendingDelete = true; return { text: "⚠️ আপনি কি সত্যি আপনার সম্পূর্ণ চ্যাট হিস্ট্রি ডিলিট করতে চান? (হ্যাঁ / না)", showButtons: false }; }
+
+        let timerMatch = searchText.match(/(?:chat stop|stop chat|চ্যাট স্টপ|স্টপ চ্যাট)\s*([0-9০-৯]+)\s*(min|sec|hour|hr|মিনিট|সেকেন্ড|ঘন্টা|মিনি)/i);
+        if (timerMatch) {
+            let val = parseInt(b2e(timerMatch[1])); let unit = timerMatch[2].toLowerCase(); let ms = ['sec', 'সেকেন্ড'].includes(unit) ? val * 1000 : ['hour', 'hr', 'ঘন্টা'].includes(unit) ? val * 60 * 60 * 1000 : val * 60 * 1000;
+            setTimeout(() => { appendMessage(`⏳ <b>রিমাইন্ডার:</b> আপনার সেট করা ${val} ${unit} সময় শেষ!`, 'bot', false, true); }, ms);
+            return { text: `ঠিক আছে! আমি ঠিক ${val} ${unit} পর আপনাকে মনে করিয়ে দেব।`, showButtons: true };
+        }
+
+        let memSaveMatch = searchText.match(/(?:মেমোরি|memory)\s+(.+)/i);
+        if (memSaveMatch && !/(শো মেমোরি|show memory|মেমোরি দেখাও)/i.test(searchText)) {
+            let memData = memSaveMatch[1].trim(); let memories = JSON.parse(localStorage.getItem('chakra_memories') || '[]'); memories.push(memData); localStorage.setItem('chakra_memories', JSON.stringify(memories));
+            return { text: `আপনার তথ্যটি মেমোরিতে সেভ করা হলো: "${memData}"।`, showButtons: true };
+        }
+        if (/(শো মেমোরি|show memory|মেমোরি দেখাও)/i.test(searchText)) {
+            let memories = JSON.parse(localStorage.getItem('chakra_memories') || '[]'); if (memories.length === 0) return { text: "আপনার মেমোরিতে এই মুহূর্তে কোনো তথ্য সেভ করা নেই।", showButtons: true };
+            let memList = memories.map((m, i) => `${i+1}. ${m}`).join('<br><br>'); return { text: `আপনার সেভ করা সব তথ্য নিচে দেওয়া হলো:<br><br><b>${memList}</b>`, showButtons: true };
+        }
+
+        if (/(কাউন্ট টাইম|count time|টাইম কাউন্ট)/i.test(searchText) && !/(শো|show)/i.test(searchText)) {
+            localStorage.setItem('chakra_count_start', Date.now()); return { text: `টাইম কাউন্ট শুরু হলো! ⏱️`, showButtons: true };
+        }
+        if (/(শো কাউন্ট|show count|কাউন্ট দেখাও)/i.test(searchText)) {
+            let start = localStorage.getItem('chakra_count_start'); if (!start) return { text: "আপনি কোনো কাউন্ট শুরু করেননি।", showButtons: true };
+            let diffSecs = Math.floor((Date.now() - parseInt(start)) / 1000); let h = Math.floor(diffSecs / 3600); let m = Math.floor((diffSecs % 3600) / 60); let s = diffSecs % 60;
+            let timeStr = `${h > 0 ? h + ' ঘণ্টা, ' : ''}${m > 0 ? m + ' মিনিট, ' : ''}${s} সেকেন্ড`;
+            return { text: `আপনার কাউন্ট করা সময়: ⏱️ <b>${timeStr}</b>`, showButtons: true };
+        }
+
+        let calcMatch = searchText.match(/(?:my cal|মাই ক্যাল)\s*([0-9০-৯\+\-\*\/\(\)\s\.]+)/i);
+        if (calcMatch) {
+            try { const answer = safeCalc(calcMatch[1]); return { text: `🧮 আপনার অঙ্কের উত্তর হলো: <b>${answer}</b>`, showButtons: true }; } 
+            catch(e) { return { text: "অঙ্কটিতে কিছু ভুল আছে। দয়া করে সঠিক ভাবে লিখুন।", showButtons: true }; }
+        }
+
+        if (/(স্কোর|score)/i.test(searchText)) { loadBotScore(); return { text: `${userName ? userName + ", " : ""}এই বটের বর্তমান মোট স্কোর হলো: 🏆 ${userScore} পয়েন্ট!`, showButtons: true }; }
+        if (/(এখন ক[য়য়]টা|ক[য়য়]টা বাজে|বর্তমান সম[য়য়]|current time|এখন সম[য়য়]|টাইম কত|কত বাজে|কতো বাজে|কটা বাজে|কোটা বাজে|সম[য়য়] কত|কয়টা বাজে)/i.test(searchText)) {
+            let timeStr = new Date().toLocaleTimeString('bn-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }); return { text: `এখন সময়: ⌚ <b>${timeStr}</b>`, showButtons: true };
+        }
+
+        if (/(ডার্ক মোড|dark mode)/i.test(searchText)) { const body = document.getElementById('main-body'); body.classList.remove('bg-gray-100'); body.classList.add('bg-gray-900'); return { text: "ডার্ক মোড চালু করা হলো! 🌙", showButtons: true }; }
+        if (/(লাইট মোড|light mode)/i.test(searchText)) { const body = document.getElementById('main-body'); body.classList.remove('bg-gray-900'); body.classList.add('bg-gray-100'); return { text: "লাইট মোড চালু করা হলো! ☀️", showButtons: true }; }
+
+        // ==========================================
+        // 🔄 রিহ্যাবিলিটেটেড: অপশন সিলেক্টর (Smart Menu Assistant)
+        // ==========================================
+        let isOnlyNumber = /^[0-9০-৯]+$/.test(cleanText); 
+        let parsedNum = parseInt(b2e(searchText)); 
+        
+        // যদি ইউজার শুধু নম্বর লেখে এবং আমাদের পকেটে অপশন সেভ করা থাকে
+        if (isOnlyNumber && !isNaN(parsedNum) && currentOptions && currentOptions.length > 0 && parsedNum > 0 && parsedNum <= currentOptions.length) {
+            searchText = currentOptions[parsedNum - 1]; // নম্বরটাকে জাদুর মতো আসল শব্দে বদলে দাও!
+            lastSuggestedKeyword = null; 
+        }
+
+        // ==========================================
+        // 🧠 রিস্টোরড: শর্ট-টার্ম মেমোরি (The Context Saver)
+        // ==========================================
+        if (lastSuggestedKeyword) {
+            let isNo = /(^|\s)(না|no|থাক|বাদ|নেক্সট|স্টপ|এখন না)(\s|$|[.,?!])/i.test(searchText);
+            let isYes = /(^|\s)(হ্যাঁ|হ্যা|yes|ok|বলুন|ঠিক আছে|চাই|অবশ্যই|দিন|করুন|প্রস্তুত|শুনবো|জানতে চাই)(\s|$|[.,?!])/i.test(searchText);
+
+            if (isNo) {
+                lastSuggestedKeyword = null; 
+                searchText = searchText.replace(/(^|\s)(না|no|থাক|বাদ|নেক্সট|স্টপ|এখন না)(\s|$|[.,?!])/gi, ' ').trim();
+                if (searchText === "") return { text: "ঠিক আছে! অন্য কী বিষয়ে জানতে চান?", showButtons: true };
+            } else if (isYes && searchText.length < 25) {
+                searchText = lastSuggestedKeyword; // 'হ্যাঁ' লিখলে বট সেটাকে আগের সাজেস্ট করা শব্দে বদলে নেবে!
+                lastSuggestedKeyword = null; 
+            } else {
+                lastSuggestedKeyword = null;
+            }
+        }
+
+        // ==========================================
+        // 🚀 THE ULTIMATE HYBRID ENGINE (Fuse.js + Brain.js)
+        // ==========================================
+        let matchedResponses = []; 
+        let isDefaultResponse = false; 
+        let shouldShowButtons = false;
+
+        // 🎯 ধাপ ১: শার্প শুটার (Fuse.js)
+        const fuse = new Fuse(currentBot.triggers, { includeScore: true, keys: ['keywords'], threshold: 0.4 }); 
+        const results = fuse.search(searchText);
+
+        if (results.length > 0 && results[0].score <= 0.4) {
+            matchedResponses = results[0].item.responses;
+        } 
+        else if (isAiReady) {
+            // 🧠 ধাপ ২: দ্য থিংকার (Brain.js LSTM)
+            let aiPrediction = aiBrain.run(searchText);
+            
+            if (aiPrediction && aiPrediction.startsWith('intent_')) {
+                let intentIndex = parseInt(aiPrediction.split('_')[1]);
+                if (currentBot.triggers[intentIndex]) {
+                    matchedResponses = currentBot.triggers[intentIndex].responses;
+                }
+            }
+        }
+
+        // 🛡️ ধাপ ৩: দুজনেই ব্যর্থ হলে ফলব্যাক
+        if (matchedResponses.length === 0) {
+            isDefaultResponse = true; 
+            shouldShowButtons = true; 
+            matchedResponses = ["আমি ঠিক বুঝতে পারলাম না। আপনি কি নিচের বিষয়গুলো থেকে কিছু জানতে চান?"];
+        }
+
+        // =========================
+        // 🎯 Response Building & Memory Extraction
+        // =========================
+        let coreResponse = matchedResponses[Math.floor(Math.random() * matchedResponses.length)];
+        
+        // 🌊 গঙ্গার জলে বিসর্জন লজিক (Memory Cleanup)
+        const suggestions = coreResponse.match(/'([^']+)'/g);
+        if (suggestions && suggestions.length > 0) { 
+            // নতুন কোটেশন পেলে পকেটে ভরবে
+            currentOptions = suggestions.map(s => s.replace(/'/g, '').toLowerCase()); 
+            lastSuggestedKeyword = currentOptions[currentOptions.length - 1]; 
+        } else { 
+            // নতুন কোটেশন না পেলে আগের সব ছিঁড়ে গঙ্গার জলে ফেলে দেবে! 💥
+            lastSuggestedKeyword = null; 
+            currentOptions = []; 
+        }
+
+        if (!isDefaultResponse && currentBot.prefixes && currentBot.prefixes.length > 0 && Math.random() < 0.40) { 
+            finalResponse += currentBot.prefixes[Math.floor(Math.random() * currentBot.prefixes.length)] + " "; 
+        }
+        finalResponse += coreResponse; 
+        finalResponse = finalResponse.replace(/\[USER_NAME\]\s*/g, ''); 
+
+        if (userName && !isDefaultResponse && Math.random() < 0.25) {
+            let namePrefixes = [`${userName}, `, `শুনুন ${userName}, `, `আরে ${userName}, `];
+            finalResponse = namePrefixes[Math.floor(Math.random() * namePrefixes.length)] + finalResponse;
+        }
+
+        // 💡 Tag Replacements (FIRE, SAVE, VARIABLES)
+        let fireMatch = finalResponse.match(/\[FIRE:([^\]]+)\]/);
+        if (fireMatch) {
+            let nextKeyword = fireMatch[1].trim().toLowerCase(); finalResponse = finalResponse.replace(fireMatch[0], '').trim();
+            const fuseFire = new Fuse(currentBot.triggers, { keys: ['keywords'], threshold: 0.2 }); const fireResults = fuseFire.search(nextKeyword);
+            if (fireResults.length > 0) { let extraResponse = fireResults[0].item.responses[0]; finalResponse += " " + extraResponse; }
+        }
+
+        let saveMatch = finalResponse.match(/\[SAVE:([^|]+)\|(.*?)\]/);
+        if (saveMatch) { pendingSaveKey = saveMatch[1].trim(); pendingConfirmText = saveMatch[2].trim(); finalResponse = finalResponse.replace(saveMatch[0], '').trim(); }
+
+        finalResponse = finalResponse.replace(/\{([^}]+)\}/g, (match, key) => { return userData[key.trim()] || ""; });
+
+        if (finalResponse.includes('[START_TIMER]')) { caseStartTime = new Date(); finalResponse = finalResponse.replace('[START_TIMER]', '').trim(); }
+        if (finalResponse.includes('[STOP_TIMER]')) {
+            if (caseStartTime) {
+                let diff = Math.floor((new Date() - caseStartTime) / 1000); let m = Math.floor(diff / 60); let s = diff % 60; let tStr = (m > 0 ? m + " মিনিট " : "") + s + " সেকেন্ড";
+                finalResponse = finalResponse.replace('[STOP_TIMER]', `<br><br><span class="text-green-700 font-bold bg-green-100 px-3 py-1 rounded-full text-xs">⏱️ কেস সলভের সময়: ${tStr}</span>`); caseStartTime = null;
+            } else finalResponse = finalResponse.replace('[STOP_TIMER]', '');
+        }
+
+        const scoreMatch = finalResponse.match(/\[SCORE:(\d+)\]/);
+        if (scoreMatch) { let pts = parseInt(scoreMatch[1]); userScore += pts; saveBotScore(); finalResponse = finalResponse.replace(scoreMatch[0], `<br><br><span class="text-yellow-800 font-bold bg-yellow-100 px-3 py-1 rounded-full text-xs border border-yellow-300 shadow-sm">🏆 +${pts} পয়েন্ট! (এই বটে মোট: ${userScore})</span>`); }
+
+        const ts = new Date().getTime(); 
+        finalResponse = finalResponse.replace(/\[VIDEO:(.*?)\|(.*?)\|(.*?)\]/g, (match, url, start, end) => { let sep = url.includes('?') ? '&' : '?'; return `<video src="${url}${sep}v=${ts}#t=${start},${end}" controls preload="none" class="w-full mt-2 rounded-lg shadow-sm"></video>`; });
+        // Lottie Animation Replace Logic
+finalResponse = finalResponse.replace(/\[LOTTIE:(.*?)\]/g, (match, url) => { 
+    return `<lottie-player src="${url.trim()}" background="transparent" speed="1" style="width: 100%; max-width: 200px; margin-top: 10px; border-radius: 8px;" loop autoplay></lottie-player>`; 
+});
+        finalResponse = finalResponse.replace(/\[AUDIO:(.*?)\|(.*?)\|(.*?)\]/g, (match, url, start, end) => { let sep = url.includes('?') ? '&' : '?'; return `<audio src="${url}${sep}v=${ts}#t=${start},${end}" controls preload="none" class="w-full mt-2"></audio>`; });
+        finalResponse = finalResponse.replace(/\[YT:(.*?)\|(.*?)\|(.*?)\]/g, (match, id, start, end) => { return `<iframe src="https://www.youtube.com/embed/${id}?start=${start}&end=${end}" controls preload="none" allowfullscreen class="w-full aspect-video mt-2 rounded-lg shadow-sm"></iframe>`; });
+        finalResponse = finalResponse.replace(/\[LINK:(.*?)\|(.*?)\]/g, (match, url, text) => { let cleanUrl = url.trim(); if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) cleanUrl = 'https://' + cleanUrl; return `<a href="${cleanUrl}" target="_blank" class="text-blue-600 hover:text-blue-800 underline font-bold transition-colors">${text.trim()}</a>`; });
+
+        return { text: finalResponse, showButtons: shouldShowButtons };
+    }
+    loadBotData();
+</script>
+</body>
+</html>
