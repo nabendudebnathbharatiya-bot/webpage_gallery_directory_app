@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio & Video Volume Controller</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: #f8fafc; color: #1e293b; padding: 15px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
+        .container { background: #ffffff; width: 100%; max-width: 500px; padding: 25px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); text-align: center; }
+        
+        h2 { font-size: 24px; margin-bottom: 5px; color: #0f172a; }
+        .subtitle { font-size: 13px; color: #64748b; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0; }
+        
+        .upload-section { margin-bottom: 20px; text-align: left; }
+        label { font-size: 14px; font-weight: bold; color: #475569; display: block; margin-bottom: 8px; }
+        input[type="file"] { width: 100%; padding: 12px; border: 2px dashed #94a3b8; border-radius: 8px; font-size: 14px; background: #f8fafc; outline: none; transition: 0.3s; cursor: pointer; color: #334155; font-weight: 600; }
+        input[type="file"]:hover { border-color: #3b82f6; }
+
+        /* Volume Slider Design */
+        .slider-container { background: #eff6ff; padding: 20px; border-radius: 12px; border: 1px solid #bfdbfe; margin-bottom: 25px; }
+        .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .slider-title { font-weight: bold; font-size: 15px; color: #1e293b; }
+        .volume-display { font-size: 18px; font-weight: bold; color: #ef4444; background: #fff; padding: 4px 12px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        input[type="range"] { width: 100%; height: 8px; background: #cbd5e1; border-radius: 5px; outline: none; appearance: none; -webkit-appearance: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #3b82f6; cursor: pointer; box-shadow: 0 2px 8px rgba(59,130,246,0.5); border: 3px solid #fff; }
+        input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.1); }
+
+        .slider-labels { display: flex; justify-content: space-between; font-size: 12px; color: #64748b; margin-top: 8px; font-weight: bold; }
+
+        button { width: 100%; padding: 16px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; background: #3b82f6; color: white; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
+        button:disabled { background: #94a3b8; box-shadow: none; cursor: not-allowed; }
+        button:active:not(:disabled) { transform: scale(0.98); }
+        
+        #statusMessage { margin-top: 15px; font-size: 14px; font-weight: bold; padding: 12px; border-radius: 8px; display: none; }
+        
+        #downloadSection { display: none; margin-top: 15px; }
+        .download-link { display: inline-block; width: 100%; padding: 15px; background: #10b981; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+
+        /* Hidden Processing Area */
+        #processingArea { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🔊 ভলিউম কন্ট্রোলার</h2>
+    <div class="subtitle">যেকোনো অডিও বা ভিডিও ফাইলের সাউন্ড বাড়ান বা কমান</div>
+
+    <div class="upload-section">
+        <label>যেকোনো ফাইল সিলেক্ট করুন (Audio / Video):</label>
+        <input type="file" id="mediaFile" accept="audio/*, video/*">
+    </div>
+
+    <div class="slider-container">
+        <div class="slider-header">
+            <span class="slider-title">ভলিউম লেভেল:</span>
+            <span class="volume-display" id="volumeText">100%</span>
+        </div>
+        <input type="range" id="volumeSlider" min="0" max="500" value="100">
+        <div class="slider-labels">
+            <span>0% (Mute)</span>
+            <span>100% (Normal)</span>
+            <span>500% (Boost)</span>
+        </div>
+    </div>
+
+    <button id="processBtn">⚙️ সাউন্ড পরিবর্তন করুন</button>
+    
+    <div id="statusMessage"></div>
+    
+    <div id="downloadSection">
+        <a id="downloadLink" class="download-link" href="#">⬇️ নতুন ফাইল ডাউনলোড করুন</a>
+    </div>
+
+    <div id="processingArea">
+        <video id="sourceVideo" playsinline></video>
+        <canvas id="renderCanvas"></canvas>
+    </div>
+</div>
+
+<script>
+    const mediaFileInput = document.getElementById('mediaFile');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const volumeText = document.getElementById('volumeText');
+    const processBtn = document.getElementById('processBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const downloadSection = document.getElementById('downloadSection');
+    const downloadLink = document.getElementById('downloadLink');
+    
+    const sourceVideo = document.getElementById('sourceVideo');
+    const canvas = document.getElementById('renderCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let animationId;
+    let isProcessing = false;
+
+    // স্লাইডারের কালার এবং টেক্সট পরিবর্তন করা
+    volumeSlider.addEventListener('input', function() {
+        const val = this.value;
+        volumeText.innerText = `${val}%`;
+        
+        if (val < 100) { volumeText.style.color = '#3b82f6'; } // কমালে নীল
+        else if (val == 100) { volumeText.style.color = '#10b981'; } // নরমাল সবুজ
+        else { volumeText.style.color = '#ef4444'; } // বাড়ালে লাল (Boost)
+    });
+
+    function showStatus(msg, type) {
+        statusMessage.style.display = 'block';
+        statusMessage.innerText = msg;
+        statusMessage.style.backgroundColor = type === 'error' ? '#fee2e2' : (type === 'progress' ? '#e0f2fe' : '#dcfce3');
+        statusMessage.style.color = type === 'error' ? '#ef4444' : (type === 'progress' ? '#0284c7' : '#16a34a');
+    }
+
+    processBtn.addEventListener('click', async () => {
+        const file = mediaFileInput.files[0];
+        if (!file) {
+            showStatus("❌ অনুগ্রহ করে একটি ফাইল সিলেক্ট করুন!", "error");
+            return;
+        }
+
+        const isVideo = file.type.startsWith('video');
+        const volumeMultiplier = volumeSlider.value / 100; // e.g. 200% = 2.0
+
+        processBtn.disabled = true;
+        downloadSection.style.display = 'none';
+        isProcessing = true;
+
+        try {
+            // ==================== AUDIO FILE PROCESSING (Super Fast) ====================
+            if (!isVideo) {
+                showStatus("⚡ অডিও প্রসেস হচ্ছে... (খুব দ্রুত হবে)", "progress");
+                
+                const fileReader = new FileReader();
+                fileReader.readAsArrayBuffer(file);
+                
+                fileReader.onload = async (e) => {
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const audioBuffer = await audioCtx.decodeAudioData(e.target.result);
+                    
+                    // অফলাইন রেন্ডারিং (দ্রুত কাজ করার জন্য)
+                    const offlineCtx = new OfflineAudioContext(1, audioBuffer.length, audioBuffer.sampleRate);
+                    const source = offlineCtx.createBufferSource();
+                    source.buffer = audioBuffer;
+                    
+                    // ভলিউম কমানো বা বাড়ানোর লজিক
+                    const gainNode = offlineCtx.createGain();
+                    gainNode.gain.value = volumeMultiplier;
+                    
+                    source.connect(gainNode);
+                    gainNode.connect(offlineCtx.destination);
+                    source.start();
+                    
+                    const renderedBuffer = await offlineCtx.startRendering();
+                    
+                    // LameJS দিয়ে MP3 তৈরি
+                    const mp3encoder = new lamejs.Mp3Encoder(1, renderedBuffer.sampleRate, 128); // 128 kbps
+                    const samples = renderedBuffer.getChannelData(0);
+                    const sampleBlockSize = 1152;
+                    const mp3Data = [];
+                    
+                    const int16Samples = new Int16Array(samples.length);
+                    for (let i = 0; i < samples.length; i++) {
+                        let s = Math.max(-1, Math.min(1, samples[i]));
+                        int16Samples[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+                    }
+                    
+                    for (let i = 0; i < int16Samples.length; i += sampleBlockSize) {
+                        const chunk = int16Samples.subarray(i, i + sampleBlockSize);
+                        const buf = mp3encoder.encodeBuffer(chunk);
+                        if (buf.length > 0) mp3Data.push(buf);
+                    }
+                    const finalBuf = mp3encoder.flush();
+                    if (finalBuf.length > 0) mp3Data.push(finalBuf);
+                    
+                    const blob = new Blob(mp3Data, { type: 'audio/mp3' });
+                    downloadLink.href = URL.createObjectURL(blob);
+                    downloadLink.download = `Volume_${volumeSlider.value}Percent.mp3`;
+                    
+                    showStatus("✅ অডিও রেডি! ডাউনলোড করুন।", "success");
+                    downloadSection.style.display = 'block';
+                    processBtn.disabled = false;
+                };
+            } 
+            // ==================== VIDEO FILE PROCESSING (Real-time) ====================
+            else {
+                showStatus("🎥 ভিডিও প্রসেস হচ্ছে... (ভিডিওটি প্লে হয়ে শেষ হওয়া পর্যন্ত অপেক্ষা করুন)", "progress");
+                
+                sourceVideo.src = URL.createObjectURL(file);
+                sourceVideo.crossOrigin = "anonymous";
+                
+                await new Promise(resolve => {
+                    sourceVideo.onloadedmetadata = () => {
+                        canvas.width = sourceVideo.videoWidth;
+                        canvas.height = sourceVideo.videoHeight;
+                        resolve();
+                    };
+                });
+
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const audioDest = audioCtx.createMediaStreamDestination();
+                const videoSource = audioCtx.createMediaElementSource(sourceVideo);
+                
+                // গেইন নোড (ভলিউম কন্ট্রোল)
+                const gainNode = audioCtx.createGain();
+                gainNode.gain.value = volumeMultiplier;
+
+                videoSource.connect(gainNode);
+                gainNode.connect(audioDest); 
+
+                const canvasStream = canvas.captureStream(30); 
+                const combinedTracks = [...canvasStream.getVideoTracks(), ...audioDest.stream.getAudioTracks()];
+                const combinedStream = new MediaStream(combinedTracks);
+
+                let mimeType = MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm';
+                const recorder = new MediaRecorder(combinedStream, { mimeType: mimeType, videoBitsPerSecond: 5000000 });
+                const chunks = [];
+
+                recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+                
+                recorder.onstop = () => {
+                    cancelAnimationFrame(animationId);
+                    const blob = new Blob(chunks, { type: mimeType });
+                    downloadLink.href = URL.createObjectURL(blob);
+                    downloadLink.download = `Volume_${volumeSlider.value}Percent.${mimeType.includes('mp4') ? 'mp4' : 'webm'}`;
+                    
+                    showStatus("✅ ভিডিও রেডি! ডাউনলোড করুন।", "success");
+                    downloadSection.style.display = 'block';
+                    processBtn.disabled = false;
+                    URL.revokeObjectURL(sourceVideo.src);
+                };
+
+                recorder.start();
+                await sourceVideo.play();
+
+                function drawFrame() {
+                    if (!sourceVideo.paused && !sourceVideo.ended) {
+                        ctx.drawImage(sourceVideo, 0, 0, canvas.width, canvas.height);
+                        animationId = requestAnimationFrame(drawFrame);
+                    }
+                }
+                drawFrame();
+
+                sourceVideo.onended = () => {
+                    recorder.stop();
+                };
+            }
+        } catch (error) {
+            console.error(error);
+            showStatus("❌ কোনো সমস্যা হয়েছে! রিফ্রেশ করে আবার চেষ্টা করুন।", "error");
+            processBtn.disabled = false;
+        }
+    });
+</script>
+
+</body>
+</html>
