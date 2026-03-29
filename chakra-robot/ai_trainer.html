@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Brain Trainer Pro 🧠</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/brain.js"></script>
+</head>
+<body class="bg-gray-100 p-8 font-sans">
+    <div class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-2xl border border-gray-200">
+        <h2 class="text-3xl font-bold mb-2 text-indigo-700 flex items-center gap-2">🧠 AI Model Trainer Pro</h2>
+        <p class="text-sm text-gray-600 mb-6 border-b pb-4">আপনার বটের .txt ফাইলের সম্পূর্ণ লেখা নিচে পেস্ট করুন। আমি নিজে থেকেই ট্রিগারগুলো খুঁজে এআই ট্রেইন করে দেব!</p>
+        
+        <textarea id="txtInput" rows="8" class="w-full p-4 border border-gray-300 rounded-xl text-sm mb-4 focus:ring-2 focus:ring-indigo-500 outline-none custom-scrollbar" placeholder="আপনার .txt ফাইলের সম্পূর্ণ ডাটা এখানে পেস্ট করুন..."></textarea>
+        
+        <button id="trainBtn" onclick="startTraining()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition transform hover:scale-[1.01] active:scale-[0.99] shadow-md flex justify-center items-center gap-2">
+            🚀 এআই ট্রেনিং শুরু করুন
+        </button>
+        
+        <div id="status" class="mt-5 text-center font-semibold text-gray-700"></div>
+
+        <div id="resultArea" class="hidden mt-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
+            <p class="text-xs text-gray-500 mb-2 font-bold uppercase tracking-wider">Generated AI Brain (JSON)</p>
+            <textarea id="outputJson" rows="4" class="w-full p-3 border border-green-300 bg-green-50/50 rounded-lg text-xs font-mono text-green-900 outline-none" readonly placeholder="Trained JSON..."></textarea>
+            
+            <button onclick="copyJSON()" class="w-full mt-4 bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a2.25 2.25 0 01-2.25 2.25H9.75A2.25 2.25 0 017.5 4.5v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" /></svg>
+                এক ক্লিকে JSON ডাটা কপি করুন
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function startTraining() {
+            const rawText = document.getElementById('txtInput').value.trim();
+            if (!rawText) {
+                alert("দয়া করে আগে আপনার .txt ফাইলের ডাটা পেস্ট করুন!");
+                return;
+            }
+
+            // UI আপডেট: লোডিং শুরু
+            const statusDiv = document.getElementById('status');
+            const btn = document.getElementById('trainBtn');
+            statusDiv.innerHTML = "⏳ <span class='animate-pulse text-indigo-600'>ডাটা প্রসেস হচ্ছে এবং এআই ট্রেনিং চলছে... ব্রাউজার হ্যাং হতে পারে, একটু অপেক্ষা করুন!</span>";
+            document.getElementById('resultArea').classList.add('hidden');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+
+            setTimeout(() => {
+                try {
+                    // ১. ম্যাজিক পার্সার (টেক্সট থেকে ট্রিগার বের করা)
+                    const lines = rawText.split('\n');
+                    const trainingData = [];
+                    let intentCounter = 0;
+
+                    lines.forEach(line => {
+                        const tLine = line.trim();
+                        if (tLine.startsWith('Trigger:')) {
+                            const keywords = tLine.replace('Trigger:', '').split('|').map(s => s.trim().toLowerCase()).filter(Boolean);
+                            keywords.forEach(kw => {
+                                if (kw.length > 2) { 
+                                    trainingData.push({ input: kw, output: `intent_${intentCounter}` });
+                                }
+                            });
+                            intentCounter++;
+                        }
+                    });
+
+                    if (trainingData.length === 0) {
+                        statusDiv.innerHTML = "❌ <b>কোনো 'Trigger:' খুঁজে পাওয়া যায়নি।</b> আপনি কি সঠিক .txt ডাটা পেস্ট করেছেন?";
+                        btn.disabled = false; btn.classList.remove('opacity-50');
+                        return;
+                    }
+
+                    // ২. এআই ট্রেনিং ইঞ্জিন (অ্যাডভান্সড মোড)
+                    const net = new brain.recurrent.LSTM({
+                        hiddenLayers: [20] // ব্রেনের নিউরন বা মেমোরি সেল বাড়িয়ে দেওয়া হলো
+                    });
+
+                    // ট্রেনিংয়ের নিয়মকানুন (Hyperparameters)
+                    net.train(trainingData, {
+                        iterations: 1500,    // ১৫০০ বার প্র্যাকটিস করবে!
+                        errorThresh: 0.011,  // ভুলের পরিমাণ ১% এর নিচে না আসা পর্যন্ত পড়া ছাড়বে না
+                        log: true,           // কনসোলে (F12) লগ দেখাবে
+                        logPeriod: 100       // প্রতি ১০০ বার পড়ার পর আপডেট দেবে
+                    });
+
+                    // ৩. JSON তৈরি
+                    const trainedBrainJSON = net.toJSON();
+                    document.getElementById('outputJson').value = JSON.stringify(trainedBrainJSON);
+
+                    statusDiv.innerHTML = `✅ <b>ট্রেনিং সফল!</b> এআই মোট <span class='text-green-600'>${trainingData.length}</span> টি শব্দগুচ্ছ থেকে <span class='text-green-600'>${intentCounter}</span> টি প্যাটার্ন শিখেছে।`;
+                    document.getElementById('resultArea').classList.remove('hidden');
+
+                    // 🎵 কাজ শেষ হওয়ার অ্যালার্ম বা সাউন্ড
+                    const successSound = new Audio('music.mp3');
+                    successSound.play();
+
+                } catch (error) {
+                    statusDiv.innerHTML = `❌ <b>ট্রেনিংয়ে সমস্যা হয়েছে:</b> ${error.message}`;
+                } finally {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50');
+                }
+            }, 500);
+        }
+
+        // 📋 এক ক্লিকে কপি করার ফাংশন
+        function copyJSON() {
+            const jsonText = document.getElementById('outputJson').value;
+            navigator.clipboard.writeText(jsonText).then(() => {
+                const btn = event.currentTarget;
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = `✅ <b>সফলভাবে কপি হয়েছে!</b> এবার .json ফাইলে পেস্ট করুন।`;
+                btn.classList.replace('bg-green-600', 'bg-indigo-600');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.classList.replace('bg-indigo-600', 'bg-green-600');
+                }, 3000);
+            }).catch(err => {
+                alert("কপি করতে সমস্যা হয়েছে। অনুগ্রহ করে ম্যানুয়ালি বক্সে ক্লিক করে কপি করুন।");
+            });
+        }
+    </script>
+</body>
+</html>
