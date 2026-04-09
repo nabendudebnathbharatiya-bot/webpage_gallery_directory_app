@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>চক্র ভিডিও এডিটর প্রো</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap');
+        body { font-family: 'Hind Siliguri', sans-serif; background-color: #0f172a; color: #f8fafc; overflow-x: hidden; }
+        
+        .app-container { max-width: 480px; margin: 0 auto; min-height: 100vh; background-color: #1e293b; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.5); position: relative;}
+        
+        #editor-canvas { width: 100%; background-color: #000; object-fit: contain; cursor: grab; touch-action: none; }
+        #editor-canvas:active { cursor: grabbing; }
+
+        .tool-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 6px; background: #334155; border-radius: 8px; font-size: 0.65rem; color: #cbd5e1; transition: 0.2s; text-align: center; cursor: pointer; }
+        .tool-btn:hover { background: #475569; color: #fff; }
+
+        .timeline-scroll::-webkit-scrollbar { height: 4px; }
+        .timeline-scroll::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 4px; }
+        .timeline-item { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 2px solid transparent; flex-shrink: 0; cursor: pointer; transition: 0.2s; opacity: 0.6; }
+        .timeline-item.active { border-color: #38bdf8; transform: scale(1.05); opacity: 1; }
+        
+        .options-panel { background: #0f172a; border-top: 1px solid #334155; padding: 10px; display: none; }
+        .options-panel.active { display: block; }
+        .modal { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 50; flex-direction: column; justify-content: center; padding: 20px; }
+        .modal.active { display: flex; }
+
+        .toast { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); background: #f59e0b; color: #000; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 0.8rem; z-index: 100; text-align: center; width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: none; transition: 0.3s; }
+        
+        /* Splash Screen Transition */
+        #splash-screen { transition: opacity 0.6s ease-out, visibility 0.6s; }
+        .splash-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div id="splash-screen" class="fixed inset-0 bg-slate-900 z-[100] flex flex-col items-center justify-center">
+        <div class="relative flex items-center justify-center w-24 h-24 mb-4">
+            <div class="absolute inset-0 border-4 border-t-sky-500 border-slate-700 rounded-full animate-spin"></div>
+            <i data-lucide="aperture" class="w-10 h-10 text-sky-400 animate-pulse"></i>
+        </div>
+        <h1 class="text-4xl font-bold text-white tracking-widest animate-pulse mb-1">চক্র</h1>
+        <p class="text-sky-400 text-xs tracking-widest">ভিডিও এডিটর প্রো</p>
+    </div>
+
+    <div class="app-container">
+        <div id="warning-toast" class="toast"><i data-lucide="alert-triangle" class="w-4 h-4 inline mb-1"></i> <span id="toast-msg">সতর্কবার্তা</span></div>
+
+        <header class="p-3 border-b border-slate-700 flex justify-between items-center bg-slate-800 z-10 relative">
+            <button onclick="openProjectManager()" class="bg-slate-700 px-2 py-1.5 rounded text-xs font-bold flex items-center gap-1 hover:bg-slate-600 transition text-sky-400">
+                <i data-lucide="folder-open" class="w-3 h-3"></i> প্রজেক্ট
+            </button>
+            
+            <h1 class="text-sm font-bold text-sky-400 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full max-w-[150px] pointer-events-none">
+                চক্র ভিডিও এডিটর
+            </h1>
+
+            <div class="flex items-center gap-2 relative z-10">
+                <a href="help.html" target="_self" class="text-slate-300 hover:text-white p-1" title="হেল্প"><i data-lucide="help-circle" class="w-5 h-5"></i></a>
+                <button id="download-btn" onclick="startRecording()" class="bg-emerald-600 px-3 py-1.5 rounded text-xs font-bold flex items-center gap-1 hover:bg-emerald-500 transition shadow-lg">
+                    <i data-lucide="download" class="w-3 h-3"></i> এক্সপোর্ট
+                </button>
+            </div>
+        </header>
+
+        <div class="bg-slate-900 px-2 py-1 flex justify-between items-center text-xs border-b border-slate-700">
+            <select id="proj-orientation" onchange="changeOrientation(this.value)" class="bg-slate-800 border border-slate-600 rounded p-1 text-white focus:outline-none">
+                <option value="portrait">পোর্ট্রেট (9:16)</option>
+                <option value="landscape">ল্যান্ডস্কেপ (16:9)</option>
+            </select>
+            <span id="auto-save-badge" class="text-slate-400 hidden animate-pulse bg-slate-800 px-2 py-0.5 rounded border border-slate-600">Auto-saving...</span>
+        </div>
+
+        <div class="relative w-full bg-black flex-1 flex flex-col justify-center overflow-hidden items-center group">
+            <canvas id="editor-canvas" width="720" height="1280"></canvas>
+            
+            <button onclick="togglePlayback()" id="play-pause-btn" class="absolute bottom-4 right-4 bg-slate-800/80 p-2.5 rounded-full text-white hover:text-sky-400 z-30 shadow-lg border border-slate-600" title="প্লে/পজ">
+                <i data-lucide="pause" id="play-pause-icon" class="w-5 h-5"></i>
+            </button>
+
+            <div id="recording-badge" class="absolute top-4 right-4 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-2 hidden animate-pulse z-20">
+                <div class="w-2 h-2 bg-white rounded-full"></div> রেকর্ডিং...
+            </div>
+        </div>
+
+        <div class="bg-slate-900 px-4 py-2 border-t border-slate-700">
+            <div class="flex justify-between items-center mb-2">
+                <p class="text-xs text-slate-400 font-bold">টাইমলাইন</p>
+                <span id="current-project-name" class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-sky-400 border border-sky-900">Untitiled</span>
+            </div>
+            <div id="timeline-container" class="flex gap-2 overflow-x-auto timeline-scroll pb-2 items-center"></div>
+        </div>
+
+        <div id="clip-editor-panel" class="options-panel text-sm custom-scroll overflow-y-auto max-h-60">
+            <div class="flex justify-between items-center mb-2 border-b border-slate-700 pb-2">
+                <span class="text-sky-400 font-bold text-xs flex items-center gap-1"><i data-lucide="settings" class="w-3 h-3"></i> ক্লিপ এডিটর</span>
+                <div class="flex items-center gap-1">
+                    <button onclick="moveActiveClip(-1)" class="bg-slate-700 p-1 rounded hover:bg-slate-600"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                    <button onclick="moveActiveClip(1)" class="bg-slate-700 p-1 rounded hover:bg-slate-600"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                    <button onclick="deleteActiveClip()" class="bg-red-900/50 p-1 ml-2 rounded text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            </div>
+
+            <div id="video-mute-container" class="hidden flex items-center justify-between gap-2 bg-slate-800 p-2 rounded border border-slate-600 mb-3">
+                <label class="text-[10px] text-slate-300 font-bold flex items-center gap-1"><i data-lucide="volume-x" class="w-3 h-3"></i> ভিডিওর আসল সাউন্ড মিউট (Mute)</label>
+                <input type="checkbox" id="clip-mute" onchange="toggleClipMute(this.checked)" class="w-4 h-4 accent-sky-500 cursor-pointer">
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 mb-3">
+                <div class="flex flex-col gap-1"><label class="text-[9px] text-slate-400">শুরু (সেকেন্ড)</label><input type="number" id="clip-start" value="0" min="0" step="0.1" class="bg-slate-800 border border-slate-600 rounded p-1 text-white text-xs" onchange="updateClipTiming()"></div>
+                <div class="flex flex-col gap-1"><label class="text-[9px] text-slate-400">শেষ (সেকেন্ড)</label><input type="number" id="clip-end" value="3" min="0.1" step="0.1" class="bg-slate-800 border border-slate-600 rounded p-1 text-white text-xs" onchange="updateClipTiming()"></div>
+                <div class="flex flex-col gap-1"><label class="text-[9px] text-slate-400">ফ্রেম</label><select id="clip-frame" class="bg-slate-800 border border-slate-600 rounded p-1 text-white text-xs" onchange="updateClipFrame(this.value)"><option value="none">নেই</option><option value="cinematic">সিনেমাটিক</option><option value="polaroid">পোলারয়েড</option></select></div>
+            </div>
+
+            <div class="mb-3 border border-slate-700 p-2 rounded bg-slate-800/50">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[10px] text-indigo-300 font-bold">ক্লিপের অতিরিক্ত অডিও</span>
+                    <input type="file" id="clip-audio-upload" accept="audio/*" class="hidden" onchange="addAudioToClip(event)">
+                    <button onclick="document.getElementById('clip-audio-upload').click()" class="bg-indigo-600 hover:bg-indigo-500 px-2 py-1 rounded text-[10px] font-bold">+ অডিও</button>
+                </div>
+                <div id="clip-audio-list" class="space-y-1"></div>
+            </div>
+
+            <button onclick="document.getElementById('text-tools').classList.toggle('hidden')" class="w-full bg-pink-600 hover:bg-pink-500 rounded p-1.5 text-white text-xs font-bold flex items-center justify-center gap-1 mb-2">
+                <i data-lucide="type" class="w-3 h-3"></i> লেখা যোগ করুন
+            </button>
+
+            <div id="text-tools" class="hidden bg-slate-800 p-2 rounded border border-slate-600 space-y-2 mb-2">
+                <input type="text" id="overlay-text" placeholder="লেখা লিখুন..." class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-white text-xs">
+                <div class="grid grid-cols-4 gap-2">
+                    <div><label class="text-[9px] text-slate-400 block">সাইজ</label><input type="number" id="txt-size" value="60" class="w-full bg-slate-900 border rounded p-1 text-white text-xs"></div>
+                    <div><label class="text-[9px] text-slate-400 block">রঙ</label><input type="color" id="txt-color" value="#ffffff" class="w-full h-6 rounded cursor-pointer p-0 border-0"></div>
+                    <div><label class="text-[9px] text-slate-400 block">ব্যাকগ্রাউন্ড</label><div class="flex items-center gap-1"><input type="checkbox" id="txt-bg-enable" checked class="w-3 h-3"><input type="color" id="txt-bg-color" value="#000000" class="w-full h-6 rounded cursor-pointer p-0 border-0"></div></div>
+                    <div><label class="text-[9px] text-slate-400 block">স্টাইল</label><select id="txt-style" class="w-full bg-slate-900 border rounded p-1 text-white text-xs"><option value="bold">Bold</option><option value="normal">Normal</option></select></div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div><label class="text-[9px] text-slate-400 block">লেখা শুরু (সেকেন্ড)</label><input type="number" id="txt-start" value="0" step="0.5" class="w-full bg-slate-900 border rounded p-1 text-white text-xs"></div>
+                    <div><label class="text-[9px] text-slate-400 block">লেখা শেষ (সেকেন্ড)</label><input type="number" id="txt-end" value="3" step="0.5" class="w-full bg-slate-900 border rounded p-1 text-white text-xs"></div>
+                </div>
+                <button onclick="addTextToClip()" class="w-full bg-blue-600 py-1.5 rounded text-xs font-bold mt-1">যুক্ত করুন</button>
+            </div>
+        </div>
+
+        <div class="p-2 bg-slate-800 border-t border-slate-700 flex justify-center gap-4">
+            <input type="file" id="media-upload" accept="video/*, image/*" multiple class="hidden" onchange="loadMedia(event)">
+            <input type="file" id="bgm-upload" accept="audio/*" class="hidden" onchange="loadBGM(event)">
+            
+            <button onclick="document.getElementById('media-upload').click()" class="tool-btn w-16"><i data-lucide="image-plus" class="w-5 h-5 text-sky-400"></i> মিডিয়া</button>
+            <button onclick="document.getElementById('bgm-upload').click()" class="tool-btn w-16 relative"><i data-lucide="music" class="w-5 h-5 text-indigo-400"></i> BGM <span id="bgm-dot" class="hidden absolute top-1 right-2 w-2 h-2 bg-green-500 rounded-full"></span></button>
+            <button onclick="clearAll()" class="tool-btn w-16 bg-red-900/30 hover:bg-red-800/50"><i data-lucide="trash-2" class="w-5 h-5 text-red-400"></i> রিসেট</button>
+        </div>
+
+        <div id="project-modal" class="modal">
+            <div class="bg-slate-800 p-5 rounded-xl w-full max-w-sm mx-auto shadow-2xl">
+                <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-sky-400">প্রজেক্টসমূহ</h2><button onclick="closeProjectManager()" class="text-slate-400"><i data-lucide="x"></i></button></div>
+                <div id="project-list" class="space-y-2 mb-4 max-h-48 overflow-y-auto"></div>
+                <div class="flex gap-2"><button onclick="createNewProject()" class="flex-1 bg-blue-600 py-2 rounded font-bold text-sm">নতুন</button><button onclick="saveCurrentProject()" class="flex-1 bg-emerald-600 py-2 rounded font-bold text-sm">সেভ করুন</button></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        
+        // --- SPLASH SCREEN LOGIC ---
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                splash.classList.add('splash-hidden');
+                setTimeout(() => { splash.style.display = 'none'; }, 600); // Remove from DOM after fade
+            }, 2500); // 1.5 Seconds loading animation
+        });
+
+        const canvas = document.getElementById('editor-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let playlist = []; 
+        let currentPlayIndex = -1;
+        let activeMediaItem = null;
+        
+        let projOrientation = 'portrait'; 
+        let isPlaying = true; 
+        let clipCurrentSec = 0; 
+        let lastDrawTime = Date.now();
+        let draggingTextObj = null;
+        let animationFrameId;
+        
+        let globalAudioCtx = null;
+        let globalAudioDest = null;
+        let bgmAudioObj = null; 
+        
+        let mediaRecorder; let recordedChunks = []; let isRecording = false;
+
+        function showWarning(message, duration = 4000) {
+            const toast = document.getElementById('warning-toast');
+            document.getElementById('toast-msg').innerText = message;
+            toast.style.display = 'block'; setTimeout(() => toast.style.display = 'none', duration);
+        }
+
+        // --- GLOBAL PLAY/PAUSE LOGIC ---
+        function togglePlayback() {
+            isPlaying = !isPlaying;
+            const icon = document.getElementById('play-pause-icon');
+            if(isPlaying) {
+                icon.setAttribute('data-lucide', 'pause');
+                lastDrawTime = Date.now(); 
+                if(activeMediaItem && activeMediaItem.type === 'video') activeMediaItem.element.play().catch(()=>{});
+            } else {
+                icon.setAttribute('data-lucide', 'play');
+                if(activeMediaItem && activeMediaItem.type === 'video') activeMediaItem.element.pause();
+                if(activeMediaItem) activeMediaItem.audios.forEach(a => a.el.pause());
+                if(bgmAudioObj) bgmAudioObj.el.pause();
+            }
+            lucide.createIcons();
+        }
+
+        // --- CLIP MUTE LOGIC ---
+        function toggleClipMute(checked) {
+            if(!activeMediaItem) return;
+            activeMediaItem.isMuted = checked;
+            if(activeMediaItem.type === 'video') {
+                activeMediaItem.element.volume = checked ? 0 : 1;
+            }
+            triggerAutoSave();
+        }
+
+        function initAudio() {
+            if(!globalAudioCtx) {
+                globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                globalAudioDest = globalAudioCtx.createMediaStreamDestination();
+            }
+            if(globalAudioCtx.state === 'suspended') globalAudioCtx.resume();
+        }
+
+        function connectToMixer(el) {
+            initAudio();
+            if(!el.isMixed) {
+                try {
+                    const source = globalAudioCtx.createMediaElementSource(el);
+                    source.connect(globalAudioDest); 
+                    source.connect(globalAudioCtx.destination); 
+                    el.isMixed = true;
+                } catch(e) {}
+            }
+        }
+
+        function loadBGM(e) {
+            initAudio(); if(!e.target.files[0]) return;
+            if(bgmAudioObj) { bgmAudioObj.el.pause(); URL.revokeObjectURL(bgmAudioObj.src); }
+            const file = e.target.files[0]; const src = URL.createObjectURL(file);
+            const el = new Audio(src); el.loop = true; connectToMixer(el);
+            bgmAudioObj = { file, src, el }; document.getElementById('bgm-dot').classList.remove('hidden');
+            if(isPlaying) el.play().catch(()=>{});
+            showWarning("BGM যুক্ত হয়েছে!"); triggerAutoSave();
+        }
+
+        function addAudioToClip(e) {
+            initAudio(); if(!activeMediaItem || !e.target.files[0]) return;
+            const file = e.target.files[0]; const src = URL.createObjectURL(file);
+            const el = new Audio(src); connectToMixer(el);
+            activeMediaItem.audios.push({ id: Date.now(), file, src, el, start: 0, end: activeMediaItem.trimEnd });
+            renderClipAudios(); triggerAutoSave();
+        }
+
+        function updateClipAudioTiming(id, start, end) {
+            if(!activeMediaItem) return; const a = activeMediaItem.audios.find(x => x.id == id);
+            if(a) { a.start = parseFloat(start); a.end = parseFloat(end); triggerAutoSave(); }
+        }
+
+        function deleteClipAudio(id) {
+            if(!activeMediaItem) return; const index = activeMediaItem.audios.findIndex(x => x.id == id);
+            if(index > -1) { activeMediaItem.audios[index].el.pause(); URL.revokeObjectURL(activeMediaItem.audios[index].src); activeMediaItem.audios.splice(index, 1); renderClipAudios(); triggerAutoSave(); }
+        }
+
+        function renderClipAudios() {
+            const list = document.getElementById('clip-audio-list'); list.innerHTML = '';
+            if(!activeMediaItem || activeMediaItem.audios.length === 0) { list.innerHTML = `<p class="text-[9px] text-slate-500">কোনো অডিও নেই</p>`; return; }
+            activeMediaItem.audios.forEach((a, i) => {
+                list.innerHTML += `
+                <div class="flex items-center gap-1 bg-slate-900 p-1 rounded border border-slate-700 text-[10px]">
+                    <span class="text-indigo-400 font-bold truncate w-12">Track ${i+1}</span>
+                    <input type="number" value="${a.start}" step="0.5" class="w-10 bg-slate-800 p-0.5 rounded text-white" onchange="updateClipAudioTiming(${a.id}, this.value, ${a.end})"> 
+                    <span class="text-slate-500">-</span>
+                    <input type="number" value="${a.end}" step="0.5" class="w-10 bg-slate-800 p-0.5 rounded text-white" onchange="updateClipAudioTiming(${a.id}, ${a.start}, this.value)">
+                    <button onclick="deleteClipAudio(${a.id})" class="text-red-400 ml-auto"><i data-lucide="x" class="w-3 h-3"></i></button>
+                </div>`;
+            });
+            lucide.createIcons();
+        }
+
+        function changeOrientation(val) {
+            projOrientation = val;
+            if(val === 'portrait') { canvas.width = 720; canvas.height = 1280; canvas.style.aspectRatio = '9/16'; } 
+            else { canvas.width = 1280; canvas.height = 720; canvas.style.aspectRatio = '16/9'; }
+            triggerAutoSave();
+        }
+
+        // --- DB MANAGEMENT ---
+        let currentProjectId = null; let currentProjectName = "Project " + Math.floor(Math.random()*1000);
+        let projectMetaList = []; let autoSaveTimer = null;
+        localforage.getItem('editor_meta_list').then(res => { if(res) projectMetaList = res; });
+        function openProjectManager() { document.getElementById('project-modal').classList.add('active'); renderProjectList(); }
+        function closeProjectManager() { document.getElementById('project-modal').classList.remove('active'); }
+
+        function renderProjectList() {
+            const list = document.getElementById('project-list'); list.innerHTML = '';
+            if(projectMetaList.length === 0) { list.innerHTML = '<p class="text-xs text-slate-400 text-center">সেভ করা প্রজেক্ট নেই</p>'; return; }
+            projectMetaList.forEach(proj => {
+                list.innerHTML += `<div class="flex justify-between bg-slate-900 p-2 rounded mb-2">
+                    <div class="flex-1 cursor-pointer" onclick="openProject('${proj.id}')"><p class="text-sm font-bold text-white">${proj.name}</p></div>
+                    <button onclick="deleteProject('${proj.id}')" class="text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
+            }); lucide.createIcons();
+        }
+
+        function createNewProject() { clearAll(); currentProjectId = null; currentProjectName = "Project "+Math.floor(Math.random()*1000); document.getElementById('current-project-name').innerText = currentProjectName; closeProjectManager(); }
+
+        async function saveProjectData(isAuto = false) {
+            if(playlist.length === 0) return;
+            if(isAuto) document.getElementById('auto-save-badge').classList.remove('hidden');
+            const projId = currentProjectId || Date.now().toString();
+            const projData = {
+                id: projId, name: currentProjectName, date: new Date().toLocaleDateString(), orientation: projOrientation,
+                bgmData: bgmAudioObj ? { file: bgmAudioObj.file } : null,
+                playlistData: playlist.map(item => ({
+                    type: item.type, rawFile: item.rawFile, trimStart: item.trimStart, trimEnd: item.trimEnd, frame: item.frame, texts: item.texts, isMuted: item.isMuted,
+                    audios: item.audios.map(a => ({ file: a.file, start: a.start, end: a.end }))
+                }))
+            };
+            await localforage.setItem('proj_' + projId, projData);
+            if(!projectMetaList.find(p => p.id === projId)) { projectMetaList.push({ id: projId, name: currentProjectName, date: projData.date }); await localforage.setItem('editor_meta_list', projectMetaList); }
+            currentProjectId = projId; 
+            if(isAuto) setTimeout(() => document.getElementById('auto-save-badge').classList.add('hidden'), 1000); else { renderProjectList(); showWarning("সেভ হয়েছে!"); }
+        }
+        function saveCurrentProject() { saveProjectData(false); }
+        function triggerAutoSave() { if(currentProjectId) { clearTimeout(autoSaveTimer); autoSaveTimer = setTimeout(()=>saveProjectData(true), 2000); } }
+
+        async function openProject(id) {
+            showWarning("লোড হচ্ছে..."); const data = await localforage.getItem('proj_'+id); if(!data) return;
+            clearAll(); currentProjectId = data.id; currentProjectName = data.name; 
+            document.getElementById('current-project-name').innerText = currentProjectName;
+            document.getElementById('proj-orientation').value = data.orientation || 'portrait'; changeOrientation(data.orientation || 'portrait');
+
+            if(data.bgmData) {
+                const src = URL.createObjectURL(data.bgmData.file); const el = new Audio(src); el.loop = true; connectToMixer(el);
+                bgmAudioObj = { file: data.bgmData.file, src, el }; document.getElementById('bgm-dot').classList.remove('hidden');
+            }
+            playlist = data.playlistData.map(item => {
+                const fileURL = URL.createObjectURL(item.rawFile); let el;
+                if(item.type === 'video') { el = document.createElement('video'); el.src = fileURL; el.volume = item.isMuted ? 0 : 1; connectToMixer(el); } else { el = new Image(); el.src = fileURL; }
+                return { type: item.type, rawFile: item.rawFile, src: fileURL, element: el, trimStart: item.trimStart||0, trimEnd: item.trimEnd||3, frame: item.frame, isMuted: item.isMuted||false, texts: item.texts||[], audios: (item.audios||[]).map((a,i) => { const asrc = URL.createObjectURL(a.file); const ael = new Audio(asrc); connectToMixer(ael); return { id: Date.now()+i, file: a.file, src: asrc, el: ael, start: a.start, end: a.end }}) };
+            });
+            renderTimelineUI(); closeProjectManager(); if(playlist.length > 0) selectClip(0);
+        }
+        async function deleteProject(id) { await localforage.removeItem('proj_'+id); projectMetaList = projectMetaList.filter(p=>p.id!==id); await localforage.setItem('editor_meta_list', projectMetaList); renderProjectList(); }
+
+        // --- MEDIA LOADING ---
+        function loadMedia(event) {
+            initAudio(); const files = event.target.files; if (!files.length) return;
+            for(let i=0; i<files.length; i++) {
+                const file = files[i]; const fileURL = URL.createObjectURL(file);
+                let item = { type: file.type.startsWith('video/') ? 'video':'image', rawFile: file, element: null, src: fileURL, trimStart: 0, trimEnd: 3, frame: 'none', isMuted: false, texts: [], audios: [] };
+                if (item.type === 'video') { 
+                    item.element = document.createElement('video'); item.element.src = item.src; item.element.volume = 1; connectToMixer(item.element);
+                    item.element.onloadedmetadata = () => { item.trimEnd = item.element.duration > 15 ? 15 : item.element.duration; triggerAutoSave(); };
+                } else { item.element = new Image(); item.element.src = item.src; }
+                playlist.push(item);
+            }
+            renderTimelineUI(); if(currentPlayIndex === -1) { if(!animationFrameId) render(); selectClip(0); }
+            triggerAutoSave();
+        }
+
+        function updateClipTiming() {
+            if(!activeMediaItem) return;
+            let start = parseFloat(document.getElementById('clip-start').value); let end = parseFloat(document.getElementById('clip-end').value);
+            if(start >= end) { showWarning("শুরুর সময় ছোট হতে হবে!"); return; }
+            activeMediaItem.trimStart = start; activeMediaItem.trimEnd = end;
+            if(activeMediaItem.type === 'video') activeMediaItem.element.currentTime = start;
+            triggerAutoSave();
+        }
+        function updateClipFrame(frame) { if(activeMediaItem) { activeMediaItem.frame = frame; triggerAutoSave(); } }
+
+        function addTextToClip() {
+            if(!activeMediaItem) return; const text = document.getElementById('overlay-text').value.trim(); if(!text) return;
+            activeMediaItem.texts.push({ text: text, size: parseInt(document.getElementById('txt-size').value), color: document.getElementById('txt-color').value, bgEnable: document.getElementById('txt-bg-enable').checked, bgColor: document.getElementById('txt-bg-color').value, style: document.getElementById('txt-style').value, start: parseFloat(document.getElementById('txt-start').value), end: parseFloat(document.getElementById('txt-end').value), x: canvas.width / 2, y: canvas.height / 2 });
+            document.getElementById('overlay-text').value = ''; document.getElementById('text-tools').classList.add('hidden'); triggerAutoSave();
+        }
+
+        // --- SMART RENDER LOOP (Handles Play/Pause) ---
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let now = Date.now();
+            let dt = (now - lastDrawTime) / 1000;
+            lastDrawTime = now;
+
+            if (activeMediaItem) {
+                if(activeMediaItem.type === 'video' && activeMediaItem.element) {
+                    clipCurrentSec = activeMediaItem.element.currentTime - activeMediaItem.trimStart;
+                    if(isPlaying && activeMediaItem.element.currentTime >= activeMediaItem.trimEnd) {
+                        if(isRecording) playNextExport();
+                        else { activeMediaItem.element.currentTime = activeMediaItem.trimStart; activeMediaItem.element.play().catch(()=>{}); } 
+                    }
+                } else {
+                    if(isPlaying) clipCurrentSec += dt;
+                    if(isPlaying && clipCurrentSec >= (activeMediaItem.trimEnd - activeMediaItem.trimStart)) {
+                        if(isRecording) playNextExport(); else clipCurrentSec = 0; 
+                    }
+                }
+
+                // Play/Pause Background Music
+                if(bgmAudioObj) {
+                    if(isPlaying) { if(bgmAudioObj.el.paused) bgmAudioObj.el.play().catch(()=>{}); } 
+                    else { if(!bgmAudioObj.el.paused) bgmAudioObj.el.pause(); }
+                }
+
+                // Handle Clip Audios
+                activeMediaItem.audios.forEach(a => {
+                    if(isPlaying && clipCurrentSec >= a.start && clipCurrentSec <= a.end) {
+                        if(a.el.paused) { 
+                            let tgt = clipCurrentSec - a.start; if(Math.abs(a.el.currentTime - tgt)>0.5) a.el.currentTime = tgt;
+                            a.el.play().catch(()=>{}); 
+                        }
+                    } else { if(!a.el.paused) a.el.pause(); }
+                });
+
+                // Draw Base Media
+                if(activeMediaItem.element) {
+                    const scale = Math.min(canvas.width / (activeMediaItem.element.videoWidth || activeMediaItem.element.width), canvas.height / (activeMediaItem.element.videoHeight || activeMediaItem.element.height));
+                    const w = (activeMediaItem.element.videoWidth || activeMediaItem.element.width) * scale; const h = (activeMediaItem.element.videoHeight || activeMediaItem.element.height) * scale;
+                    ctx.drawImage(activeMediaItem.element, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+                }
+                
+                if(activeMediaItem.frame === 'cinematic') { ctx.fillStyle = "black"; ctx.fillRect(0, 0, canvas.width, 100); ctx.fillRect(0, canvas.height - 100, canvas.width, 100); } 
+                else if(activeMediaItem.frame === 'polaroid') { ctx.fillStyle = "white"; ctx.fillRect(0,0,canvas.width,30); ctx.fillRect(0,0,30,canvas.height); ctx.fillRect(canvas.width-30,0,30,canvas.height); ctx.fillRect(0,canvas.height-120,canvas.width,120); }
+
+                // Draw Texts
+                activeMediaItem.texts.forEach((t) => {
+                    if(clipCurrentSec >= t.start && clipCurrentSec <= t.end) {
+                        ctx.font = `${t.style === 'italic' ? 'italic' : ''} ${t.style === 'bold' ? 'bold' : ''} ${t.size}px 'Hind Siliguri', sans-serif`;
+                        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                        if(t.bgEnable) { let pad = t.size * 0.3; let txtW = ctx.measureText(t.text).width; let txtH = t.size; ctx.fillStyle = t.bgColor; ctx.fillRect(t.x - txtW/2 - pad, t.y - txtH/2 - pad, txtW + pad*2, txtH + pad*2); }
+                        ctx.fillStyle = t.color; ctx.shadowColor = "rgba(0,0,0,0.8)"; ctx.shadowBlur = 5; ctx.fillText(t.text, t.x, t.y); ctx.shadowBlur = 0;
+                    }
+                });
+            }
+            animationFrameId = requestAnimationFrame(render);
+        }
+
+        function getMousePos(evt) { const r = canvas.getBoundingClientRect(); return { x: ((evt.clientX || (evt.touches && evt.touches[0].clientX)) - r.left) * (canvas.width/r.width), y: ((evt.clientY || (evt.touches && evt.touches[0].clientY)) - r.top) * (canvas.height/r.height) }; }
+        function onPointerDown(e) { if(!activeMediaItem) return; e.preventDefault(); const pos = getMousePos(e); activeMediaItem.texts.forEach((t)=>{ ctx.font=`${t.size}px 'Hind Siliguri'`; if(pos.x>=t.x-ctx.measureText(t.text).width/2 && pos.x<=t.x+ctx.measureText(t.text).width/2 && pos.y>=t.y-t.size && pos.y<=t.y+t.size) draggingTextObj=t; }); }
+        function onPointerMove(e) { if(draggingTextObj) { e.preventDefault(); const p = getMousePos(e); draggingTextObj.x=p.x; draggingTextObj.y=p.y; } }
+        function onPointerUp() { if(draggingTextObj) { draggingTextObj=null; triggerAutoSave(); } }
+        canvas.addEventListener('mousedown', onPointerDown); canvas.addEventListener('mousemove', onPointerMove); window.addEventListener('mouseup', onPointerUp); canvas.addEventListener('touchstart', onPointerDown, {passive:false}); canvas.addEventListener('touchmove', onPointerMove, {passive:false}); window.addEventListener('touchend', onPointerUp);
+
+        function renderTimelineUI() {
+            const container = document.getElementById('timeline-container'); container.innerHTML = '';
+            playlist.forEach((item, index) => {
+                const el = item.type==='video'?document.createElement('video'):new Image(); el.src = item.src; el.className = `timeline-item ${index===currentPlayIndex?'active':''}`;
+                el.onclick = () => selectClip(index); container.appendChild(el);
+            }); lucide.createIcons();
+        }
+
+        function selectClip(index) {
+            initAudio(); clipCurrentSec = 0; lastDrawTime = Date.now();
+            if(activeMediaItem) { if(activeMediaItem.type==='video') activeMediaItem.element.pause(); activeMediaItem.audios.forEach(a => a.el.pause()); }
+            currentPlayIndex = index; activeMediaItem = playlist[index]; renderTimelineUI(); renderClipAudios();
+            
+            document.getElementById('clip-editor-panel').classList.add('active');
+            document.getElementById('clip-start').value = activeMediaItem.trimStart; document.getElementById('clip-end').value = activeMediaItem.trimEnd; document.getElementById('clip-frame').value = activeMediaItem.frame;
+            
+            // Video Mute UI
+            const muteContainer = document.getElementById('video-mute-container');
+            if(activeMediaItem.type === 'video') { muteContainer.classList.remove('hidden'); document.getElementById('clip-mute').checked = activeMediaItem.isMuted; } 
+            else { muteContainer.classList.add('hidden'); }
+
+            if (activeMediaItem.type === 'video') { activeMediaItem.element.currentTime = activeMediaItem.trimStart; if(isPlaying) activeMediaItem.element.play().catch(()=>{}); } 
+        }
+
+        function deleteActiveClip() { if(currentPlayIndex===-1)return; playlist.splice(currentPlayIndex,1); currentPlayIndex=-1; activeMediaItem=null; renderTimelineUI(); document.getElementById('clip-editor-panel').classList.remove('active'); triggerAutoSave();}
+        function moveActiveClip(dir) { if(currentPlayIndex===-1 || playlist.length<2)return; let n = currentPlayIndex+dir; if(n<0||n>=playlist.length)return; let tmp=playlist[currentPlayIndex]; playlist[currentPlayIndex]=playlist[n]; playlist[n]=tmp; selectClip(n); triggerAutoSave();}
+        function clearAll() { playlist.forEach(p=>{URL.revokeObjectURL(p.src); p.audios.forEach(a=>URL.revokeObjectURL(a.src));}); playlist=[]; currentPlayIndex=-1; activeMediaItem=null; if(bgmAudioObj){URL.revokeObjectURL(bgmAudioObj.src); bgmAudioObj=null; document.getElementById('bgm-dot').classList.add('hidden');} renderTimelineUI(); document.getElementById('clip-editor-panel').classList.remove('active'); ctx.clearRect(0,0,canvas.width,canvas.height); }
+
+        function playNextExport() {
+            if(activeMediaItem) { activeMediaItem.audios.forEach(a => a.el.pause()); }
+            let nextIndex = currentPlayIndex + 1;
+            if(nextIndex >= playlist.length) { mediaRecorder.stop(); currentPlayIndex=-1; document.getElementById('clip-editor-panel').classList.remove('active'); if(bgmAudioObj) bgmAudioObj.el.pause(); return; }
+            currentPlayIndex = nextIndex; activeMediaItem = playlist[nextIndex]; clipCurrentSec = 0; renderTimelineUI();
+            if (activeMediaItem.type === 'video') { activeMediaItem.element.currentTime = activeMediaItem.trimStart; activeMediaItem.element.play().catch(()=>{}); } 
+        }
+
+        function startRecording() {
+            initAudio(); if(playlist.length===0) return alert("মিডিয়া নেই!"); isRecording = true; recordedChunks = [];
+            
+            // Force play for recording
+            if(!isPlaying) togglePlayback(); 
+
+            const stream = canvas.captureStream(30); 
+            if(globalAudioDest && globalAudioDest.stream.getAudioTracks().length > 0) { globalAudioDest.stream.getAudioTracks().forEach(t => stream.addTrack(t)); }
+
+            let opt = { mimeType: 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"' }; if(!MediaRecorder.isTypeSupported(opt.mimeType)) opt={mimeType:'video/mp4'}; if(!MediaRecorder.isTypeSupported(opt.mimeType)) opt={mimeType:'video/webm'};
+            
+            mediaRecorder = new MediaRecorder(stream, opt); mediaRecorder.ondataavailable = e => { if(e.data.size>0) recordedChunks.push(e.data); };
+            mediaRecorder.onstop = () => {
+                const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(recordedChunks, {type:opt.mimeType}));
+                a.download = `Chakra-Pro-Video.${opt.mimeType.includes('mp4')?'mp4':'webm'}`; a.click(); isRecording = false;
+                document.getElementById('recording-badge').classList.add('hidden'); document.getElementById('download-btn').innerHTML = `<i data-lucide="download" class="w-3 h-3"></i> এক্সপোর্ট`;
+                selectClip(0);
+            };
+            document.getElementById('recording-badge').classList.remove('hidden'); document.getElementById('download-btn').innerHTML = `রেকর্ডিং...`;
+            
+            mediaRecorder.start(); 
+            if(bgmAudioObj) { bgmAudioObj.el.currentTime = 0; bgmAudioObj.el.play().catch(()=>{}); }
+            currentPlayIndex = 0; activeMediaItem = playlist[0]; clipCurrentSec = 0;
+            if (activeMediaItem.type === 'video') { activeMediaItem.element.currentTime = activeMediaItem.trimStart; activeMediaItem.element.play().catch(()=>{}); } 
+        }
+        
+        changeOrientation('portrait'); render(); 
+    </script>
+</body>
+</html>
