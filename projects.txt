@@ -63,6 +63,6 @@ File: ads1| ad-manage/ads1.txt
 Title: social media file maker tool
 Description: vedio,image, text ও অডিও যুক্ত করে ভিডিও বানান
 Tags: Tailwind CSS, HTML,JS
-Thumbnail:
+Thumbnail:IMG.jpg
 Demo: social-media-tool/index.html
 File: pending
