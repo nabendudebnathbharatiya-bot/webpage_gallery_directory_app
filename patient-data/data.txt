@@ -1,0 +1,64 @@
+ID: CHK-1001
+Name: Hemalata Debnath
+Image: https://raw.githubusercontent.com/nabendudebnathbharatiya-bot/My-app-assets2/main/images/flat-design-om-symbol-design.png
+
+Date: 24-03-2024--- Address: Ranagat
+
+Disputed Organs: Lung, Heart, Stomach
+
+Pathology Report Name: Chest X-Ray
+Pathology Report Image: https://raw.githubusercontent.com/nabendudebnathbharatiya-bot/My-app-assets2/main/images/flat-design-om-symbol-design.png?t&fit=crop&q=80&w=500
+
+
+Evidence of Recovery: শ്বাসকষ্ট একদম কমে গেছে, এখন নিজে হাঁটতে পারেন।
+
+
+Before Text: প্রচণ্ড বুকে ব্যথা এবং শ্বাস নিতে কষ্ট হতো।
+Before Image: https://raw.githubusercontent.com/nabendudebnathbharatiya-bot/My-app-assets2/main/images/flat-design-om-symbol-design.png?auto=format&fit=crop&q=80&w=500
+
+
+After Text: থেরাপির পর সম্পূর্ণ স্বাভাবিকভাবে শ্বাস নিতে পারছেন।
+After Image: https://raw.githubusercontent.com/nabendudebnathbharatiya-bot/My-app-assets2/main/images/flat-design-om-symbol-design.png?auto=format&fit=crop&q=80&w=500
+
+
+Details:
+রোগীর পুরো নাম: হেমলতা দেবনাথ
+বয়স: ৬৫ বছর
+লিঙ্গ: মহিলা
+ঠিকানা: রানাঘাট, পশ্চিমবঙ্গ
+ভর্তির সময়কার অবস্থা: রোগী খুব দুর্বল ছিলেন এবং ক্রনিক হাঁপানি ছিল।
+থেরাপির ধরন: কসমিক এনার্জি হিলিং (Zero Energy)
+অতিরিক্ত মন্তব্য: রোগীকে প্রতিদিন ২০ মিনিট জিরো এনার্জি মেশিনে রাখা হয়েছিল।
+
+
+---
+
+
+ID: CHK-1002
+Name: Amit Das
+address ranaghqt
+Image: https://cdn-icons-png.flaticon.com/512/3135/3135715.png
+
+Date: 10-04-2024
+Disputed Organs: Liver, Kidney
+
+Pathology Report Name: LFT Blood Test
+Pathology Report Image: https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&q=80&w=500
+
+
+Pathology Report Name: KFT Blood Test
+Pathology Report Image: https://images.unsplash.com/photo-1584362917165-526a968579e8?auto=format&fit=crop&q=80&w=500
+
+
+Evidence of Recovery: ক্রিয়েটিনিন লেভেল ৩.০ থেকে কমে ১.৫-এ নেমে এসেছে।
+
+
+Details:
+রোগীর পুরো নাম: অমিত দাস
+বয়স: ৪২ বছর
+লিঙ্গ: পুরুষ
+ঠিকানা: কল্যাণী, নদীয়া
+সমস্যা: ফ্যাটি লিভার এবং কিডনির সমস্যা।
+
+
+---
