@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chakradham | Unified Patient System</title>
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #0f172a; 
+            background-image: radial-gradient(circle at top right, #1e293b 0%, #0f172a 100%);
+            background-attachment: fixed;
+            color: #cbd5e1;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+        
+        .loader {
+            border: 3px solid rgba(6, 182, 212, 0.2);
+            border-top: 3px solid #06b6d4; 
+            border-radius: 50%;
+            width: 50px; height: 50px;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="antialiased pb-20 md:pb-0">
+
+   <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-lg border-b border-slate-800 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            
+            <div class="flex items-center gap-3 md:gap-4">
+                
+                <img src="https://cdn-icons-png.flaticon.com/512/3004/3004458.png" alt="Logo" 
+                     class="w-10 h-10 md:w-12 md:h-12 rounded-xl object-cover border border-cyan-500/50 bg-slate-800 p-1 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                
+                <div>
+                    <h1 class="font-bold text-white tracking-widest uppercase text-base md:text-xl">CHAKRADHAM</h1>
+                    <p class="text-[10px] md:text-xs text-cyan-500 font-medium tracking-widest">COSMIC HEALING</p>
+                </div>
+
+            </div>
+            <div class="flex gap-2">
+                <button onclick="showSection('mainView')" class="bg-slate-800 hover:bg-cyan-600 text-white px-3 py-2 md:px-4 md:py-2 rounded-lg text-xs md:text-sm transition-all shadow-md active:scale-95 flex items-center gap-2">
+                    <i class="fa-solid fa-house"></i> <span class="hidden sm:inline">Home</span>
+                </button>
+                <button onclick="showSection('historyView')" class="bg-slate-800 hover:bg-emerald-600 text-white px-3 py-2 md:px-4 md:py-2 rounded-lg text-xs md:text-sm transition-all shadow-md active:scale-95 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left"></i> <span class="hidden sm:inline">History</span>
+                </button>
+            </div>
+            
+        </div>
+    </header>
+
+    <div id="mainView" class="max-w-7xl mx-auto px-4 mt-8 transition-opacity duration-500">
+        <div class="mb-8 relative">
+            <input type="text" id="searchMain" placeholder="Search Patient Name or ID..." 
+                   class="w-full pl-12 pr-4 py-4 bg-slate-800/80 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-cyan-500 outline-none shadow-lg">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        
+        <div id="loadingMain" class="hidden justify-center py-10"><div class="loader"></div></div>
+        <div id="errorMain" class="hidden text-center text-red-400 mt-4 font-medium max-w-md mx-auto bg-slate-800/80 border border-red-500/30 p-6 rounded-2xl shadow-lg"></div>
+        
+        <div id="cardContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+        <div id="noResultMain" class="hidden text-center py-16 text-slate-500"><i class="fa-solid fa-folder-open text-4xl mb-3"></i><br>No records found.</div>
+    </div>
+
+    <div id="historyView" class="hidden max-w-5xl mx-auto px-4 mt-8">
+        <h2 class="text-2xl font-bold text-emerald-400 mb-6 uppercase tracking-wider text-center">Treatment History</h2>
+        
+        <div class="mb-8 relative max-w-2xl mx-auto">
+            <input type="text" id="searchHistory" placeholder="Enter Patient ID (e.g. CHK-1001)..." 
+                   class="w-full pl-12 pr-4 py-4 bg-slate-800/80 border border-emerald-500/50 rounded-xl text-white text-center text-lg uppercase outline-none focus:ring-2 focus:ring-emerald-500 shadow-lg">
+            <i class="fa-solid fa-user-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+        </div>
+        
+        <div id="historyDashboard" class="hidden bg-slate-800/50 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl">
+            <div class="p-6 border-b border-slate-700 bg-slate-900/50 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <p id="histDisplayId" class="text-emerald-400 font-mono text-sm bg-slate-900 inline-block px-2 py-1 rounded border border-slate-700"></p>
+                    <h3 id="histDisplayName" class="text-2xl font-bold text-white mt-2"></h3>
+                </div>
+                <div class="relative w-full md:w-64">
+                    <i class="fa-solid fa-filter absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+                    <input type="text" id="filterHistory" placeholder="Filter Organ, Date..." 
+                           class="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-sm text-white focus:outline-none focus:border-emerald-500">
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-900/80 text-emerald-400 text-xs uppercase tracking-wider border-b border-slate-700">
+                        <tr>
+                            <th class="p-4">Date</th>
+                            <th class="p-4">Code</th>
+                            <th class="p-4">Target / Organ</th>
+                            <th class="p-4">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody" class="text-slate-300 divide-y divide-slate-700/50"></tbody>
+                </table>
+            </div>
+        </div>
+        <div id="noHistory" class="hidden text-center py-10 text-slate-500"><i class="fa-solid fa-file-excel text-4xl mb-3"></i><br>No history found for this ID.</div>
+    </div>
+
+    <div id="fullScreenView" class="hidden fixed inset-0 z-50 bg-[#0f172a] overflow-y-auto">
+        <div class="p-4 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 flex justify-between items-center sticky top-0 z-50 shadow-lg">
+            <button onclick="closeFullScreen()" class="flex items-center gap-2 bg-slate-800 hover:bg-red-500 text-slate-300 hover:text-white px-5 py-2.5 rounded-lg text-sm font-semibold border border-slate-700 transition-all active:scale-95">
+                <i class="fa-solid fa-arrow-left"></i> Back
+            </button>
+            <span class="text-cyan-400 font-bold uppercase tracking-widest">Record Details</span>
+        </div>
+        
+        <div class="max-w-5xl mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row items-center md:items-start gap-6 mb-10 pb-8 border-b border-slate-800">
+                <img id="fsImage" src="" class="w-32 h-32 md:w-40 md:h-40 rounded-2xl object-cover border-2 border-cyan-500/50 shadow-lg bg-slate-700 p-1">
+                <div class="text-center md:text-left flex-1">
+                    <span id="fsId" class="inline-block bg-slate-900 text-cyan-400 text-sm font-bold px-4 py-1.5 rounded-md border border-slate-700 shadow-inner mb-3"></span>
+                    <h2 id="fsName" class="text-3xl md:text-5xl font-bold text-white mb-2"></h2>
+                    <p class="text-slate-400 font-medium"><i class="fa-regular fa-calendar mr-2"></i> Date: <span id="fsDate"></span></p>
+                </div>
+            </div>
+
+            <div class="space-y-8" id="fsDynamicContent"></div>
+
+            <div class="mt-8">
+                <h3 class="text-xl font-bold text-cyan-400 mb-4 border-b border-slate-700 pb-2"><i class="fa-solid fa-file-lines mr-2"></i> Admission Details</h3>
+                <div id="fsDetails" class="bg-slate-900/50 rounded-xl p-6 border border-slate-700/50 text-slate-300 leading-relaxed font-mono whitespace-pre-wrap"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let patientData = [];
+        let historyData = [];
+        let currentPatientHistory = []; // Needed for filtering inside history
+
+        // ✅ External Link & Cache Busting Rule
+        const applyCacheBuster = url => url.includes('?') ? `${url}&v=${new Date().getTime()}` : `${url}?v=${new Date().getTime()}`;
+
+        // ================= 1. FETCH ALL DATA =================
+        async function loadData() {
+            const loader = document.getElementById('loadingMain');
+            const errorMain = document.getElementById('errorMain');
+            
+            loader.style.display = 'flex';
+            errorMain.style.display = 'none';
+
+            try {
+                // Fetch data.txt
+                const resP = await fetch(applyCacheBuster('data.txt'));
+                if (!resP.ok) throw new Error("Server failed to load data.txt");
+                const txtP = await resP.text();
+                patientData = parseDataTxt(txtP);
+                renderCards();
+
+                // Fetch history.txt
+                const resH = await fetch(applyCacheBuster('history.txt'));
+                if (resH.ok) {
+                    const txtH = await resH.text();
+                    historyData = parseHistoryTxt(txtH);
+                }
+            } catch (err) {
+                // ✅ Fetching Rule Error Handling
+                errorMain.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-3xl mb-2 text-red-500"></i><br>Oops! There was a problem loading the database.<br><span class="text-xs text-slate-500 mt-1 block">${err.message}</span>`;
+                errorMain.style.display = 'block';
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        // ================= 2. ROCK-SOLID PARSERS =================
+
+        // ✅ Advanced Parser for data.txt (Line by Line)
+        function parseDataTxt(text) {
+            const lines = text.split('\n');
+            const patients = [];
+            let currentPatient = null;
+            let isDetails = false;
+
+            lines.forEach(line => {
+                const c = line.trim();
+                if (!c || c.match(/^---+$/)) return; // Skip empty lines and dash lines
+
+                if (c.toUpperCase().startsWith('ID:')) {
+                    if (currentPatient && currentPatient.id) patients.push(currentPatient);
+                    currentPatient = { 
+                        id: c.substring(3).trim().toUpperCase(), name: '', image: '', date: '', 
+                        organs: [], pathoName: [], pathoImage: [], recovery: [],
+                        beforeText: [], beforeImage: [], afterText: [], afterImage: [], details: [] 
+                    };
+                    isDetails = false;
+                } 
+                else if (currentPatient) {
+                    if (c.toLowerCase() === 'details:') {
+                        isDetails = true;
+                    } 
+                    else if (!isDetails && c.includes(':')) {
+                        const idx = c.indexOf(':');
+                        const k = c.substring(0, idx).trim().toLowerCase();
+                        const v = c.substring(idx + 1).trim();
+                        
+                        if(k === 'name') currentPatient.name = v;
+                        else if(k === 'image') currentPatient.image = v;
+                        else if(k === 'date') currentPatient.date = v;
+                        else if(k === 'disputed organs') currentPatient.organs.push(v);
+                        else if(k === 'pathology report name') currentPatient.pathoName.push(v);
+                        else if(k === 'pathology report image') currentPatient.pathoImage.push(v);
+                        else if(k === 'evidence of recovery') currentPatient.recovery.push(v);
+                        else if(k === 'before text') currentPatient.beforeText.push(v);
+                        else if(k === 'before image') currentPatient.beforeImage.push(v);
+                        else if(k === 'after text') currentPatient.afterText.push(v);
+                        else if(k === 'after image') currentPatient.afterImage.push(v);
+                    } 
+                    else if (isDetails) {
+                        currentPatient.details.push(c);
+                    }
+                }
+            });
+            if (currentPatient && currentPatient.id) patients.push(currentPatient);
+            return patients;
+        }
+
+        // ✅ Bulletproof Parser for history.txt (Solves the missing values bug)
+        function parseHistoryTxt(text) {
+            const lines = text.split('\n');
+            const patients = [];
+            let currentPatient = null;
+
+            lines.forEach(line => {
+                const c = line.trim();
+                if (!c) return;
+                
+                // When we find a new ID, save the old one and start a new object
+                if (c.toUpperCase().startsWith('ID:')) {
+                    if (currentPatient && currentPatient.id) patients.push(currentPatient);
+                    currentPatient = { id: c.substring(3).trim().toUpperCase(), name: '', records: [] };
+                } 
+                else if (c.toUpperCase().startsWith('NAME:') && currentPatient) {
+                    currentPatient.name = c.substring(5).trim();
+                } 
+                // Capture table values perfectly (ignores dashed lines automatically)
+                else if (c.includes('|') && !c.toUpperCase().includes('DATE') && currentPatient) {
+                    const parts = c.split('|').map(p => p.trim());
+                    if (parts.length >= 4) {
+                        currentPatient.records.push({ d: parts[0], c: parts[1], t: parts[2], v: parts[3] });
+                    }
+                }
+            });
+            if (currentPatient && currentPatient.id) patients.push(currentPatient);
+            return patients;
+        }
+
+        // ================= 3. UI CONTROLLERS =================
+
+        // Navigation
+        function showSection(id) {
+            document.getElementById('mainView').classList.add('hidden');
+            document.getElementById('historyView').classList.add('hidden');
+            document.getElementById('fullScreenView').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        function closeFullScreen() { showSection('mainView'); }
+
+        // Render Cards
+        function renderCards(filter = "") {
+            const container = document.getElementById('cardContainer');
+            const noResult = document.getElementById('noResultMain');
+            container.innerHTML = "";
+            
+            const f = patientData.filter(p => p.id.toLowerCase().includes(filter.toLowerCase()) || p.name.toLowerCase().includes(filter.toLowerCase()));
+            
+            if(f.length === 0) { noResult.style.display = 'block'; } 
+            else { noResult.style.display = 'none'; }
+
+            f.forEach(p => {
+                const imgSrc = p.image ? applyCacheBuster(p.image) : 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+                container.innerHTML += `
+                    <button onclick="openFS('${p.id}')" class="w-full text-left group bg-slate-800/80 p-5 rounded-2xl border border-slate-700 hover:border-cyan-500 transition-all shadow-lg hover:-translate-y-1">
+                        <div class="flex items-center gap-4 mb-4">
+                            <img src="${imgSrc}" class="w-16 h-16 rounded-full object-cover border-2 border-slate-600 group-hover:border-cyan-400" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
+                            <div>
+                                <h2 class="text-xl font-bold text-white group-hover:text-cyan-400">${p.name}</h2>
+                                <span class="text-xs text-slate-400 bg-slate-900 px-2 py-1 rounded border border-slate-700 mt-1 inline-block">${p.id}</span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-slate-900 border border-slate-600 text-cyan-400 text-center py-2.5 rounded-xl font-semibold group-hover:bg-cyan-500 group-hover:text-slate-900 transition-all">
+                            <i class="fa-solid fa-expand"></i> View Full Record
+                        </div>
+                    </button>`;
+            });
+        }
+
+        // Open Full Screen with Advanced Data
+        function openFS(id) {
+            const p = patientData.find(x => x.id === id);
+            if(!p) return;
+            
+            document.getElementById('fsId').innerText = p.id;
+            document.getElementById('fsName').innerText = p.name;
+            document.getElementById('fsDate').innerText = p.date || 'N/A';
+            document.getElementById('fsImage').src = applyCacheBuster(p.image || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png");
+            document.getElementById('fsDetails').innerHTML = p.details.join('<br>');
+
+            const fsDynamic = document.getElementById('fsDynamicContent');
+            fsDynamic.innerHTML = ''; 
+
+            const buildSec = (title, icon, html) => html ? `<div class="bg-slate-800/40 rounded-2xl p-6 border border-slate-700/50 shadow-inner"><h3 class="text-lg font-bold text-cyan-400 mb-4 border-b border-slate-700 pb-2"><i class="fa-solid ${icon} mr-2"></i> ${title}</h3>${html}</div>` : '';
+
+            // Organs & Recovery
+            let medHtml = '';
+            if(p.organs.length > 0) medHtml += `<div class="mb-3"><strong class="text-white">Disputed Organs:</strong> <span class="text-slate-300">${p.organs.join(', ')}</span></div>`;
+            if(p.recovery.length > 0) p.recovery.forEach(r => medHtml += `<div class="mb-2"><strong class="text-emerald-400">Evidence of Recovery:</strong> <span class="text-slate-300">${r}</span></div>`);
+            fsDynamic.innerHTML += buildSec('Medical Condition', 'fa-staff-snake', medHtml);
+
+            // Pathology
+            if(p.pathoName.length > 0 || p.pathoImage.length > 0) {
+                let pth = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+                for(let i=0; i<Math.max(p.pathoName.length, p.pathoImage.length); i++) {
+                    let img = p.pathoImage[i] ? `<img src="${applyCacheBuster(p.pathoImage[i])}" class="w-full h-48 object-cover rounded-lg mt-2 cursor-pointer hover:opacity-80 transition-opacity border border-slate-600" onclick="window.open(this.src)">` : '';
+                    pth += `<div class="bg-slate-900 p-4 rounded-xl border border-slate-700"><p class="font-semibold text-slate-200">${p.pathoName[i]||'Report Document'}</p>${img}</div>`;
+                }
+                fsDynamic.innerHTML += buildSec('Pathology Reports', 'fa-microscope', pth + '</div>');
+            }
+
+            // Before & After
+            if(p.beforeText.length > 0 || p.afterText.length > 0 || p.beforeImage.length > 0 || p.afterImage.length > 0) {
+                let ba = '<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">';
+                for(let i=0; i<Math.max(p.beforeText.length, p.afterText.length, p.beforeImage.length, p.afterImage.length); i++) {
+                    let bI = p.beforeImage[i] ? `<img src="${applyCacheBuster(p.beforeImage[i])}" class="w-full h-64 object-cover rounded-lg mt-3 border border-red-500/30">` : '';
+                    let aI = p.afterImage[i] ? `<img src="${applyCacheBuster(p.afterImage[i])}" class="w-full h-64 object-cover rounded-lg mt-3 border border-emerald-500/30">` : '';
+                    ba += `
+                        <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-700 relative"><span class="absolute top-0 right-0 bg-red-500/20 text-red-400 text-xs px-3 py-1 rounded-bl-lg border-b border-l border-red-500/30">Before Therapy</span><p class="mt-4 text-slate-300">${p.beforeText[i]||''}</p>${bI}</div>
+                        <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-700 relative"><span class="absolute top-0 right-0 bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1 rounded-bl-lg border-b border-l border-emerald-500/30">After Therapy</span><p class="mt-4 text-slate-300">${p.afterText[i]||''}</p>${aI}</div>`;
+                }
+                fsDynamic.innerHTML += buildSec('Transformation', 'fa-person-running', ba + '</div>');
+            }
+
+            showSection('fullScreenView');
+        }
+
+        // ================= 4. HISTORY VIEW LOGIC =================
+        function renderHistoryTable(data) {
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '';
+            
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center p-6 text-slate-500">No records found matching your filter.</td></tr>';
+                return;
+            }
+            
+            data.forEach(row => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-700/30 transition-colors">
+                        <td class="p-4 text-emerald-300 font-mono text-sm">${row.d}</td>
+                        <td class="p-4 text-slate-400">${row.c}</td>
+                        <td class="p-4 text-white font-medium">${row.t}</td>
+                        <td class="p-4 text-emerald-400 font-bold">${row.v}</td>
+                    </tr>`;
+            });
+        }
+
+        document.getElementById('searchMain').addEventListener('input', (e) => renderCards(e.target.value));
+
+        document.getElementById('searchHistory').addEventListener('input', (e) => {
+            const val = e.target.value.trim().toUpperCase();
+            const dash = document.getElementById('historyDashboard');
+            const noHist = document.getElementById('noHistory');
+            document.getElementById('filterHistory').value = ''; // Reset filter
+
+            if (val.length < 3) {
+                dash.classList.add('hidden');
+                noHist.classList.add('hidden');
+                return;
+            }
+
+            const found = historyData.find(h => h.id === val);
+            if(found) {
+                dash.classList.remove('hidden');
+                noHist.classList.add('hidden');
+                document.getElementById('histDisplayId').innerText = found.id;
+                document.getElementById('histDisplayName').innerText = found.name;
+                currentPatientHistory = found.records;
+                renderHistoryTable(currentPatientHistory);
+            } else {
+                dash.classList.add('hidden');
+                noHist.classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('filterHistory').addEventListener('input', (e) => {
+            const f = e.target.value.toLowerCase();
+            const filtered = currentPatientHistory.filter(r => r.d.toLowerCase().includes(f) || r.t.toLowerCase().includes(f) || r.c.toLowerCase().includes(f));
+            renderHistoryTable(filtered);
+        });
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
