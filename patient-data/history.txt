@@ -1,0 +1,20 @@
+ID: CHK-1001
+NAME: HEMALATA DEBNATH
+-------
+DATE | CODE |TARGET/ORGAN | VALUE
+24/03/24 |(BI) | LUNG (L) | 4M
+25/03/24 | (BI) | B. Int (L) | 4M
+26/03/24 | (BI) | LUNG (L) | 4M
+26/03/24 | (BI) | OJD (D) | 4M
+27/03/24 | (BI) | B. Int (L) | 4M
+27/03/24 | (BI) | HEART (L) | 4M
+28/03/24 | (BI) | SHOULDER (S) | 4M
+---
+ID: CHK-1002
+NAME: AMIT DAS
+DATE | CODE | TARGET/ORGAN | VALUE
+10/04/24 | (BI) | LIVER (L) | 4M
+11/04/24 | (BI) | STOMACH (L) | 4M
+12/04/24 | (BI) | KIDNEY (R) | 4M
+13/04/24 | (BI) | DETOX | 4M
+---
