@@ -10,36 +10,32 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap');
         
-        /* বডি স্ক্রল বন্ধ করা হয়েছে যাতে অ্যাপের মতো ফিল হয় */
-        body { font-family: 'Hind Siliguri', sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 0; height: 100dvh; overflow: hidden; }
+        /* বডি এবং কন্টেইনারকে স্ক্রলযোগ্য করা হয়েছে */
+        body { font-family: 'Hind Siliguri', sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 0; }
+        .app-container { max-width: 560px; margin: 0 auto; min-height: 100vh; background-color: #1e293b; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.5); position: relative; }
         
-        .app-container { max-width: 480px; margin: 0 auto; height: 100%; background-color: #1e293b; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
-        
-        /* ক্যানভাস অটো-রিসাইজ হওয়ার জন্য */
         #editor-canvas { max-width: 100%; max-height: 100%; background-color: #000; object-fit: contain; cursor: grab; touch-action: none; }
         #editor-canvas:active { cursor: grabbing; }
 
-        .tool-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 6px; background: #334155; border-radius: 8px; font-size: 0.65rem; color: #cbd5e1; transition: 0.2s; text-align: center; cursor: pointer; }
+        .tool-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px; background: #334155; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: #cbd5e1; transition: 0.2s; text-align: center; cursor: pointer; }
         .tool-btn:hover { background: #475569; color: #fff; }
 
         .timeline-scroll::-webkit-scrollbar { height: 4px; }
         .timeline-scroll::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 4px; }
-        .timeline-item { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 2px solid transparent; flex-shrink: 0; cursor: pointer; transition: 0.2s; opacity: 0.6; }
+        .timeline-item { width: 60px; height: 60px; border-radius: 6px; object-fit: cover; border: 2px solid transparent; flex-shrink: 0; cursor: pointer; transition: 0.2s; opacity: 0.6; }
         .timeline-item.active { border-color: #38bdf8; transform: scale(1.05); opacity: 1; }
         
-        .options-panel { background: #0f172a; border-top: 1px solid #334155; padding: 10px; display: none; }
+        /* ওভারলে বাদ দিয়ে নরমাল ব্লক করা হয়েছে */
+        .options-panel { display: none; background: #0f172a; border-top: 1px solid #334155; padding: 16px; }
         .options-panel.active { display: block; }
+        
         .modal { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 50; flex-direction: column; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
 
-        .toast { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); background: #f59e0b; color: #000; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 0.8rem; z-index: 100; text-align: center; width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: none; transition: 0.3s; }
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #f59e0b; color: #000; padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; z-index: 100; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: none; transition: 0.3s; }
         
         #splash-screen { transition: opacity 0.6s ease-out, visibility 0.6s; }
         .splash-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        
-        /* কাস্টম স্ক্রলবার */
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -50,121 +46,129 @@
             <i data-lucide="aperture" class="w-10 h-10 text-sky-400 animate-pulse"></i>
         </div>
         <h1 class="text-4xl font-bold text-white tracking-widest animate-pulse mb-1">চক্র</h1>
-        <p class="text-sky-400 text-xs tracking-widest">ভিডিও এডিটর প্রো</p>
+        <p class="text-sky-400 text-sm tracking-widest">ভিডিও এডিটর প্রো</p>
     </div>
 
-    <div class="app-container">
-        <div id="warning-toast" class="toast"><i data-lucide="alert-triangle" class="w-4 h-4 inline mb-1"></i> <span id="toast-msg">সতর্কবার্তা</span></div>
+    <div id="warning-toast" class="toast"><i data-lucide="alert-triangle" class="w-5 h-5 inline mb-1"></i> <span id="toast-msg">সতর্কবার্তা</span></div>
 
-        <header class="p-3 border-b border-slate-700 flex justify-between items-center bg-slate-800 z-10 relative flex-shrink-0">
-            <button onclick="openProjectManager()" class="bg-slate-700 px-2 py-1.5 rounded text-xs font-bold flex items-center gap-1 hover:bg-slate-600 transition text-sky-400">
-                <i data-lucide="folder-open" class="w-3 h-3"></i> প্রজেক্ট
+    <div class="app-container">
+        
+        <header class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800 z-10 relative flex-shrink-0">
+            <button onclick="openProjectManager()" class="bg-slate-700 px-3 py-2 rounded text-sm font-bold flex items-center gap-2 hover:bg-slate-600 transition text-sky-400">
+                <i data-lucide="folder-open" class="w-4 h-4"></i> প্রজেক্ট
             </button>
             
-            <h1 class="text-sm font-bold text-sky-400 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full max-w-[150px] pointer-events-none">
+            <h1 class="text-base font-bold text-sky-400 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full max-w-[180px] pointer-events-none">
                 চক্র ভিডিও এডিটর
             </h1>
 
             <div class="flex items-center gap-2 relative z-10">
-                <a href="help.html" target="_self" class="text-slate-300 hover:text-white p-1" title="হেল্প"><i data-lucide="help-circle" class="w-5 h-5"></i></a>
-                <button id="download-btn" onclick="startRecording()" class="bg-emerald-600 px-3 py-1.5 rounded text-xs font-bold flex items-center gap-1 hover:bg-emerald-500 transition shadow-lg">
-                    <i data-lucide="download" class="w-3 h-3"></i> এক্সপোর্ট
+                <button id="download-btn" onclick="startRecording()" class="bg-emerald-600 px-4 py-2 rounded text-sm font-bold flex items-center gap-2 hover:bg-emerald-500 transition shadow-lg">
+                    <i data-lucide="download" class="w-4 h-4"></i> এক্সপোর্ট
                 </button>
             </div>
         </header>
 
-        <div class="bg-slate-900 px-2 py-1 flex justify-between items-center text-xs border-b border-slate-700 flex-shrink-0">
-            <select id="proj-orientation" onchange="changeOrientation(this.value)" class="bg-slate-800 border border-slate-600 rounded p-1 text-white focus:outline-none">
-                <option value="portrait">পোর্ট্রেট (9:16)</option>
-                <option value="landscape">ল্যান্ডস্কেপ (16:9)</option>
-            </select>
-            <span id="auto-save-badge" class="text-slate-400 hidden animate-pulse bg-slate-800 px-2 py-0.5 rounded border border-slate-600">Auto-saving...</span>
+        <div class="bg-slate-900 px-3 py-2 flex justify-between items-center border-b border-slate-700 flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <select id="proj-orientation" onchange="changeOrientation(this.value)" class="bg-slate-800 border border-slate-600 rounded p-1.5 text-sm text-white focus:outline-none">
+                    <option value="portrait">পোর্ট্রেট (9:16)</option>
+                    <option value="landscape">ল্যান্ডস্কেপ (16:9)</option>
+                </select>
+                <a href="help.html" target="_self" class="text-slate-300 hover:text-white flex items-center justify-center p-1" title="হেল্প">
+                    <i data-lucide="help-circle" class="w-5 h-5"></i>
+                </a>
+            </div>
+            <span id="auto-save-badge" class="text-slate-400 hidden animate-pulse bg-slate-800 px-2 py-1 rounded border border-slate-600 text-xs">Auto-saving...</span>
         </div>
 
-        <div class="relative w-full bg-black flex-1 min-h-0 flex flex-col justify-center overflow-hidden items-center group">
+        <div class="relative w-full bg-black flex flex-col justify-center overflow-hidden items-center group flex-shrink-0" style="height: 45vh; min-height: 300px;">
             <canvas id="editor-canvas" width="720" height="1280"></canvas>
             
-            <button onclick="togglePlayback()" id="play-pause-btn" class="absolute bottom-4 right-4 bg-slate-800/80 p-2.5 rounded-full text-white hover:text-sky-400 z-30 shadow-lg border border-slate-600" title="প্লে/পজ">
-                <i data-lucide="pause" id="play-pause-icon" class="w-5 h-5"></i>
+            <button onclick="togglePlayback()" id="play-pause-btn" class="absolute bottom-6 right-6 bg-slate-800/80 p-3 rounded-full text-white hover:text-sky-400 z-30 shadow-lg border border-slate-600" title="প্লে/পজ">
+                <i data-lucide="pause" id="play-pause-icon" class="w-6 h-6"></i>
             </button>
 
-            <div id="recording-badge" class="absolute top-4 right-4 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-2 hidden animate-pulse z-20">
-                <div class="w-2 h-2 bg-white rounded-full"></div> রেকর্ডিং...
+            <div id="recording-badge" class="absolute top-4 right-4 bg-red-600 text-white text-sm font-bold px-4 py-1.5 rounded-full flex items-center gap-2 hidden animate-pulse z-20">
+                <div class="w-3 h-3 bg-white rounded-full"></div> রেকর্ডিং...
             </div>
         </div>
 
-        <div class="bg-slate-900 px-4 py-2 border-t border-slate-700 flex-shrink-0">
+        <div class="bg-slate-900 px-4 py-3 border-t border-slate-700 flex-shrink-0 relative z-20">
             <div class="flex justify-between items-center mb-2">
-                <p class="text-xs text-slate-400 font-bold">টাইমলাইন</p>
-                <span id="current-project-name" class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-sky-400 border border-sky-900">Untitiled</span>
+                <p class="text-sm text-slate-400 font-bold">টাইমলাইন</p>
+                <span id="current-project-name" class="text-xs bg-slate-800 px-2 py-1 rounded text-sky-400 border border-sky-900">Untitiled</span>
             </div>
-            <div id="timeline-container" class="flex gap-2 overflow-x-auto timeline-scroll pb-2 items-center"></div>
+            <div id="timeline-container" class="flex gap-3 overflow-x-auto timeline-scroll pb-2 items-center"></div>
         </div>
 
-        <div id="clip-editor-panel" class="options-panel text-sm custom-scroll overflow-y-auto max-h-[35vh] flex-shrink-0">
-            <div class="flex justify-between items-center mb-2 border-b border-slate-700 pb-2">
-                <span class="text-sky-400 font-bold text-xs flex items-center gap-1"><i data-lucide="settings" class="w-3 h-3"></i> ক্লিপ এডিটর</span>
-                <div class="flex items-center gap-1">
-                    <button onclick="moveActiveClip(-1)" class="bg-slate-700 p-1 rounded hover:bg-slate-600"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
-                    <button onclick="moveActiveClip(1)" class="bg-slate-700 p-1 rounded hover:bg-slate-600"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
-                    <button onclick="deleteActiveClip()" class="bg-red-900/50 p-1 ml-2 rounded text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        <div id="clip-editor-panel" class="options-panel text-base flex-shrink-0">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
+                <span class="text-sky-400 font-bold text-sm flex items-center gap-2"><i data-lucide="settings" class="w-5 h-5"></i> ক্লিপ সেটিংস</span>
+                <div class="flex items-center gap-2">
+                    <button onclick="moveActiveClip(-1)" class="bg-slate-700 p-2 rounded hover:bg-slate-600"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                    <button onclick="moveActiveClip(1)" class="bg-slate-700 p-2 rounded hover:bg-slate-600"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+                    <button onclick="deleteActiveClip()" class="bg-red-900/50 p-2 ml-2 rounded text-red-400 hover:bg-red-800/50"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
                 </div>
             </div>
 
-            <div id="video-mute-container" class="hidden flex items-center justify-between gap-2 bg-slate-800 p-2 rounded border border-slate-600 mb-3">
-                <label class="text-[10px] text-slate-300 font-bold flex items-center gap-1"><i data-lucide="volume-x" class="w-3 h-3"></i> ভিডিওর আসল সাউন্ড মিউট (Mute)</label>
-                <input type="checkbox" id="clip-mute" onchange="toggleClipMute(this.checked)" class="w-4 h-4 accent-sky-500 cursor-pointer">
+            <div id="video-mute-container" class="hidden flex items-center justify-between gap-2 bg-slate-800 p-3 rounded border border-slate-600 mb-4">
+                <label class="text-sm text-slate-300 font-bold flex items-center gap-2"><i data-lucide="volume-x" class="w-5 h-5"></i> আসল সাউন্ড মিউট করুন</label>
+                <input type="checkbox" id="clip-mute" onchange="toggleClipMute(this.checked)" class="w-5 h-5 accent-sky-500 cursor-pointer">
             </div>
 
-            <div class="grid grid-cols-3 gap-2 mb-3">
-                <div class="flex flex-col gap-1"><label class="text-[9px] text-slate-400">শুরু (সেকেন্ড)</label><input type="number" id="clip-start" value="0" min="0" step="0.1" class="bg-slate-800 border border-slate-600 rounded p-1 text-white text-xs" onchange="updateClipTiming()"></div>
-                <div class="flex flex-col gap-1"><label class="text-[9px] text-slate-400">শেষ (সেকেন্ড)</label><input type="number" id="clip-end" value="3" min="0.1" step="0.1" class="bg-slate-800 border border-slate-600 rounded p-1 text-white text-xs" onchange="updateClipTiming()"></div>
-                <div class="flex flex-col gap-1"><label class="text-[9px] text-slate-400">ফ্রেম</label><select id="clip-frame" class="bg-slate-800 border border-slate-600 rounded p-1 text-white text-xs" onchange="updateClipFrame(this.value)"><option value="none">নেই</option><option value="cinematic">সিনেমাটিক</option><option value="polaroid">পোলারয়েড</option></select></div>
+            <div class="grid grid-cols-3 gap-3 mb-4">
+                <div class="flex flex-col gap-1"><label class="text-xs text-slate-400">শুরু (সেকেন্ড)</label><input type="number" id="clip-start" value="0" min="0" step="0.1" class="bg-slate-800 border border-slate-600 rounded p-2 text-white text-sm" onchange="updateClipTiming()"></div>
+                <div class="flex flex-col gap-1"><label class="text-xs text-slate-400">শেষ (সেকেন্ড)</label><input type="number" id="clip-end" value="3" min="0.1" step="0.1" class="bg-slate-800 border border-slate-600 rounded p-2 text-white text-sm" onchange="updateClipTiming()"></div>
+                <div class="flex flex-col gap-1"><label class="text-xs text-slate-400">ফ্রেম</label><select id="clip-frame" class="bg-slate-800 border border-slate-600 rounded p-2 text-white text-sm" onchange="updateClipFrame(this.value)"><option value="none">নেই</option><option value="cinematic">সিনেমাটিক</option><option value="polaroid">পোলারয়েড</option></select></div>
             </div>
 
-            <div class="mb-3 border border-slate-700 p-2 rounded bg-slate-800/50">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-[10px] text-indigo-300 font-bold">ক্লিপের অতিরিক্ত অডিও</span>
+            <div class="mb-5 border border-slate-700 p-3 rounded bg-slate-800/50">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-sm text-indigo-300 font-bold">অতিরিক্ত অডিও ট্র্যাক</span>
                     <input type="file" id="clip-audio-upload" accept="audio/*" class="hidden" onchange="addAudioToClip(event)">
-                    <button onclick="document.getElementById('clip-audio-upload').click()" class="bg-indigo-600 hover:bg-indigo-500 px-2 py-1 rounded text-[10px] font-bold">+ অডিও</button>
+                    <button onclick="document.getElementById('clip-audio-upload').click()" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded text-xs font-bold shadow-lg">+ অডিও যোগ</button>
                 </div>
-                <div id="clip-audio-list" class="space-y-1"></div>
+                <div id="clip-audio-list" class="space-y-2"></div>
             </div>
 
-            <button onclick="document.getElementById('text-tools').classList.toggle('hidden')" class="w-full bg-pink-600 hover:bg-pink-500 rounded p-1.5 text-white text-xs font-bold flex items-center justify-center gap-1 mb-2">
-                <i data-lucide="type" class="w-3 h-3"></i> লেখা যোগ করুন
-            </button>
+            <div class="w-full bg-pink-900/30 border border-pink-700/50 rounded p-2 text-pink-300 text-sm font-bold flex items-center justify-center gap-2 mb-3">
+                <i data-lucide="type" class="w-4 h-4"></i> লেখা (Text) সেটিংস
+            </div>
 
-            <div id="text-tools" class="hidden bg-slate-800 p-2 rounded border border-slate-600 space-y-2 mb-2">
-                <input type="text" id="overlay-text" placeholder="লেখা লিখুন..." class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-white text-xs">
-                <div class="grid grid-cols-4 gap-2">
-                    <div><label class="text-[9px] text-slate-400 block">সাইজ</label><input type="number" id="txt-size" value="60" class="w-full bg-slate-900 border rounded p-1 text-white text-xs"></div>
-                    <div><label class="text-[9px] text-slate-400 block">রঙ</label><input type="color" id="txt-color" value="#ffffff" class="w-full h-6 rounded cursor-pointer p-0 border-0"></div>
-                    <div><label class="text-[9px] text-slate-400 block">ব্যাকগ্রাউন্ড</label><div class="flex items-center gap-1"><input type="checkbox" id="txt-bg-enable" checked class="w-3 h-3"><input type="color" id="txt-bg-color" value="#000000" class="w-full h-6 rounded cursor-pointer p-0 border-0"></div></div>
-                    <div><label class="text-[9px] text-slate-400 block">স্টাইল</label><select id="txt-style" class="w-full bg-slate-900 border rounded p-1 text-white text-xs"><option value="bold">Bold</option><option value="normal">Normal</option></select></div>
+            <div id="text-tools" class="bg-slate-800 p-4 rounded border border-slate-600 space-y-4 mb-4">
+                <input type="text" id="overlay-text" placeholder="এখানে লেখা লিখুন..." class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white text-base shadow-inner focus:border-sky-500 focus:outline-none">
+                
+                <div class="grid grid-cols-4 gap-3">
+                    <div><label class="text-xs text-slate-400 block mb-1">সাইজ</label><input type="number" id="txt-size" value="60" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm"></div>
+                    <div><label class="text-xs text-slate-400 block mb-1">রঙ</label><input type="color" id="txt-color" value="#ffffff" class="w-full h-9 rounded cursor-pointer p-0 border-0"></div>
+                    <div><label class="text-xs text-slate-400 block mb-1">ব্যাকগ্রাউন্ড</label><div class="flex items-center gap-2"><input type="checkbox" id="txt-bg-enable" checked class="w-4 h-4"><input type="color" id="txt-bg-color" value="#000000" class="w-full h-9 rounded cursor-pointer p-0 border-0"></div></div>
+                    <div><label class="text-xs text-slate-400 block mb-1">স্টাইল</label><select id="txt-style" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm"><option value="bold">Bold</option><option value="normal">Normal</option></select></div>
                 </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div><label class="text-[9px] text-slate-400 block">লেখা শুরু (সেকেন্ড)</label><input type="number" id="txt-start" value="0" step="0.5" class="w-full bg-slate-900 border rounded p-1 text-white text-xs"></div>
-                    <div><label class="text-[9px] text-slate-400 block">লেখা শেষ (সেকেন্ড)</label><input type="number" id="txt-end" value="3" step="0.5" class="w-full bg-slate-900 border rounded p-1 text-white text-xs"></div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-xs text-slate-400 block mb-1">লেখা শুরু (সেকেন্ড)</label><input type="number" id="txt-start" value="0" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm"></div>
+                    <div><label class="text-xs text-slate-400 block mb-1">লেখা শেষ (সেকেন্ড)</label><input type="number" id="txt-end" value="3" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm"></div>
                 </div>
-                <button onclick="addTextToClip()" class="w-full bg-blue-600 py-1.5 rounded text-xs font-bold mt-1">যুক্ত করুন</button>
+                
+                <button onclick="addTextToClip()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded text-sm font-bold shadow-lg transition">ক্লিপে যুক্ত করুন</button>
             </div>
         </div>
 
-        <div class="p-2 bg-slate-800 border-t border-slate-700 flex justify-center gap-4 flex-shrink-0">
+        <div class="p-4 bg-slate-800 border-t border-slate-700 flex justify-center gap-6 flex-shrink-0 relative z-20 mt-auto">
             <input type="file" id="media-upload" accept="video/*, image/*" multiple class="hidden" onchange="loadMedia(event)">
             <input type="file" id="bgm-upload" accept="audio/*" class="hidden" onchange="loadBGM(event)">
             
-            <button onclick="document.getElementById('media-upload').click()" class="tool-btn w-16"><i data-lucide="image-plus" class="w-5 h-5 text-sky-400"></i> মিডিয়া</button>
-            <button onclick="document.getElementById('bgm-upload').click()" class="tool-btn w-16 relative"><i data-lucide="music" class="w-5 h-5 text-indigo-400"></i> BGM <span id="bgm-dot" class="hidden absolute top-1 right-2 w-2 h-2 bg-green-500 rounded-full"></span></button>
-            <button onclick="clearAll()" class="tool-btn w-16 bg-red-900/30 hover:bg-red-800/50"><i data-lucide="trash-2" class="w-5 h-5 text-red-400"></i> রিসেট</button>
+            <button onclick="document.getElementById('media-upload').click()" class="tool-btn flex-1 max-w-[100px]"><i data-lucide="image-plus" class="w-6 h-6 text-sky-400"></i> মিডিয়া</button>
+            <button onclick="document.getElementById('bgm-upload').click()" class="tool-btn flex-1 max-w-[100px] relative"><i data-lucide="music" class="w-6 h-6 text-indigo-400"></i> BGM <span id="bgm-dot" class="hidden absolute top-2 right-3 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-800"></span></button>
+            <button onclick="clearAll()" class="tool-btn flex-1 max-w-[100px] bg-red-900/30 hover:bg-red-800/50"><i data-lucide="trash-2" class="w-6 h-6 text-red-400"></i> রিসেট</button>
         </div>
 
         <div id="project-modal" class="modal">
-            <div class="bg-slate-800 p-5 rounded-xl w-full max-w-sm mx-auto shadow-2xl">
-                <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-sky-400">প্রজেক্টসমূহ</h2><button onclick="closeProjectManager()" class="text-slate-400"><i data-lucide="x"></i></button></div>
-                <div id="project-list" class="space-y-2 mb-4 max-h-48 overflow-y-auto custom-scroll"></div>
-                <div class="flex gap-2"><button onclick="createNewProject()" class="flex-1 bg-blue-600 py-2 rounded font-bold text-sm">নতুন</button><button onclick="saveCurrentProject()" class="flex-1 bg-emerald-600 py-2 rounded font-bold text-sm">সেভ করুন</button></div>
+            <div class="bg-slate-800 p-6 rounded-xl w-full max-w-sm mx-auto shadow-2xl">
+                <div class="flex justify-between items-center mb-5"><h2 class="text-2xl font-bold text-sky-400">প্রজেক্টসমূহ</h2><button onclick="closeProjectManager()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+                <div id="project-list" class="space-y-3 mb-5 max-h-56 overflow-y-auto custom-scroll"></div>
+                <div class="flex gap-3"><button onclick="createNewProject()" class="flex-1 bg-blue-600 py-2.5 rounded font-bold text-base">নতুন</button><button onclick="saveCurrentProject()" class="flex-1 bg-emerald-600 py-2.5 rounded font-bold text-base">সেভ করুন</button></div>
             </div>
         </div>
     </div>
@@ -200,7 +204,7 @@
         
         let mediaRecorder; let recordedChunks = []; let isRecording = false;
 
-        function showWarning(message, duration = 4000) {
+        function showWarning(message, duration = 5000) {
             const toast = document.getElementById('warning-toast');
             document.getElementById('toast-msg').innerText = message;
             toast.style.display = 'block'; setTimeout(() => toast.style.display = 'none', duration);
@@ -256,7 +260,7 @@
             const el = new Audio(src); el.loop = true; connectToMixer(el);
             bgmAudioObj = { file, src, el }; document.getElementById('bgm-dot').classList.remove('hidden');
             if(isPlaying) el.play().catch(()=>{});
-            showWarning("BGM যুক্ত হয়েছে!"); triggerAutoSave();
+            showWarning("BGM যুক্ত হয়েছে!"); triggerAutoSave();
         }
 
         function addAudioToClip(e) {
@@ -279,15 +283,15 @@
 
         function renderClipAudios() {
             const list = document.getElementById('clip-audio-list'); list.innerHTML = '';
-            if(!activeMediaItem || activeMediaItem.audios.length === 0) { list.innerHTML = `<p class="text-[9px] text-slate-500">কোনো অডিও নেই</p>`; return; }
+            if(!activeMediaItem || activeMediaItem.audios.length === 0) { list.innerHTML = `<p class="text-xs text-slate-500">কোনো অডিও নেই</p>`; return; }
             activeMediaItem.audios.forEach((a, i) => {
                 list.innerHTML += `
-                <div class="flex items-center gap-1 bg-slate-900 p-1 rounded border border-slate-700 text-[10px]">
-                    <span class="text-indigo-400 font-bold truncate w-12">Track ${i+1}</span>
-                    <input type="number" value="${a.start}" step="0.5" class="w-10 bg-slate-800 p-0.5 rounded text-white" onchange="updateClipAudioTiming(${a.id}, this.value, ${a.end})"> 
+                <div class="flex items-center gap-2 bg-slate-900 p-2 rounded border border-slate-700 text-sm">
+                    <span class="text-indigo-400 font-bold truncate w-16">Track ${i+1}</span>
+                    <input type="number" value="${a.start}" step="0.5" class="w-16 bg-slate-800 p-1.5 rounded text-white" onchange="updateClipAudioTiming(${a.id}, this.value, ${a.end})"> 
                     <span class="text-slate-500">-</span>
-                    <input type="number" value="${a.end}" step="0.5" class="w-10 bg-slate-800 p-0.5 rounded text-white" onchange="updateClipAudioTiming(${a.id}, ${a.start}, this.value)">
-                    <button onclick="deleteClipAudio(${a.id})" class="text-red-400 ml-auto"><i data-lucide="x" class="w-3 h-3"></i></button>
+                    <input type="number" value="${a.end}" step="0.5" class="w-16 bg-slate-800 p-1.5 rounded text-white" onchange="updateClipAudioTiming(${a.id}, ${a.start}, this.value)">
+                    <button onclick="deleteClipAudio(${a.id})" class="text-red-400 ml-auto p-2 hover:bg-red-900/30 rounded"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>`;
             });
             lucide.createIcons();
@@ -308,11 +312,11 @@
 
         function renderProjectList() {
             const list = document.getElementById('project-list'); list.innerHTML = '';
-            if(projectMetaList.length === 0) { list.innerHTML = '<p class="text-xs text-slate-400 text-center">সেভ করা প্রজেক্ট নেই</p>'; return; }
+            if(projectMetaList.length === 0) { list.innerHTML = '<p class="text-sm text-slate-400 text-center">সেভ করা প্রজেক্ট নেই</p>'; return; }
             projectMetaList.forEach(proj => {
-                list.innerHTML += `<div class="flex justify-between bg-slate-900 p-2 rounded mb-2">
-                    <div class="flex-1 cursor-pointer" onclick="openProject('${proj.id}')"><p class="text-sm font-bold text-white">${proj.name}</p></div>
-                    <button onclick="deleteProject('${proj.id}')" class="text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
+                list.innerHTML += `<div class="flex justify-between items-center bg-slate-900 p-3 rounded mb-2">
+                    <div class="flex-1 cursor-pointer" onclick="openProject('${proj.id}')"><p class="text-base font-bold text-white">${proj.name}</p></div>
+                    <button onclick="deleteProject('${proj.id}')" class="text-red-400 p-2 hover:bg-red-900/30 rounded"><i data-lucide="trash-2" class="w-5 h-5"></i></button></div>`;
             }); lucide.createIcons();
         }
 
@@ -333,7 +337,7 @@
             await localforage.setItem('proj_' + projId, projData);
             if(!projectMetaList.find(p => p.id === projId)) { projectMetaList.push({ id: projId, name: currentProjectName, date: projData.date }); await localforage.setItem('editor_meta_list', projectMetaList); }
             currentProjectId = projId; 
-            if(isAuto) setTimeout(() => document.getElementById('auto-save-badge').classList.add('hidden'), 1000); else { renderProjectList(); showWarning("সেভ হয়েছে!"); }
+            if(isAuto) setTimeout(() => document.getElementById('auto-save-badge').classList.add('hidden'), 1000); else { renderProjectList(); showWarning("সেভ হয়েছে!"); }
         }
         function saveCurrentProject() { saveProjectData(false); }
         function triggerAutoSave() { if(currentProjectId) { clearTimeout(autoSaveTimer); autoSaveTimer = setTimeout(()=>saveProjectData(true), 2000); } }
@@ -364,7 +368,11 @@
                 let item = { type: file.type.startsWith('video/') ? 'video':'image', rawFile: file, element: null, src: fileURL, trimStart: 0, trimEnd: 3, frame: 'none', isMuted: false, texts: [], audios: [] };
                 if (item.type === 'video') { 
                     item.element = document.createElement('video'); item.element.src = item.src; item.element.volume = 1; connectToMixer(item.element);
-                    item.element.onloadedmetadata = () => { item.trimEnd = item.element.duration > 15 ? 15 : item.element.duration; triggerAutoSave(); };
+                    item.element.onloadedmetadata = () => { 
+                        item.trimEnd = item.element.duration > 15 ? 15 : item.element.duration; 
+                        if (item.element.duration > 300) { showWarning("ভিডিওটি ৫ মিনিটের বড়, তবে আপনি কাজ চালিয়ে যেতে পারবেন।", 6000); }
+                        triggerAutoSave(); 
+                    };
                 } else { item.element = new Image(); item.element.src = item.src; }
                 playlist.push(item);
             }
@@ -375,7 +383,7 @@
         function updateClipTiming() {
             if(!activeMediaItem) return;
             let start = parseFloat(document.getElementById('clip-start').value); let end = parseFloat(document.getElementById('clip-end').value);
-            if(start >= end) { showWarning("শুরুর সময় ছোট হতে হবে!"); return; }
+            if(start >= end) { showWarning("শুরুর সময় ছোট হতে হবে!"); return; }
             activeMediaItem.trimStart = start; activeMediaItem.trimEnd = end;
             if(activeMediaItem.type === 'video') activeMediaItem.element.currentTime = start;
             triggerAutoSave();
@@ -385,7 +393,7 @@
         function addTextToClip() {
             if(!activeMediaItem) return; const text = document.getElementById('overlay-text').value.trim(); if(!text) return;
             activeMediaItem.texts.push({ text: text, size: parseInt(document.getElementById('txt-size').value), color: document.getElementById('txt-color').value, bgEnable: document.getElementById('txt-bg-enable').checked, bgColor: document.getElementById('txt-bg-color').value, style: document.getElementById('txt-style').value, start: parseFloat(document.getElementById('txt-start').value), end: parseFloat(document.getElementById('txt-end').value), x: canvas.width / 2, y: canvas.height / 2 });
-            document.getElementById('overlay-text').value = ''; document.getElementById('text-tools').classList.add('hidden'); triggerAutoSave();
+            document.getElementById('overlay-text').value = ''; triggerAutoSave(); showWarning("লেখা ক্যানভাসে যুক্ত হয়েছে!");
         }
 
         function render() {
@@ -468,6 +476,9 @@
             else { muteContainer.classList.add('hidden'); }
 
             if (activeMediaItem.type === 'video') { activeMediaItem.element.currentTime = activeMediaItem.trimStart; if(isPlaying) activeMediaItem.element.play().catch(()=>{}); } 
+            
+            // স্ক্রল করে প্যানেলটি কিছুটা ভিউতে আনা
+            setTimeout(() => { document.getElementById('clip-editor-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100);
         }
 
         function deleteActiveClip() { if(currentPlayIndex===-1)return; playlist.splice(currentPlayIndex,1); currentPlayIndex=-1; activeMediaItem=null; renderTimelineUI(); document.getElementById('clip-editor-panel').classList.remove('active'); triggerAutoSave();}
@@ -496,7 +507,7 @@
             mediaRecorder.onstop = () => {
                 const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(recordedChunks, {type:opt.mimeType}));
                 a.download = `Chakra-Pro-Video.${opt.mimeType.includes('mp4')?'mp4':'webm'}`; a.click(); isRecording = false;
-                document.getElementById('recording-badge').classList.add('hidden'); document.getElementById('download-btn').innerHTML = `<i data-lucide="download" class="w-3 h-3"></i> এক্সপোর্ট`;
+                document.getElementById('recording-badge').classList.add('hidden'); document.getElementById('download-btn').innerHTML = `<i data-lucide="download" class="w-4 h-4"></i> এক্সপোর্ট`;
                 selectClip(0);
             };
             document.getElementById('recording-badge').classList.remove('hidden'); document.getElementById('download-btn').innerHTML = `রেকর্ডিং...`;
