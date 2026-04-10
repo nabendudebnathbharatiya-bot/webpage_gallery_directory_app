@@ -66,3 +66,14 @@ Tags: Tailwind CSS, HTML,JS
 Thumbnail:social-media-tool/IMG.jpg
 Demo: social-media-tool/index.html
 File: pending
+
+---
+
+Title: chakradham patient data
+Description: চক্রধাম কসমিক হিলিং স্টেশন 
+Tags: Tailwind CSS, HTML,JS
+Thumbnail: patient-data/app-logo.jpg
+Demo: patient-data/index.html
+File: index.html | patient-data/index.html
+File: data.txt | patient-data/data.txt
+File: history.txt | patient-data/history.txt
