@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chakra EduPlayer - Ultimate Version</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Entry Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInLeft { from { transform: translateX(-50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideInUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideInDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes zoomIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        
+        /* Exit Animations */
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(50px); opacity: 0; } }
+        @keyframes zoomOut { from { transform: scale(1); opacity: 1; } to { transform: scale(0.5); opacity: 0; } }
+
+        /* Animation Classes */
+        .anim-fade { animation: fadeIn 1s ease-out forwards; }
+        .anim-slide-left { animation: slideInLeft 1s ease-out forwards; }
+        .anim-slide-up { animation: slideInUp 1s ease-out forwards; }
+        .anim-slide-down { animation: slideInDown 1s ease-out forwards; }
+        .anim-zoom { animation: zoomIn 1s ease-out forwards; }
+        .animate-heartbeat { animation: heartbeat 0.6s ease-in-out; }
+
+        /* Exit Animation Classes */
+        .anim-fade-out { animation: fadeOut 0.8s ease-in forwards !important; }
+        .anim-slide-out { animation: slideOutRight 0.8s ease-in forwards !important; }
+        .anim-zoom-out { animation: zoomOut 0.8s ease-in forwards !important; }
+        
+        input[type=range] { -webkit-appearance: none; background: transparent; cursor: pointer; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #14b8a6; margin-top: -5px; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 5px; background: rgba(255,255,255,0.3); border-radius: 3px; }
+
+        #toast-msg { transition: opacity 0.5s, transform 0.5s; }
+        select { background: rgba(0,0,0,0.5); color: white; border: 1px solid gray; border-radius: 4px; padding: 2px 5px; outline: none; cursor: pointer; }
+    </style>
+</head>
+<body class="bg-gray-950 flex items-center justify-center h-[100dvh] w-full m-0 overflow-hidden font-sans select-none">
+
+    <div id="toast-msg" class="fixed top-10 left-1/2 -translate-x-1/2 bg-teal-600 text-white px-6 py-3 rounded-full shadow-2xl z-[100] opacity-0 pointer-events-none transform -translate-y-5 font-bold text-sm md:text-base">
+        Message
+    </div>
+
+    <div id="player-container" class="relative w-full h-full sm:h-auto sm:max-h-[95vh] max-w-6xl sm:aspect-video bg-black shadow-2xl overflow-hidden sm:rounded-xl border-gray-800 sm:border group flex flex-col justify-center text-white">
+        
+        <div id="start-screen" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 z-50 px-4 text-center">
+            <h1 class="text-3xl md:text-5xl font-bold text-white mb-4">Chakra EduPlayer</h1>
+            <p id="loading-text" class="text-teal-400 mb-6 animate-pulse text-lg">ডেটা লোড হচ্ছে...</p>
+            <button id="start-btn" class="hidden w-20 h-20 md:w-24 md:h-24 bg-teal-600 rounded-full flex items-center justify-center hover:bg-teal-500 hover:scale-110 transition-all duration-300 shadow-[0_0_20px_rgba(13,148,136,0.6)]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 md:h-12 md:w-12 text-white ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </button>
+        </div>
+
+        <div id="slide-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-10 flex items-center justify-center"></div>
+
+        <div id="side-icons" class="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 flex flex-col gap-4 md:gap-5 z-40 hidden pointer-events-auto opacity-0 transition-opacity duration-300">
+            <button onclick="handleLike(event)" class="p-2 md:p-3 bg-black/50 hover:bg-black/80 rounded-full transition-colors group relative">
+                <svg id="icon-like" class="h-6 w-6 md:h-7 md:w-7 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.5l1.318-1.182a4.5 4.5 0 116.364 6.364L12 21.5l-7.682-7.682a4.5 4.5 0 010-6.364z" />
+                </svg>
+            </button>
+            <button onclick="handleShare()" class="p-2 md:p-3 bg-black/50 hover:bg-black/80 rounded-full transition text-white">
+                <svg class="h-6 w-6 md:h-7 md:w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342a8.962 8.962 0 01-1.092.939c-2.45 1.57-2.82 4.632-1.025 6.428.854.854 2.12.854 2.975 0l4.343-4.343a4.5 4.5 0 00-6.364-6.364l-1.092.939z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.316 10.658a8.962 8.962 0 011.092-.939c2.45-1.57 2.82-4.632 1.025-6.428-.854-.854-2.12-.854-2.975 0l-4.343 4.343a4.5 4.5 0 006.364 6.364l1.092-.939z" />
+                </svg>
+            </button>
+             <button onclick="handleWhatsApp()" class="p-2 md:p-3 bg-black/50 hover:bg-green-600/90 rounded-full transition text-white">
+                <svg class="h-6 w-6 md:h-7 md:w-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.385 0 12.031c0 2.147.565 4.248 1.635 6.105L.194 24l6.02-1.579A11.97 11.97 0 0012.031 24c6.645 0 12.031-5.385 12.031-12.031S18.676 0 12.031 0zm0 22.012a9.96 9.96 0 01-5.074-1.378l-.364-.216-3.773.99.998-3.68-.237-.377A9.968 9.968 0 012.07 12.031c0-5.503 4.478-9.981 9.981-9.981 5.503 0 9.981 4.478 9.981 9.981 0 5.503-4.478 9.981-9.981 9.981zm5.474-7.462c-.3-.15-1.774-.876-2.049-.977-.275-.1-.475-.15-.675.15-.2.3-.775.977-.95 1.177-.175.2-.35.225-.65.075-1.313-.65-2.28-1.127-3.153-2.65-.175-.3-.02-.463.13-.613.135-.135.3-.35.45-.525.15-.175.2-.3.3-.5.1-.2.05-.375-.025-.525-.075-.15-.675-1.625-.925-2.225-.245-.588-.495-.508-.675-.518-.17-.008-.37-.013-.57-.013-.2 0-.525.075-.8.375-.275.3-1.05 1.025-1.05 2.5 0 1.475 1.075 2.9 1.225 3.1.15.2 2.125 3.25 5.15 4.55.725.313 1.288.5 1.725.638.725.225 1.388.188 1.913.113.588-.088 1.774-.725 2.024-1.425.25-.7.25-1.3.175-1.425-.075-.125-.275-.2-.575-.35z"/></svg>
+            </button>
+            <button onclick="handleHome()" class="p-2 md:p-3 bg-black/50 hover:bg-black/80 rounded-full transition text-white">
+                <svg class="h-6 w-6 md:h-7 md:w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+            </button>
+        </div>
+
+        <div id="controls-bar" class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black via-black/90 to-transparent pt-16 pb-4 md:pb-6 px-4 md:px-8 opacity-0 transition-opacity duration-500 z-40 hidden flex-col gap-3 pointer-events-none">
+            
+            <input type="range" id="progress-bar" class="w-full pointer-events-auto" value="0" min="0" max="100" step="0.1">
+            
+            <div class="flex items-center justify-between text-white mt-1 pointer-events-auto">
+                <div class="flex items-center gap-2 md:gap-4">
+                    <button id="prev-btn" class="p-1 hover:text-teal-400 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" /></svg>
+                    </button>
+                    <button id="play-pause-btn" class="p-1 hover:text-teal-400 transition">
+                        <svg id="icon-pause" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 md:h-10 md:w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <svg id="icon-play" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 md:h-10 md:w-10 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </button>
+                    <button id="next-btn" class="p-1 hover:text-teal-400 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+                    </button>
+                    
+                    <span id="time-display" class="text-xs md:text-sm font-mono opacity-80 ml-2">00:00 / 00:00</span>
+
+                    <div class="hidden sm:flex items-center gap-2 ml-2 group/vol">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+                        <input type="range" id="volume-bar" class="w-20 opacity-0 group-hover/vol:opacity-100 transition-opacity duration-300" value="100" min="0" max="100">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 md:gap-4">
+                    <select id="speed-control" class="text-xs md:text-sm">
+                        <option value="0.5">0.5x</option>
+                        <option value="1" selected>1x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2">2x</option>
+                    </select>
+                    <button id="fullscreen-btn" class="p-1 hover:text-teal-400 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-7 md:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Variables ---
+        let slideData = [];
+        let playerMode = 'auto';
+        let currentSlide = 0;
+        let isPlaying = false;
+        let slideTimeMs = 0;
+        let playInterval;
+        let currentMediaElements = [];
+        let idleTimeout;
+        let currentAudioObj = null;
+        let playbackSpeed = 1;
+
+        // Config variables
+        let likeMessage = "ধন্যবাদ লাইক করার জন্য!";
+        let shareText = "দেখুন এই চমৎকার শিক্ষামূলক ক্লাসটি!";
+        let shareLink = window.location.href;
+        let homeLink = "/";
+        let waNumber = "";
+
+        // Elements
+        const playerContainer = document.getElementById("player-container");
+        const slideCanvas = document.getElementById("slide-canvas");
+        const controlsBar = document.getElementById("controls-bar");
+        const sideIcons = document.getElementById("side-icons");
+        const timeDisplay = document.getElementById("time-display");
+        const progressBar = document.getElementById("progress-bar");
+        const playPauseBtn = document.getElementById("play-pause-btn");
+
+        // --- Utils ---
+        function getCacheBustedUrl(url) {
+            if (!url || url.includes('youtube.com') || url.includes('youtu.be') || url.startsWith('data:')) return url;
+            return `${url}${url.includes('?') ? '&' : '?'}v=${new Date().getTime()}`;
+        }
+        
+        function extractYouTubeId(url) {
+            if (!url) return null;
+            const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|live\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+            const match = url.match(regex);
+            return match ? match[1] : url; 
+        }
+
+        function formatTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById("toast-msg");
+            toast.innerText = msg;
+            toast.style.opacity = "1";
+            toast.style.transform = "translate(-50%, 0)";
+            setTimeout(() => { toast.style.opacity = "0"; toast.style.transform = "translate(-50%, -20px)"; }, 3000);
+        }
+
+        function triggerFireworkEmojis() {
+            const emojis = ['❤️', '⭐', '✨', '🎈', '🎉'];
+            const burstCount = 30; 
+
+            for (let i = 0; i < burstCount; i++) {
+                const em = document.createElement('div');
+                em.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                em.className = 'absolute pointer-events-none text-2xl md:text-3xl z-[60]';
+                
+                em.style.top = '10%';
+                em.style.left = '50%';
+                em.style.transform = 'translate(-50%, -50%)';
+                em.style.opacity = '1';
+                em.style.transition = 'transform 2s cubic-bezier(0.17, 0.84, 0.44, 1), opacity 2s ease-out';
+                
+                playerContainer.appendChild(em);
+
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * 250 + 50; 
+                const endX = Math.cos(angle) * radius;
+                const endY = Math.sin(angle) * radius + (Math.random() * 200); 
+
+                setTimeout(() => {
+                    em.style.transform = `translate(${endX}px, ${endY + 200}px) rotate(${Math.random() * 720 - 360}deg)`;
+                    em.style.opacity = '0';
+                }, 10);
+
+                setTimeout(() => em.remove(), 2100);
+            }
+        }
+
+        // Action Handlers
+        const likeIcon = document.getElementById('icon-like');
+        if(localStorage.getItem('liked_chakra_player')) { likeIcon.style.fill = '#ef4444'; likeIcon.classList.add('text-red-500'); }
+        
+        function handleLike(event) {
+            if(localStorage.getItem('liked_chakra_player')) { showToast("আপনি আগেই লাইক দিয়েছেন!"); return; }
+            localStorage.setItem('liked_chakra_player', 'true');
+            
+            likeIcon.classList.add('animate-heartbeat');
+            likeIcon.style.fill = '#ef4444';
+            likeIcon.classList.add('text-red-500');
+            
+            showToast(likeMessage); 
+            triggerFireworkEmojis(); 
+
+            setTimeout(() => likeIcon.classList.remove('animate-heartbeat'), 600);
+        }
+
+        function handleShare() { if(navigator.share) navigator.share({title: 'EduPlayer', text: shareText, url: shareLink}); else showToast('Share not supported.'); }
+        function handleWhatsApp() { if(waNumber) window.open(`https://wa.me/${waNumber}`); }
+        function handleHome() { window.location.href = homeLink; }
+
+        // --- Data Parser (UPDATED FOR SECONDS) ---
+        function parseTextData(text) {
+            const lines = text.split('\n');
+            let dataArr = [];
+            let currSlide = null;
+            let currElement = null;
+
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line || line.startsWith('-') || line.startsWith('=')) return;
+
+                if (line.startsWith('PlayerMode:')) playerMode = line.split(':')[1].trim().toLowerCase();
+                else if (line.startsWith('LikeMessage:')) likeMessage = line.substring(12).trim();
+                else if (line.startsWith('ShareText:')) shareText = line.substring(10).trim();
+                else if (line.startsWith('ShareLink:')) shareLink = line.substring(10).trim();
+                else if (line.startsWith('HomeLink:')) homeLink = line.substring(9).trim();
+                else if (line.startsWith('WhatsAppNumber:')) waNumber = line.substring(15).trim();
+
+                else if (line === '[Slide]' || line === '[AdSlide]') {
+                    currSlide = { isAd: line === '[AdSlide]', duration: 5000, skipTime: null, audio: null, layout: 'flex flex-col items-center justify-center w-full h-full p-4', elements: [] };
+                    dataArr.push(currSlide);
+                    currElement = null;
+                } 
+                // SECONDS LOGIC: All inputs like 60, 30 are parsed in seconds
+                else if (line.startsWith('Duration:')) { 
+                    const val = parseFloat(line.substring(9).trim());
+                    if (currElement) currElement.playduration = val;
+                    else if (currSlide) currSlide.duration = val * 1000; // Slide engine runs in MS
+                } 
+                else if (line.startsWith('Start:')) { 
+                    if (currElement) currElement.start = parseFloat(line.substring(6).trim()); 
+                }
+                else if (line.startsWith('SkipTime:')) { 
+                    if (currSlide) currSlide.skipTime = parseFloat(line.substring(9).trim()) * 1000; 
+                } 
+                else if (line.startsWith('ExitTime:')) { 
+                    if (currElement) currElement.exittime = parseFloat(line.substring(9).trim()) * 1000; 
+                }
+                else if (line.startsWith('Audio:')) { if (currSlide) currSlide.audio = getCacheBustedUrl(line.substring(6).trim()); } 
+                else if (line.startsWith('Layout:')) { if (currSlide) currSlide.layout = line.substring(7).trim(); } 
+                else if (line.startsWith('Element:')) {
+                    currElement = { type: line.substring(8).trim().toLowerCase() };
+                    if (currSlide) currSlide.elements.push(currElement);
+                } else if (currElement) {
+                    const colonIdx = line.indexOf(':');
+                    if (colonIdx > -1) {
+                        const key = line.substring(0, colonIdx).trim().toLowerCase();
+                        currElement[key] = line.substring(colonIdx + 1).trim();
+                    }
+                }
+            });
+            return dataArr;
+        }
+
+        // --- Init ---
+        window.addEventListener('load', () => {
+            fetch('data.txt?t=' + Date.now()).then(res => res.text()).then(text => {
+                slideData = parseTextData(text);
+                document.getElementById("loading-text").classList.add("hidden");
+                document.getElementById("start-btn").classList.remove("hidden");
+            }).catch(e => {
+                document.getElementById("loading-text").innerText = "Data file missing or error!";
+            });
+        });
+
+        document.getElementById("start-btn").addEventListener("click", () => {
+            document.getElementById("start-screen").style.display = "none";
+            controlsBar.classList.remove("hidden");
+            controlsBar.classList.add("flex");
+            sideIcons.classList.remove("hidden");
+            loadSlide(0);
+            playPresentation();
+        });
+
+        function handleAudio(newAudioUrl) {
+            const masterVol = document.getElementById("volume-bar").value / 100;
+            if (currentAudioObj) {
+                let oldAudio = currentAudioObj;
+                let vol = oldAudio.volume;
+                let fadeOut = setInterval(() => {
+                    vol -= 0.05;
+                    if(vol <= 0) { clearInterval(fadeOut); oldAudio.pause(); } else { oldAudio.volume = vol; }
+                }, 100);
+            }
+
+            if (newAudioUrl) {
+                currentAudioObj = new Audio(newAudioUrl);
+                currentAudioObj.playbackRate = playbackSpeed;
+                currentAudioObj.volume = 0;
+                if(isPlaying) currentAudioObj.play().catch(e => console.log(e));
+                
+                let vol = 0;
+                let fadeIn = setInterval(() => {
+                    vol += 0.05;
+                    if(vol >= masterVol) { clearInterval(fadeIn); currentAudioObj.volume = masterVol; } else { currentAudioObj.volume = vol; }
+                }, 100);
+            } else {
+                currentAudioObj = null;
+            }
+        }
+
+        window.restartPresentation = function() { currentSlide = 0; loadSlide(0); playPresentation(); }
+
+        // --- Load Slide ---
+        function loadSlide(index) {
+            slideTimeMs = 0;
+            progressBar.value = 0;
+            currentMediaElements = [];
+            slideCanvas.innerHTML = ""; 
+            currentSlide = index;
+            
+            if (index >= slideData.length) {
+                if (currentAudioObj) { currentAudioObj.pause(); currentAudioObj = null; }
+                slideCanvas.innerHTML = `
+                    <div class="flex flex-col items-center justify-center w-full h-full text-white anim-fade bg-gray-900 p-4 text-center z-50 pointer-events-auto">
+                        <h2 class="text-3xl md:text-5xl font-bold mb-8 text-teal-400">প্রেজেন্টেশন শেষ</h2>
+                        <button onclick="restartPresentation()" class="px-8 py-4 bg-teal-600 hover:bg-teal-500 rounded-full font-bold text-xl md:text-2xl flex items-center gap-3 transition-transform hover:scale-105 shadow-[0_0_20px_rgba(13,148,136,0.5)]">
+                            <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                            আবার দেখুন
+                        </button>
+                    </div>`;
+                pausePresentation();
+                timeDisplay.innerText = `00:00 / 00:00`;
+                return;
+            }
+
+            const slide = slideData[index];
+            handleAudio(slide.audio);
+            timeDisplay.innerText = `00:00 / ${formatTime(slide.duration)}`;
+
+            const slideWrapper = document.createElement("div");
+            slideWrapper.className = slide.layout + " absolute inset-0 z-10";
+
+            if (slide.isAd && slide.skipTime) {
+                const skipBtn = document.createElement("button");
+                skipBtn.id = "skip-ad-btn";
+                skipBtn.className = "absolute bottom-20 md:bottom-24 right-4 md:right-8 bg-gray-800/90 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-bold text-sm z-50 hidden anim-fade border border-gray-600 shadow-xl flex items-center gap-2 pointer-events-auto transition cursor-pointer";
+                skipBtn.innerHTML = `Skip Ad <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7" /></svg>`;
+                skipBtn.onclick = () => { progressBar.value = 100; goNext(); };
+                slideWrapper.appendChild(skipBtn);
+            }
+
+            slide.elements.forEach(el => {
+                const classes = `${el.class || el.style || ''} ${el.animation || 'anim-fade'} opacity-0`;
+                let domElement;
+                let srcVal = el.content || el.src || el.text || '';
+
+                if (el.type === "text") {
+                    domElement = document.createElement("div"); domElement.className = classes; domElement.innerHTML = srcVal;
+                } else if (el.type === "image") {
+                    domElement = document.createElement("img"); domElement.src = getCacheBustedUrl(srcVal); domElement.className = classes;
+                } else if (el.type === "video") {
+                    domElement = document.createElement("video"); 
+                    let srcString = getCacheBustedUrl(srcVal);
+                    // HTML5 Video Media Fragment
+                    if (el.start !== undefined || el.playduration !== undefined) {
+                        let s = el.start || 0;
+                        srcString += `#t=${s}`;
+                        if (el.playduration !== undefined) srcString += `,${s + el.playduration}`;
+                    }
+                    domElement.src = srcString;
+                    domElement.className = classes + " pointer-events-auto";
+                    domElement.volume = document.getElementById("volume-bar").value / 100;
+                    domElement.playbackRate = playbackSpeed;
+                    currentMediaElements.push({ type: 'video', el: domElement, data: el });
+                } else if (el.type === "youtube") {
+                    const videoId = extractYouTubeId(srcVal);
+                    domElement = document.createElement("iframe");
+                    
+                    // YouTube Start & End logic
+                    let ytParams = `enablejsapi=1&autoplay=1&controls=0&rel=0&playsinline=1`;
+                    if (el.start !== undefined) ytParams += `&start=${Math.floor(el.start)}`;
+                    if (el.playduration !== undefined) {
+                        let s = el.start || 0;
+                        ytParams += `&end=${Math.floor(s + el.playduration)}`;
+                    }
+
+                    domElement.src = `https://www.youtube.com/embed/${videoId}?${ytParams}`;
+                    domElement.className = classes + " pointer-events-auto border-0 w-full h-full max-h-[80%]";
+                    domElement.setAttribute("allow", "autoplay; encrypted-media");
+                    currentMediaElements.push({ type: 'youtube', el: domElement, data: el });
+                }
+                
+                if(domElement) {
+                    if (el.exittime) {
+                        domElement.setAttribute('data-exit-time', el.exittime);
+                        domElement.setAttribute('data-exit-anim', el.exitanimation || 'anim-fade-out');
+                        domElement.classList.add('track-exit'); 
+                    }
+                    slideWrapper.appendChild(domElement);
+                }
+            });
+
+            slideCanvas.appendChild(slideWrapper);
+        }
+
+        // --- Playback Controls ---
+        function playPresentation() {
+            if (currentSlide >= slideData.length) return;
+            isPlaying = true;
+            document.getElementById("icon-play").classList.add("hidden");
+            document.getElementById("icon-pause").classList.remove("hidden");
+
+            if (currentAudioObj) currentAudioObj.play().catch(e=>console.log(e));
+
+            currentMediaElements.forEach(media => {
+                if(media.type === 'video') media.el.play().catch(e=>console.log(e));
+                if(media.type === 'youtube') {
+                    media.el.contentWindow.postMessage(JSON.stringify({event: "command", func: "playVideo", args: []}), '*');
+                    media.el.contentWindow.postMessage(JSON.stringify({event: "command", func: "setPlaybackRate", args: [playbackSpeed]}), '*');
+                }
+            });
+
+            clearInterval(playInterval);
+            playInterval = setInterval(() => {
+                if(!isPlaying) return;
+                const slide = slideData[currentSlide];
+                if(!slide) return;
+
+                slideTimeMs += (100 * playbackSpeed);
+                progressBar.value = (slideTimeMs / slide.duration) * 100;
+                timeDisplay.innerText = `${formatTime(slideTimeMs)} / ${formatTime(slide.duration)}`;
+
+                if (slide.isAd && slide.skipTime && slideTimeMs >= slide.skipTime) {
+                    const skipBtn = document.getElementById("skip-ad-btn");
+                    if(skipBtn && skipBtn.classList.contains("hidden")) skipBtn.classList.remove("hidden");
+                }
+                
+                const exitableElements = document.querySelectorAll('.track-exit:not(.has-exited)');
+                exitableElements.forEach(el => {
+                    const exitTime = parseInt(el.getAttribute('data-exit-time'));
+                    if (slideTimeMs >= exitTime) {
+                        el.classList.add('has-exited'); 
+                        const exitAnim = el.getAttribute('data-exit-anim');
+                        
+                        el.style.animation = 'none'; 
+                        void el.offsetWidth; 
+                        el.style.animation = null; 
+                        el.classList.add(exitAnim);
+
+                        if (el.tagName === 'VIDEO') el.pause();
+                        if (el.tagName === 'IFRAME') el.contentWindow.postMessage(JSON.stringify({event: "command", func: "pauseVideo", args: []}), '*');
+                    }
+                });
+
+                if (slideTimeMs >= slide.duration) {
+                    if (playerMode === 'auto') goNext();
+                    else { progressBar.value = 100; pausePresentation(); }
+                }
+            }, 100);
+        }
+
+        function pausePresentation() {
+            isPlaying = false;
+            document.getElementById("icon-pause").classList.add("hidden");
+            document.getElementById("icon-play").classList.remove("hidden");
+            clearInterval(playInterval);
+
+            if (currentAudioObj) currentAudioObj.pause();
+            currentMediaElements.forEach(media => {
+                if(media.type === 'video') media.el.pause();
+                if(media.type === 'youtube') media.el.contentWindow.postMessage(JSON.stringify({event: "command", func: "pauseVideo", args: []}), '*');
+            });
+        }
+
+        function goNext() { if(currentSlide < slideData.length - 1) { loadSlide(currentSlide + 1); if(isPlaying || playerMode === 'auto') playPresentation(); } else { loadSlide(currentSlide + 1); } }
+        function goPrev() { if(currentSlide > 0) { loadSlide(currentSlide - 1); if(isPlaying || playerMode === 'auto') playPresentation(); } }
+        
+        playPauseBtn.addEventListener("click", () => isPlaying ? pausePresentation() : playPresentation());
+        document.getElementById("next-btn").addEventListener("click", goNext);
+        document.getElementById("prev-btn").addEventListener("click", goPrev);
+
+        // Settings Listeners
+        progressBar.addEventListener("input", (e) => {
+            if(!slideData[currentSlide]) return;
+            slideTimeMs = (e.target.value / 100) * slideData[currentSlide].duration;
+            timeDisplay.innerText = `${formatTime(slideTimeMs)} / ${formatTime(slideData[currentSlide].duration)}`;
+            
+            if(currentAudioObj) currentAudioObj.currentTime = slideTimeMs / 1000;
+            
+            currentMediaElements.forEach(media => {
+                const targetTime = slideTimeMs / 1000;
+                let mediaTarget = targetTime;
+                if (media.data && media.data.start) mediaTarget += media.data.start; // Sync logic with new Start time
+                
+                if(media.type === 'video') media.el.currentTime = mediaTarget;
+                if(media.type === 'youtube') media.el.contentWindow.postMessage(JSON.stringify({event: "command", func: "seekTo", args:[mediaTarget, true]}), '*');
+            });
+            
+            if (slideData[currentSlide].isAd && slideData[currentSlide].skipTime) {
+                const skipBtn = document.getElementById("skip-ad-btn");
+                if (slideTimeMs >= slideData[currentSlide].skipTime) skipBtn?.classList.remove("hidden");
+                else skipBtn?.classList.add("hidden");
+            }
+        });
+
+        document.getElementById("volume-bar").addEventListener("input", (e) => {
+            const vol = e.target.value / 100;
+            if (currentAudioObj) currentAudioObj.volume = vol;
+            currentMediaElements.forEach(media => {
+                if(media.type === 'video') media.el.volume = vol;
+                if(media.type === 'youtube') media.el.contentWindow.postMessage(JSON.stringify({event: "command", func: "setVolume", args:[vol * 100]}), '*');
+            });
+        });
+
+        document.getElementById("speed-control").addEventListener("change", (e) => {
+            playbackSpeed = parseFloat(e.target.value);
+            if (currentAudioObj) currentAudioObj.playbackRate = playbackSpeed;
+            currentMediaElements.forEach(media => {
+                if(media.type === 'video') media.el.playbackRate = playbackSpeed;
+                if(media.type === 'youtube') media.el.contentWindow.postMessage(JSON.stringify({event: "command", func: "setPlaybackRate", args: [playbackSpeed]}), '*');
+            });
+        });
+
+        document.getElementById("fullscreen-btn").addEventListener("click", () => {
+            if (!document.fullscreenElement) {
+                if(playerContainer.requestFullscreen) playerContainer.requestFullscreen();
+                else if(playerContainer.webkitRequestFullscreen) playerContainer.webkitRequestFullscreen();
+            } else { 
+                if(document.exitFullscreen) document.exitFullscreen();
+                else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+            }
+        });
+
+        // Idle UI hide/show
+        function showControls() {
+            controlsBar.classList.remove("opacity-0");
+            sideIcons.classList.remove("opacity-0");
+            playerContainer.style.cursor = "default";
+            clearTimeout(idleTimeout);
+            idleTimeout = setTimeout(() => {
+                if(isPlaying) {
+                    controlsBar.classList.add("opacity-0");
+                    sideIcons.classList.add("opacity-0");
+                    playerContainer.style.cursor = "none";
+                }
+            }, 3000);
+        }
+
+        playerContainer.addEventListener("mousemove", showControls);
+        playerContainer.addEventListener("touchstart", showControls);
+        playerContainer.addEventListener("click", showControls);
+        playerContainer.addEventListener("mouseleave", () => { if(isPlaying){ controlsBar.classList.add("opacity-0"); sideIcons.classList.add("opacity-0"); } });
+    </script>
+</body>
+</html>
