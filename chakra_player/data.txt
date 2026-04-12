@@ -1,0 +1,633 @@
+PlayerMode: auto
+LikeMessage: আশা জীর প্রতি শ্রদ্ধাজ্ঞাপন করার জন্য ধন্যবাদ!
+ShareText: সুরসম্রাজ্ঞী আশা ভোঁসলের অমর সৃষ্টি ও জীবনকাহিনী ফিরে দেখুন...
+ShareLink: https://yourwebsite.com/asha-tribute
+
+[Slide]
+Duration: 15
+Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gradient-to-b from-gray-950 to-black
+Element: video
+Content: asha.mp3
+Start: 1
+PlayDuration: 15
+Class: opacity-0 absolute w-0 h-0
+Element: text
+Content: <h1 class="text-3xl font-bold text-white">গানেই আমি বেঁচে থাকবো</h1>
+Start: 2
+Element: text
+Content: <h1 class="text-4xl font-extrabold text-white mb-4 drop-shadow-md leading-tight">সুরের আকাশে<br><span class="text-teal-400">নক্ষত্রপতন</span></h1>
+Class: z-20
+Animation: anim-slide-down
+Element: text
+Content: <p class="text-2xl text-gray-300 font-medium">আশা ভোঁসলে</p><p class="text-lg text-gray-500 mt-2">(৮ সেপ্টেম্বর ১৯৩৩ - অনন্তকাল)</p>
+Class: mt-4 z-20
+Animation: anim-fade
+Start: 2
+Element: text
+Content: <p class="mt-8 text-sm text-gray-400 italic">তাঁর অমর স্মৃতির উদ্দেশ্যে ৩০টি অধ্যায়...</p>
+Class: z-20
+Animation: anim-slide-up
+Start: 5
+
+[Slide]
+Duration: 15
+Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-900
+Element: youtube
+Content:https://youtu.be/Gh5ttePuK08?si=Y8_n3h7pFxzWE_-A
+Start: 5
+PlayDuration: 15
+Class: opacity-0 absolute w-0 h-0
+Element: text
+Content: <h2 class="text-2xl text-teal-300 font-bold mb-4">১. সাঙ্গীতিক পরিবারে জন্ম</h2>
+Class: z-20 w-full
+Animation: anim-zoom
+Element: text
+Content: <p class="text-lg text-white leading-relaxed text-justify">১৯৩৩ সালের ৮ সেপ্টেম্বর মহারাষ্ট্রের এক সাঙ্গীতিক পরিবারে জন্ম। পিতা পণ্ডিত দীনানাথ মঙ্গেশকরের হাত ধরেই সঙ্গীতে হাতেখড়ি। লতা, ঊষা, মীনা এবং হৃদয়নাথের সাথেই তাঁর বেড়ে ওঠা।</p>
+Class: z-20 mt-4
+Animation: anim-slide-up
+Start: 2
+
+[Slide]
+Duration: 35
+Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
+Element: text
+Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">২. প্রথম গাওয়া গান</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: youtube
+Content: https://www.youtube.com/watch?v=YplYY4Tv0mY
+Start: 25
+PlayDuration: 30
+Class: w-full max-w-md h-[45vh] rounded-xl shadow-[0_0_15px_rgba(20,184,166,0.3)] border-2 border-teal-900
+Animation: anim-zoom
+Start: 2
+Element: text
+Content: <p class="text-white mt-4 text-lg italic">"চলা চলা নব বালা" (মারাঠি ছবি: মাঝা বাল - ১৯৪৩)</p>
+Class: z-20
+Animation: anim-fade
+Start: 4
+
+[Slide]
+Duration: 15
+Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gradient-to-t from-gray-900 to-black
+Element: youtube
+Content: https://www.youtube.com/watch?v=_k1x-2c5H00
+Start: 10
+PlayDuration: 15
+Class: opacity-0 absolute w-0 h-0
+Element: text
+Content: <h2 class="text-2xl text-teal-300 font-bold mb-4">৩. সংগ্রামের দিনগুলি</h2>
+Class: z-20 w-full
+Animation: anim-zoom
+Element: text
+Content: <p class="text-lg text-white leading-relaxed text-justify">১৯৫০-এর দশকে বলিউডে গীতা দত্ত এবং লতা মঙ্গেশকরের রাজত্ব। আশা তখন শুধু বি-গ্রেড সিনেমা, ভ্যাম্প বা ক্যাবারে ডান্সের গান পেতেন। কিন্তু হাল ছাড়েননি।</p>
+Class: z-20 mt-4
+Animation: anim-slide-up
+Start: 2
+
+[Slide]
+Duration: 65
+Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
+Element: text
+Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">৪. শুরুর দিকের একটি অমূল্য রত্ন</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: youtube
+Content: https://youtu.be/Y2XXeon6Vo4?si=bzfWUjJN0vnG8mtM
+Start: 30
+PlayDuration: 60
+Class: w-full max-w-md h-[45vh] rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.2)]
+Animation: anim-fade
+Start: 2
+Element: text
+Content: <p class="text-white mt-4 text-lg italic">"ইনা মিনা ডিকা..." (আশা ভোঁসলে ভার্সন)</p>
+Class: z-20
+Animation: anim-slide-up
+Start: 4
+
+[Slide]
+Duration: 15
+Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-900
+Element: youtube
+Content: https://www.youtube.com/watch?v=Ew3i-G28b7Y
+Start: 5
+PlayDuration: 15
+Class: opacity-0 absolute w-0 h-0
+Element: text
+Content: <h2 class="text-2xl text-teal-300 font-bold mb-4">৫. ও. পি. নাইয়ার ম্যাজিক</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: text
+Content: <p class="text-lg text-white leading-relaxed text-justify">সুরকার ও. পি. নাইয়ার প্রথম আবিষ্কার করেন আশার কণ্ঠের জাদু। তাঁর সুরেই আশা হয়ে ওঠেন বলিউডের নতুন সেনসেশন।</p>
+Class: z-20 mt-4
+Animation: anim-fade
+Start: 2
+
+[Slide]
+Duration: 35
+Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
+Element: text
+Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">৬. আইয়ে মেহেরবাঁ...</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: youtube
+Content: https://youtube.com/shorts/GqrXyIgGkP4?si=VO2vDGYx0GZmmKhw
+Start: 2
+PlayDuration: 25
+Class: w-full max-w-md h-[45vh] rounded-xl shadow-[0_0_15px_rgba(20,184,166,0.3)]
+Animation: anim-zoom
+Start: 2
+Element: text
+Content: <p class="text-white mt-4 text-lg italic">মধুবালা এবং আশার আইকনিক কম্বিনেশন...</p>
+Class: z-20
+Animation: anim-fade
+Start: 4
+
+[Slide]
+Duration: 15
+Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gradient-to-t from-gray-900 to-black
+Element: youtube
+Content: https://www.youtube.com/watch?v=tT_I5wRk8O8
+Start: 10
+PlayDuration: 15
+Class: opacity-0 absolute w-0 h-0
+Element: text
+Content: <h2 class="text-2xl text-teal-300 font-bold mb-4">৭. আর. ডি. বর্মনের সাথে স্বর্ণযুগ</h2>
+Class: z-20 w-full
+Animation: anim-zoom
+Element: text
+Content: <p class="text-lg text-white leading-relaxed text-justify">রাহুল দেব বর্মন (পঞ্চম দা) এবং আশা ভোঁসলে জুটি বলিউডের মিউজিকের ধারা বদলে দেন। পরবর্তীতে তাঁরা বিবাহবন্ধনে আবদ্ধ হন।</p>
+Class: z-20 mt-4
+Animation: anim-slide-up
+Start: 2
+
+[Slide]
+Duration: 15
+Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-950
+Element: youtube
+Content: https://www.youtube.com/watch?v=cDyazrwoC6A
+Start: 10
+PlayDuration: 15
+Class: opacity-0 absolute w-0 h-0
+Element: text
+Content: <h2 class="text-2xl text-teal-300 font-bold mb-4">৮. ক্যাবারে কুইন হেলেন ও আশা</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: text
+Content: <p class="text-lg text-white leading-relaxed text-justify">হেলেনের নাচ আর আশার গলা— এই জুটি বলিউডের বক্স অফিস কাঁপিয়ে দিয়েছিল।</p>
+Class: z-20 mt-4
+Animation: anim-fade
+Start: 2
+
+[Slide]
+Duration: 42
+Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
+Element: text
+Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">৯. হেলেন ম্যাজিক</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: youtube
+Content: https://youtube.com/shorts/zamOHgvcrhc?si=4QotIYieqYdudvK2
+Start: 1
+PlayDuration: 35
+Class: w-full max-w-md h-[45vh] rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.2)]
+Animation: anim-zoom
+Start: 2
+Element: text
+Content: <p class="text-white mt-4 text-lg italic">"পিয়া তু অব তো আজা..."</p>
+Class: z-20
+Animation: anim-fade
+Start: 4
+
+[Slide]
+Duration: 15
+Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-900
+Element: video
+Content:Element: video
+Content: asha.mp3
+Start: 10
+PlayDuration: 15
+Class: opacity-0 absolute w-0 h-0
+Element: text
+Content: <h2 class="text-2xl text-teal-300 font-bold mb-4">১০. লতা ও আশার বোনকাহিনি</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: text
+Content: <p class="text-lg text-white leading-relaxed text-justify">মিডিয়া সবসময় দুই বোনের মধ্যে লড়াইয়ের কথা বললেও, তাঁরা ছিলেন একে অপরের পরিপূরক। দুজনে মিলে গেয়েছেন বহু কালজয়ী ডুয়েট।</p>
+Class: z-20 mt-4
+Animation: anim-fade
+Start: 2
+
+[Slide]
+Duration: 42
+Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
+Element: text
+Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">১১. দুই কিংবদন্তির ডুয়েট</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: youtube
+Content: https://youtube.com/shorts/tYSFaqwOouU?si=kJ7BzlhzsVa5ZgkN
+Start: 1
+PlayDuration: 35
+Class: w-full max-w-md h-[45vh] rounded-xl shadow-[0_0_15px_rgba(20,184,166,0.3)]
+Animation: anim-fade
+Start: 2
+Element: text
+Content: <p class="text-white mt-4 text-lg italic">"ম্যায় চলি ম্যায় চলি..." (লতা ও আশা)</p>
+Class: z-20
+Animation: anim-slide-up
+Start: 4
+
+
+[Slide]
+Duration: 15
+Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gradient-to-t from-gray-900 to-black
+Element: video
+Content: asha.mp3
+Start: 30
+PlayDuration: 15
+Class: opacity-0 absolute w-0 h-0
+Element: text
+Content: <h2 class="text-2xl text-teal-300 font-bold mb-4">১২. গজল সম্রাজ্ঞী: উমরাও জান</h2>
+Class: z-20 w-full
+Animation: anim-zoom
+Element: text
+Content: <p class="text-lg text-white leading-relaxed text-justify">১৯৮১ সালে খৈয়ামের সুরে 'উমরাও জান' ছবিতে গজল গেয়ে তিনি সারা ভারতকে স্তব্ধ করে দেন এবং জাতীয় পুরস্কার লাভ করেন।</p>
+Class: z-20 mt-4
+Animation: anim-slide-up
+Start: 2
+
+[Slide]
+Duration: 35
+Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
+Element: text
+Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">১৩. উমরাও জানের জাদুকরী সুর</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: youtube
+Content: https://youtube.com/shorts/aaqx3CVrfcI?si=mN1_4uP7knlH3h72
+Start: 1
+PlayDuration: 30
+Class: w-full max-w-md h-[45vh] rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.2)]
+Animation: anim-fade
+Start: 2
+Element: text
+Content: <p class="text-white mt-4 text-lg italic">"ইন আঁখো কি মাস্তি কে..."</p>
+Class: z-20
+Animation: anim-slide-up
+Start: 4
+
+[Slide]
+Duration: 15
+Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-900
+Element: video
+Content: asha.mp3
+Start: 40
+PlayDuration: 15
+Class: opacity-0 absolute w-0 h-0
+Element: text
+Content: <h2 class="text-2xl text-teal-300 font-bold mb-4">১৪. বাঙালির প্রাণের 'আশা'</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: text
+Content: <p class="text-lg text-white leading-relaxed text-justify">আর. ডি. বর্মনের সুরে তাঁর গাওয়া পুজোর বাংলা গানগুলো আজও বাঙালির ড্রয়িংরুমে নষ্টালজিয়া তৈরি করে।</p>
+Class: z-20 mt-4
+Animation: anim-fade
+Start: 2
+
+[Slide]
+Duration: 70
+Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
+Element: text
+Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">১৫. কালজয়ী বাংলা গান</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: youtube
+Content: https://youtu.be/w1z0yPGlLwA?si=Vp7f9-yA8P7Ms5xH
+Start: 30
+PlayDuration: 60
+Class: w-full max-w-md h-[45vh] rounded-xl shadow-[0_0_15px_rgba(20,184,166,0.3)]
+Animation: anim-zoom
+Start: 2
+Element: text
+Content: <p class="text-white mt-4 text-lg italic">"মোহুয়ায় জমেছে আজ মৌ গো..."</p>
+Class: z-20
+Animation: anim-fade
+Start: 4
+
+[Slide]
+Duration: 65
+Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
+Element: text
+Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">১৬. আরও একটি বাংলা মাস্টারপিস</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: youtube
+Content: https://youtu.be/DD2nzTDTavc?si=_F93m5Vmw6KLnxhH
+Start: 31
+PlayDuration: 60
+Class: w-full max-w-md h-[45vh] rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.2)]
+Animation: anim-fade
+Start: 2
+Element: text
+Content: <p class="text-white mt-4 text-lg italic">"যাবো কি যাবো না..."</p>
+Class: z-20
+Animation: anim-slide-up
+Start: 4
+
+[Slide]
+Duration: 15
+Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gradient-to-b from-gray-950 to-gray-800
+Element: video
+Content: asha.mp3
+Start: 20
+PlayDuration: 15
+Class: opacity-0 absolute w-0 h-0
+Element: text
+Content: <h2 class="text-2xl text-teal-300 font-bold mb-4">১৭. গিনেস ওয়ার্ল্ড রেকর্ড</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: text
+Content: <p class="text-lg text-white leading-relaxed text-justify">২০১১ সালে গিনেস বুক অফ ওয়ার্ল্ড রেকর্ডস তাঁকে মিউজিক ইতিহাসের "সবচেয়ে বেশি স্টুডিও রেকর্ডিং করা শিল্পী" হিসেবে স্বীকৃতি দেয় (১১,০০০ এর বেশি গান)।</p>
+Class: z-20 mt-4
+Animation: anim-fade
+Start: 2
+
+[Slide]
+Duration: 15
+Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-900
+Element: youtube
+Content: https://www.youtube.com/watch?v=FztO_70FIBE
+Start: 20
+PlayDuration: 15
+Class: opacity-0 absolute w-0 h-0
+Element: text
+Content: <h2 class="text-2xl text-teal-300 font-bold mb-4">১৮. গুলজার ও পঞ্চম</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: text
+Content: <p class="text-lg text-white leading-relaxed text-justify">গুলজারের লেখা অদ্ভুত সুন্দর লিরিক্সগুলোতে প্রাণ দিয়েছিলেন আশা। 'ইজাজত' সিনেমার গান তার বড় প্রমাণ।</p>
+Class: z-20 mt-4
+Animation: anim-fade
+Start: 2
+
+[Slide]
+Duration: 35
+Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
+Element: text
+Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">১৯. এক অমর মাস্টারপিস</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: youtube
+Content: https://youtube.com/shorts/2vkwATaQ6Ec?si=uRpPW1LBomqVZsRD
+Start: 1
+PlayDuration: 30
+Class: w-full max-w-md h-[45vh] rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.4)]
+Animation: anim-zoom
+Start: 2
+Element: text
+Content: <p class="text-white mt-4 text-lg italic">"মেরা কুছ সামান..." (ইজাজত)</p>
+Class: z-20
+Animation: anim-fade
+Start: 4
+
+[Slide]
+Duration: 15
+Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-900
+Element: video
+Content: asha.mp3
+Start: 5
+PlayDuration: 15
+Class: opacity-0 absolute w-0 h-0
+Element: text
+Content: <h2 class="text-2xl text-teal-300 font-bold mb-4">২০. নব্বইয়ের দশক ও এ. আর. রহমান</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: text
+Content: <p class="text-lg text-white leading-relaxed text-justify">নব্বইয়ের দশকে এ. আর. রহমানের সুরে 'রঙ্গিলা' ছবিতে আশা প্রমাণ করেন বয়স তাঁর কাছে শুধু একটা সংখ্যা।</p>
+Class: z-20 mt-4
+Animation: anim-slide-up
+Start: 2
+
+[Slide]
+Duration: 65
+Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
+Element: text
+Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">২১. তারুণ্যের সুর</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: youtube
+Content: https://youtube.com/shorts/dARO3vBIMPY?si=NrQwTqE_Jl9GVvcX
+Start: 1
+PlayDuration: 60
+Class: w-full max-w-md h-[45vh] rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.2)]
+Animation: anim-fade
+Start: 2
+Element: text
+Content: <p class="text-white mt-4 text-lg italic">"তানহা তানহা..." (রঙ্গিলা)</p>
+Class: z-20
+Animation: anim-slide-up
+Start: 4
+
+[Slide]
+Duration: 15
+Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gradient-to-t from-gray-900 to-black
+Element: youtube
+Content: https://www.youtube.com/watch?v=1UFsS76A-4A
+Start: 5
+PlayDuration: 15
+Class: opacity-0 absolute w-0 h-0
+Element: text
+Content: <h2 class="text-2xl text-teal-300 font-bold mb-4">২২. আন্তর্জাতিক স্বীকৃতি</h2>
+Class: z-20 w-full
+Animation: anim-zoom
+Element: text
+Content: <p class="text-lg text-white leading-relaxed text-justify">১৯৯৭ সালে ব্রিটিশ ব্যান্ড 'Cornershop' তাঁকে ট্রিবিউট করে "Brimful of Asha" গানটি বানায়, যা বিশ্বজুড়ে হিট হয়।</p>
+Class: z-20 mt-4
+Animation: anim-slide-up
+Start: 2
+
+[Slide]
+Duration: 25
+Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
+Element: text
+Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">২৩. Brimful of Asha</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: youtube
+Content: https://youtube.com/shorts/94puvgx6Qmc?si=W6Ys-4cIeNI3z4B7
+Start: 1
+PlayDuration: 20
+Class: w-full max-w-md h-[45vh] rounded-xl shadow-[0_0_15px_rgba(20,184,166,0.3)]
+Animation: anim-zoom
+Start: 2
+Element: text
+Content: <p class="text-white mt-4 text-lg italic">ইন্টারন্যাশনাল ট্রিবিউট সং...</p>
+Class: z-20
+Animation: anim-fade
+Start: 4
+
+[Slide]
+Duration: 15
+Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-900
+Element: youtube
+Content: https://www.youtube.com/watch?v=0yA9m1h3-Y8
+Start: 10
+PlayDuration: 15
+Class: opacity-0 absolute w-0 h-0
+Element: text
+Content: <h2 class="text-2xl text-teal-300 font-bold mb-4">২৪. পপ মিউজিকের রানি</h2>
+Class: z-20 w-full
+Animation: anim-zoom
+Element: text
+Content: <p class="text-lg text-white leading-relaxed text-justify">আশার গলা এমন ছিল যে তিনি সকালে ভজন এবং বিকেলে হিপ-হপ ক্যাবারে অনায়াসে গাইতে পারতেন।</p>
+Class: z-20 mt-4
+Animation: anim-slide-up
+Start: 2
+
+[Slide]
+Duration: 20
+Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
+Element: text
+Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">২৫. দম মারো দম</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: youtube
+Content: https://youtube.com/shorts/wnH0_TQ_beU?si=DV36WBf-LVynxmTF
+Start: 1
+PlayDuration: 20
+Class: w-full max-w-md h-[45vh] rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.2)]
+Animation: anim-fade
+Start: 2
+Element: text
+Content: <p class="text-white mt-4 text-lg italic">হিপ্পি কালচারের জাতীয় সঙ্গীত...</p>
+Class: z-20
+Animation: anim-slide-up
+Start: 4
+
+[Slide]
+Duration: 25
+Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
+Element: text
+Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">২৬. রোমান্টিক ডুয়েট</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: youtube
+Content: https://youtube.com/shorts/3Dk25CVDEKA?si=UlQA6doRnIqYhFOE
+Start: 1
+PlayDuration: 25
+Class: w-full max-w-md h-[45vh] rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.2)]
+Animation: anim-zoom
+Start: 2
+Element: text
+Content: <p class="text-white mt-4 text-lg italic">"চুরা লিয়া হ্যায় তুমনে..."</p>
+Class: z-20
+Animation: anim-fade
+Start: 4
+
+[Slide]
+Duration: 50
+Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
+Element: text
+Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">২৭. বয়সের সীমানা পেরিয়ে</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: youtube
+Content: https://youtube.com/shorts/b-h438zuMKA?si=UGte1px4h4u-oHbl
+Start: 1
+PlayDuration: 45
+Class: w-full max-w-md h-[45vh] rounded-xl shadow-[0_0_15px_rgba(20,184,166,0.3)]
+Animation: anim-fade
+Start: 2
+Element: text
+Content: <p class="text-white mt-4 text-lg italic">"রাধা ক্যায়সে না জলে..." (লগান)</p>
+Class: z-20
+Animation: anim-slide-up
+Start: 4
+
+[Slide]
+Duration: 15
+Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-900
+Element: youtube
+Content: https://www.youtube.com/watch?v=2J_Hn94Xq8w
+Start: 10
+PlayDuration: 15
+Class: opacity-0 absolute w-0 h-0
+Element: text
+Content: <h2 class="text-2xl text-teal-300 font-bold mb-4">২৮. জীবনের দর্শন</h2>
+Class: z-20 w-full
+Animation: anim-zoom
+Element: text
+Content: <div class="bg-gray-800/80 p-6 rounded-lg border border-gray-600"><p class="text-xl text-teal-400 font-medium italic">"আমার জীবনটা একটা রেকর্ডিং স্টুডিওর মতো। আমি শুধু গান গেয়েছি আর মানুষের ভালোবাসা কুড়িয়েছি। গান থেমে গেলে আমারও জীবন থেমে যাবে।"</p></div>
+Class: z-20 mt-4
+Animation: anim-slide-up
+Start: 2
+
+[Slide]
+Duration: 15
+Layout: flex flex-col items-center justify-center w-full h-full p-8 text-center bg-black
+Element: text
+Content: <h1 class="text-3xl md:text-4xl text-white font-bold leading-relaxed tracking-wide">"আমার সুর রয়ে যাবে<br>তোমাদের মাঝে..."</h1>
+Class: z-20
+Animation: anim-zoom
+ExitTime: 12
+ExitAnimation: anim-fade-out
+Element: text
+Content: <p class="text-gray-400 mt-4 text-lg">আশা ভোঁসলে</p>
+Class: z-20
+Animation: anim-slide-up
+Start: 4
+
+[Slide]
+Duration: 10
+Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
+Element: text
+Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">২৯. কসমিক হিলিং স্টেশন</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: video
+Content: https://raw.githubusercontent.com/nabendudebnathbharatiya-bot/My-app-assets2/main/Vedios/intro2.mp4
+Start: 0
+PlayDuration: 10
+Class: w-full max-w-md h-[45vh] rounded-xl shadow-[0_0_15px_rgba(20,184,166,0.3)]
+Animation: anim-fade
+Start: 2
+Element: text
+Content: <p class="text-white mt-4 text-lg italic">"স্বাস্থ্যই সম্পদ"</p>
+Class: z-20
+Animation: anim-slide-up
+Start: 4
+
+[Slide]
+Duration: 45
+Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
+Element: text
+Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">নমস্কার ও প্রণাম chakradhamonline পক্ষ থেকে গভীর শ্রদ্ধাঞ্জলি</h2>
+Class: z-20 w-full
+Animation: anim-slide-down
+Element: youtube
+Content: https://youtube.com/shorts/sDbqjsDEnik?si=_VMPV0DuSIZb7Epc
+Start: 0
+PlayDuration: 40
+Class: w-full max-w-md h-[45vh] rounded-xl shadow-[0_0_15px_rgba(20,184,166,0.3)]
+Animation: anim-fade
+Start: 2
+Element: text
+Content: <p class="text-white mt-4 text-lg italic">আত্মার শান্তি কামনা করি</p>
+Class: z-20
+Animation: anim-slide-up
+Start: 4
+
+[Slide]
+Duration: 10
+Layout: flex flex-col items-center justify-center w-full h-full p-8 text-center bg-black
+Element: text
+Content: <h1 class="text-4xl md:text-5xl text-teal-500 font-extrabold tracking-widest shadow-lg">বিনম্র শ্রদ্ধাঞ্জলি</h1>
+Class: z-20
+Animation: anim-zoom
+Start: 1
+Element: text
+Content: <p class="text-gray-500 mt-6 text-base leading-relaxed">তৈরি করেছেন: CHAKRADHAM ONLINE <br> (NABENDU DEBNATH)</p>
+Class: z-20
+Animation: anim-fade
+Start: 3
