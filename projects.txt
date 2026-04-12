@@ -77,3 +77,17 @@ Demo: patient-data/index.html
 File: index.html | patient-data/index.html
 File: data.txt | patient-data/data.txt
 File: history.txt | patient-data/history.txt
+
+
+---
+
+Title: chakra player. com 
+Description: yotube এর মতো ভিডিও দেখুন
+Tags: Tailwind CSS, HTML,JS
+Thumbnail: chakra_player/logo.jpg
+Demo: chakra_player/index.html
+File: index.html | chakra_player/index.html
+File: data.txt | chakra_player/data.txt
+
+
+
