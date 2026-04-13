@@ -12,7 +12,7 @@ Start: 1
 PlayDuration: 15
 Class: opacity-0 absolute w-0 h-0
 Element: text
-Content: <h1 class="text-3xl font-bold text-white">এই প্রেজেন্টেশন ইউটিউব লিংক দিয়ে তৈরি, একটু লোড হতে দেরি, ইউটিউব ad এগুলি আমাদের হাতে নেই </h1>
+Content: <h1 class="text-3xl font-bold text-white">এই প্রেজেন্টেশন ইউটিউব লিংক দিয়ে তৈরি,</h1> একটু লোড হতে দেরি, ইউটিউব ad এগুলি আমাদের হাতে নেই </h1>
 Start: 2
 Element: text
 Content: <h1 class="text-4xl font-extrabold text-white mb-4 drop-shadow-md leading-tight">কোনো ভিডিও মিস করলে আগে পরে করে নির্দিষ্ট ভিডিও স্লাইডে যেতে পারেন<br><span class="text-teal-400">আশা ছিল ,আজ আশা নেই</span></h1>
