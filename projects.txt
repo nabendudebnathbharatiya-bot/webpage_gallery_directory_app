@@ -82,7 +82,7 @@ File: history.txt | patient-data/history.txt
 ---
 
 Title: chakra player. com 
-Description: yotube এর মতো ভিডিও দেখুন
+Description: youtube এর মতো ভিডিও দেখুন
 Tags: Tailwind CSS, HTML,JS
 Thumbnail: chakra_player/logo.jpg
 Demo: chakra_player/index.html
