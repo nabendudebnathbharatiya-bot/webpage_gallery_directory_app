@@ -4,7 +4,7 @@ ShareText: সুরসম্রাজ্ঞী আশা ভোঁসলের 
 ShareLink: https://yourwebsite.com/asha-tribute
 
 [Slide]
-Duration: 15
+Duration: 20
 Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gradient-to-b from-gray-950 to-black
 Element: video
 Content: asha.mp3
@@ -12,7 +12,33 @@ Start: 1
 PlayDuration: 15
 Class: opacity-0 absolute w-0 h-0
 Element: text
-Content: <h1 class="text-3xl font-bold text-white">গানেই আমি বেঁচে থাকবো</h1>
+Content: <h1 class="text-3xl font-bold text-white">এই প্রেজেন্টেশন ইউটিউব লিংক দিয়ে তৈরি, একটু লোড হতে দেরি, ইউটিউব ad এগুলি আমাদের হাতে নেই </h1>
+Start: 2
+Element: text
+Content: <h1 class="text-4xl font-extrabold text-white mb-4 drop-shadow-md leading-tight">কোনো ভিডিও মিস করলে আগে পরে করে নির্দিষ্ট ভিডিও স্লাইডে যেতে পারেন<br><span class="text-teal-400">আশা ছিল ,আজ আশা নেই</span></h1>
+Class: z-20
+Animation: anim-slide-down
+Element: text
+Content: <p class="text-2xl text-gray-300 font-medium">আশা ভোঁসলে</p><p class="text-lg text-gray-500 mt-2">(৮ সেপ্টেম্বর ১৯৩৩ - অনন্তকাল)</p>
+Class: mt-4 z-20
+Animation: anim-fade
+Start: 2
+Element: text
+Content: <p class="mt-8 text-sm text-gray-400 italic">chakradham online</p>
+Class: z-20
+Animation: anim-slide-up
+Start: 5
+
+[Slide]
+Duration: 20
+Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gradient-to-b from-gray-950 to-black
+Element: video
+Content: asha.mp3
+Start: 1
+PlayDuration: 15
+Class: opacity-0 absolute w-0 h-0
+Element: text
+Content: <h1 class="text-3xl font-bold text-white">গানেই আমি বেঁচে থাকবো...</h1>
 Start: 2
 Element: text
 Content: <h1 class="text-4xl font-extrabold text-white mb-4 drop-shadow-md leading-tight">সুরের আকাশে<br><span class="text-teal-400">নক্ষত্রপতন</span></h1>
@@ -30,7 +56,7 @@ Animation: anim-slide-up
 Start: 5
 
 [Slide]
-Duration: 15
+Duration: 20
 Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-900
 Element: youtube
 Content:https://youtu.be/Gh5ttePuK08?si=Y8_n3h7pFxzWE_-A
@@ -48,7 +74,7 @@ Animation: anim-slide-up
 Start: 2
 
 [Slide]
-Duration: 35
+Duration: 45
 Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
 Element: text
 Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">২. প্রথম গাওয়া গান</h2>
@@ -68,7 +94,7 @@ Animation: anim-fade
 Start: 4
 
 [Slide]
-Duration: 15
+Duration: 25
 Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gradient-to-t from-gray-900 to-black
 Element: youtube
 Content: https://www.youtube.com/watch?v=_k1x-2c5H00
@@ -86,7 +112,7 @@ Animation: anim-slide-up
 Start: 2
 
 [Slide]
-Duration: 65
+Duration: 75
 Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
 Element: text
 Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">৪. শুরুর দিকের একটি অমূল্য রত্ন</h2>
@@ -106,7 +132,7 @@ Animation: anim-slide-up
 Start: 4
 
 [Slide]
-Duration: 15
+Duration: 25
 Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-900
 Element: youtube
 Content: https://www.youtube.com/watch?v=Ew3i-G28b7Y
@@ -124,7 +150,7 @@ Animation: anim-fade
 Start: 2
 
 [Slide]
-Duration: 35
+Duration: 45
 Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
 Element: text
 Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">৬. আইয়ে মেহেরবাঁ...</h2>
@@ -144,7 +170,7 @@ Animation: anim-fade
 Start: 4
 
 [Slide]
-Duration: 15
+Duration: 25
 Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gradient-to-t from-gray-900 to-black
 Element: youtube
 Content: https://www.youtube.com/watch?v=tT_I5wRk8O8
@@ -162,7 +188,7 @@ Animation: anim-slide-up
 Start: 2
 
 [Slide]
-Duration: 15
+Duration: 25
 Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-950
 Element: youtube
 Content: https://www.youtube.com/watch?v=cDyazrwoC6A
@@ -180,7 +206,7 @@ Animation: anim-fade
 Start: 2
 
 [Slide]
-Duration: 42
+Duration: 52
 Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
 Element: text
 Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">৯. হেলেন ম্যাজিক</h2>
@@ -200,7 +226,7 @@ Animation: anim-fade
 Start: 4
 
 [Slide]
-Duration: 15
+Duration: 25
 Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-900
 Element: video
 Content:Element: video
@@ -219,7 +245,7 @@ Animation: anim-fade
 Start: 2
 
 [Slide]
-Duration: 42
+Duration: 52
 Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
 Element: text
 Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">১১. দুই কিংবদন্তির ডুয়েট</h2>
@@ -240,7 +266,7 @@ Start: 4
 
 
 [Slide]
-Duration: 15
+Duration: 25
 Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gradient-to-t from-gray-900 to-black
 Element: video
 Content: asha.mp3
@@ -258,7 +284,7 @@ Animation: anim-slide-up
 Start: 2
 
 [Slide]
-Duration: 35
+Duration: 45
 Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
 Element: text
 Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">১৩. উমরাও জানের জাদুকরী সুর</h2>
@@ -278,7 +304,7 @@ Animation: anim-slide-up
 Start: 4
 
 [Slide]
-Duration: 15
+Duration: 25
 Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-900
 Element: video
 Content: asha.mp3
@@ -296,7 +322,7 @@ Animation: anim-fade
 Start: 2
 
 [Slide]
-Duration: 70
+Duration: 80
 Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
 Element: text
 Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">১৫. কালজয়ী বাংলা গান</h2>
@@ -316,7 +342,7 @@ Animation: anim-fade
 Start: 4
 
 [Slide]
-Duration: 65
+Duration: 75
 Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
 Element: text
 Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">১৬. আরও একটি বাংলা মাস্টারপিস</h2>
@@ -336,7 +362,7 @@ Animation: anim-slide-up
 Start: 4
 
 [Slide]
-Duration: 15
+Duration: 25
 Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gradient-to-b from-gray-950 to-gray-800
 Element: video
 Content: asha.mp3
@@ -354,7 +380,7 @@ Animation: anim-fade
 Start: 2
 
 [Slide]
-Duration: 15
+Duration: 25
 Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-900
 Element: youtube
 Content: https://www.youtube.com/watch?v=FztO_70FIBE
@@ -372,7 +398,7 @@ Animation: anim-fade
 Start: 2
 
 [Slide]
-Duration: 35
+Duration: 45
 Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
 Element: text
 Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">১৯. এক অমর মাস্টারপিস</h2>
@@ -392,7 +418,7 @@ Animation: anim-fade
 Start: 4
 
 [Slide]
-Duration: 15
+Duration: 25
 Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-900
 Element: video
 Content: asha.mp3
@@ -430,7 +456,7 @@ Animation: anim-slide-up
 Start: 4
 
 [Slide]
-Duration: 15
+Duration: 25
 Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gradient-to-t from-gray-900 to-black
 Element: youtube
 Content: https://www.youtube.com/watch?v=1UFsS76A-4A
@@ -468,7 +494,7 @@ Animation: anim-fade
 Start: 4
 
 [Slide]
-Duration: 15
+Duration: 25
 Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-900
 Element: youtube
 Content: https://www.youtube.com/watch?v=0yA9m1h3-Y8
@@ -486,7 +512,7 @@ Animation: anim-slide-up
 Start: 2
 
 [Slide]
-Duration: 20
+Duration: 30
 Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
 Element: text
 Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">২৫. দম মারো দম</h2>
@@ -506,7 +532,7 @@ Animation: anim-slide-up
 Start: 4
 
 [Slide]
-Duration: 25
+Duration: 35
 Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
 Element: text
 Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">২৬. রোমান্টিক ডুয়েট</h2>
@@ -526,7 +552,7 @@ Animation: anim-fade
 Start: 4
 
 [Slide]
-Duration: 50
+Duration: 60
 Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
 Element: text
 Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">২৭. বয়সের সীমানা পেরিয়ে</h2>
@@ -546,7 +572,7 @@ Animation: anim-slide-up
 Start: 4
 
 [Slide]
-Duration: 15
+Duration: 25
 Layout: flex flex-col items-center justify-center w-full h-full p-6 text-center bg-gray-900
 Element: youtube
 Content: https://www.youtube.com/watch?v=2J_Hn94Xq8w
@@ -564,7 +590,7 @@ Animation: anim-slide-up
 Start: 2
 
 [Slide]
-Duration: 15
+Duration: 25
 Layout: flex flex-col items-center justify-center w-full h-full p-8 text-center bg-black
 Element: text
 Content: <h1 class="text-3xl md:text-4xl text-white font-bold leading-relaxed tracking-wide">"আমার সুর রয়ে যাবে<br>তোমাদের মাঝে..."</h1>
@@ -579,7 +605,7 @@ Animation: anim-slide-up
 Start: 4
 
 [Slide]
-Duration: 10
+Duration: 20
 Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
 Element: text
 Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">২৯. কসমিক হিলিং স্টেশন</h2>
@@ -599,7 +625,7 @@ Animation: anim-slide-up
 Start: 4
 
 [Slide]
-Duration: 45
+Duration: 55
 Layout: flex flex-col items-center justify-start w-full h-full p-4 pt-10 text-center bg-black
 Element: text
 Content: <h2 class="text-2xl text-teal-400 font-bold mb-4">নমস্কার ও প্রণাম chakradhamonline পক্ষ থেকে গভীর শ্রদ্ধাঞ্জলি</h2>
@@ -619,7 +645,7 @@ Animation: anim-slide-up
 Start: 4
 
 [Slide]
-Duration: 10
+Duration: 20
 Layout: flex flex-col items-center justify-center w-full h-full p-8 text-center bg-black
 Element: text
 Content: <h1 class="text-4xl md:text-5xl text-teal-500 font-extrabold tracking-widest shadow-lg">বিনম্র শ্রদ্ধাঞ্জলি</h1>
