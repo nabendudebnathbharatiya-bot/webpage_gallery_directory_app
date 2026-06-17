@@ -89,5 +89,15 @@ Demo: chakra_player/index.html
 File: index.html | chakra_player/index.html
 File: data.txt | chakra_player/data.txt
 
+---
+
+
+Title: egg therapy game
+Description: পঁচা সামজের জন্য পঁচা ডিম
+Tags: Tailwind CSS, HTML,JS
+Thumbnail: egg_therapy_game/logo.jpg
+Demo: egg_therapy_game/index.html
+File: index.html | egg_therapy_game/index.html
+File: criminals.json | egg_therapy_game/criminals.json
 
 
