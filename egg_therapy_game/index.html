@@ -3,8 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <meta name="description" content="Egg Therapy Game - চোর, বাটপার ও অপরাধীদের ডিম মেরে রাগ কমানোর একটি চমৎকার বিনোদনমূলক গেম।">
     <title>Egg Therapy Game ডিম থেরাপি</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -17,12 +23,13 @@
         .drip-yolk { animation: dripAnim 2s cubic-bezier(0.4, 0, 0.2, 1) forwards; transform-origin: top; }
         @keyframes dripAnim { 0% { transform: scaleY(0.1); opacity: 0.8; } 100% { transform: scaleY(1); opacity: 0.9; } }
         
-        .spinner { border: 4px solid rgba(255, 255, 255, 0.3); width: 50px; height: 50px; border-radius: 50%; border-top-color: #ffffff; animation: spin 1s ease-in-out infinite; }
+        .spinner { border: 4px solid rgba(255, 255, 255, 0.3); width: 50px; height: 50px; border-radius: 50%; border-top-color: #ef4444; animation: spin 1s ease-in-out infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         .float-up { animation: floatUpAnim 1s ease-out forwards; }
         @keyframes floatUpAnim { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-60px) scale(1.5); opacity: 0; text-shadow: 0px 0px 10px rgba(255,0,0,0.8); } }
 
+        /* কাস্টম স্ক্রলবার ডিজাইন */
         .custom-scrollbar::-webkit-scrollbar { width: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #fef08a; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #fca5a5; border-radius: 10px; }
@@ -34,41 +41,21 @@
     <audio id="bg-music" loop></audio>
     <audio id="splat-sound"></audio>
 
-    <div id="screen-splash" class="w-full h-screen flex flex-col items-center justify-center bg-gradient-to-r from-orange-400 to-red-500 absolute inset-0 z-50">
-        <div class="bg-white/20 p-8 rounded-full mb-6">
-            <img src="https://cdn-icons-png.flaticon.com/512/837/837560.png" alt="Egg Logo" class="w-32 h-32 drop-shadow-xl animate-bounce">
-        </div>
-        <h1 id="splash-title" class="text-5xl font-extrabold text-white mb-8 drop-shadow-lg text-center px-4">লোড হচ্ছে...</h1>
-        
-        <div id="splash-loader" class="flex flex-col items-center">
-            <div class="spinner mb-4"></div>
-            <p class="text-white text-lg font-semibold">ডেটা এবং মিউজিক লোড হচ্ছে...</p>
-        </div>
-        
-        <button id="play-btn" onclick="startMusic()" class="hidden mt-8 bg-white text-red-500 hover:bg-gray-100 font-extrabold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition flex items-center gap-2 text-xl">
-            ▶️ মিউজিক প্লে করুন
-        </button>
-
-        <button id="skip-btn" onclick="skipToGame()" class="hidden mt-8 bg-black/30 hover:bg-black/50 text-white font-bold py-2 px-8 rounded-full border border-white/50 transition backdrop-blur">
-            স্কিপ করুন ⏭️
-        </button>
-    </div>
-
-    <div id="screen-intro" class="hidden w-full max-w-md mt-20 flex flex-col items-center bg-white p-8 rounded-2xl shadow-xl text-center">
-        <h1 id="intro-title" class="text-4xl font-extrabold text-red-600 mb-6 drop-shadow-sm">
-        ডিম থেরাপি গেম🥚</h1>
-        <div class="space-y-4 text-left w-full mb-8">
+    <div id="screen-intro" class="w-full h-screen flex flex-col items-center justify-center bg-white p-8 text-center relative z-40">
+        <h1 id="intro-title" class="text-4xl md:text-5xl font-extrabold text-red-600 mb-8 drop-shadow-sm">
+        ডিম থেরাপি গেম 🥚</h1>
+        <div class="space-y-4 text-left w-full max-w-md mb-8">
             <p class="flex items-center gap-3 text-lg"><span class="text-3xl">🦹‍♂️</span> ছবি বা গ্যালারি থেকে সিলেক্ট করুন।</p>
             <p class="flex items-center gap-3 text-lg"><span class="text-3xl">🎯</span> ডিম ছুঁড়লেই শুনবেন ফাটানোর সাউন্ড।</p>
             <p class="flex items-center gap-3 text-lg"><span class="text-3xl">🗯️</span> প্রতি ডিমে ভাসবে মজার স্লোগান!</p>
             <p class="flex items-center gap-3 text-lg"><span class="text-3xl">📸</span> কমেন্ট লিখে ম্যানুয়ালি স্ক্রিনশট নিন।</p>
         </div>
-        <button onclick="showScreen('screen-selection')" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-full text-xl shadow-lg transform hover:scale-105 transition">
+        <button onclick="startGamePlay()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-10 rounded-full text-xl shadow-lg transform hover:scale-105 transition">
             খেলা শুরু করি
         </button>
     </div>
 
-    <div id="screen-selection" class="hidden w-full max-w-3xl mt-6 flex-col items-center text-center px-4">
+    <div id="screen-selection" class="hidden w-full max-w-3xl mt-6 flex-col items-center text-center px-4 z-30">
         <h2 class="text-3xl font-bold text-gray-800 mb-4">যাকে ডিম মারতে চান তাকে বেছে নিন</h2>
         
         <div class="mb-4 w-full flex justify-center">
@@ -86,17 +73,13 @@
         </div>
 
         <div id="loading-state" class="hidden flex-col items-center justify-center my-4">
-            <div class="spinner mb-2 border-t-red-500"></div>
+            <div class="spinner mb-2"></div>
             <p class="font-semibold text-gray-600">লিস্ট লোড হচ্ছে...</p>
         </div>
 
         <div id="error-state" class="hidden my-4 bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg">
-            <p id="error-message" class="font-bold">নেটওয়ার্ক এরর। আবার চেষ্টা করুন।</p>
-            <button onclick="fetchGameData()" class="mt-3 bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded">Retry</button>
-        </div>
-        
-        <div id="empty-state" class="hidden my-4 text-xl font-bold text-gray-500">
-            No data found 🚫
+            <p id="error-message" class="font-bold">নেটওয়ার্ক এরর। লিস্ট লোড হয়নি।</p>
+            <button onclick="fetchGameData()" class="mt-3 bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded">আবার চেষ্টা করুন</button>
         </div>
 
         <div class="w-full bg-white/60 backdrop-blur border-2 border-yellow-200 rounded-2xl p-4 shadow-inner max-h-[45vh] overflow-y-auto custom-scrollbar">
@@ -104,12 +87,12 @@
         </div>
     </div>
 
-    <div id="screen-game" class="hidden w-full h-screen flex flex-col items-center bg-gray-200 relative">
+    <div id="screen-game" class="hidden w-full h-screen flex flex-col items-center bg-gray-200 relative z-20">
         <div id="full-capture-area" class="relative w-full max-w-lg mx-auto h-full flex flex-col bg-gray-300 shadow-2xl">
             
             <div class="z-30 bg-white/95 backdrop-blur px-6 py-3 shadow-sm flex justify-between items-center w-full border-b border-gray-200">
                 <div>
-                    <h2 id="game-header-title" class="text-base text-gray-500 font-bold mb-1">Egg Therapy Game</h2>
+                    <h2 id="game-header-title" class="text-base text-gray-500 font-bold mb-1">ডিম থেরাপি গেম</h2>
                     <p class="text-lg font-bold">ডিম মারা হয়েছে: <span id="score" class="text-red-600 text-3xl">0</span></p>
                 </div>
                 <button id="comment-btn" onclick="handleCommentAndFreeze()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full text-sm shadow-md transition-all flex items-center gap-2">
@@ -133,24 +116,40 @@
         let isGameFrozen = false; 
         const slogans = ["চোর!", "চিটার!", "ভণ্ড!", "পাজি!", "দুর্নীতিবাজ!", "শরম নাই!", "লুটেরা!", "ঠগবাজ!"];
 
+        // পেজ লোড হলেই ব্যাকগ্রাউন্ডে ডেটা ফেচ শুরু হবে, কিন্তু ইন্ট্রো স্ক্রিন থাকবে
         window.onload = () => fetchGameData();
 
         function showScreen(screenId) {
-            document.querySelectorAll('body > div[id^="screen-"]').forEach(div => div.classList.add('hidden'));
+            document.getElementById('screen-intro').classList.add('hidden');
+            document.getElementById('screen-selection').classList.add('hidden');
+            document.getElementById('screen-game').classList.add('hidden');
+            
             document.getElementById(screenId).classList.remove('hidden');
             document.getElementById(screenId).classList.add('flex');
         }
 
+        // ইন্ট্রো থেকে খেলা শুরু বোতাম চাপলে মিউজিক বাজবে এবং সিলেকশন পেজ আসবে
+        function startGamePlay() {
+            const bgMusic = document.getElementById('bg-music');
+            if (bgMusic.src) {
+                bgMusic.volume = 0.3;
+                bgMusic.play().catch(e => console.log("Audio play error:", e));
+            }
+            showScreen('screen-selection');
+        }
+
         async function fetchGameData() {
             const errorState = document.getElementById('error-state');
-            const splashLoader = document.getElementById('splash-loader');
-            const playBtn = document.getElementById('play-btn');
             const galleryLoader = document.getElementById('loading-state');
+            const gallery = document.getElementById('character-gallery');
 
             errorState.classList.add('hidden');
+            gallery.innerHTML = '';
             galleryLoader.classList.remove('hidden');
+            galleryLoader.classList.add('flex');
 
             try {
+                // ক্যাশ এড়ানোর জন্য টাইমস্ট্যাম্প যুক্ত করা হয়েছে
                 const timestamp = new Date().getTime();
                 const response = await fetch(`criminals.json?v=${timestamp}`);
                 
@@ -159,16 +158,12 @@
                 const gameData = await response.json();
 
                 const title = gameData.title || "Egg Therapy Game ডিম থেরাপি";
-                document.getElementById('splash-title').innerText = title;
                 document.getElementById('intro-title').innerText = title + " 🥚";
                 document.getElementById('game-header-title').innerText = title;
                 document.title = title;
 
                 if(gameData.bgMusic) document.getElementById('bg-music').src = gameData.bgMusic;
                 if(gameData.splatSound) document.getElementById('splat-sound').src = gameData.splatSound;
-
-                const gallery = document.getElementById('character-gallery');
-                gallery.innerHTML = '';
 
                 if (Array.isArray(gameData.criminals)) {
                     gameData.criminals.forEach(criminal => {
@@ -187,31 +182,14 @@
                 }
 
                 galleryLoader.classList.add('hidden');
-
-                setTimeout(() => {
-                    splashLoader.classList.add('hidden');
-                    playBtn.classList.remove('hidden');
-                }, 1000);
+                galleryLoader.classList.remove('flex');
 
             } catch (error) {
-                document.getElementById('error-message').innerText = "ডেটা লোড করতে সমস্যা হয়েছে।";
+                console.error("Fetch failed:", error);
                 errorState.classList.remove('hidden');
-                splashLoader.classList.add('hidden');
                 galleryLoader.classList.add('hidden');
+                galleryLoader.classList.remove('flex');
             }
-        }
-
-        function startMusic() {
-            const bgMusic = document.getElementById('bg-music');
-            bgMusic.volume = 0.3;
-            bgMusic.play().catch(e => console.log("Audio play error:", e));
-
-            document.getElementById('play-btn').classList.add('hidden');
-            document.getElementById('skip-btn').classList.remove('hidden');
-        }
-
-        function skipToGame() {
-            showScreen('screen-intro');
         }
 
         function handleMobileFileUpload(event) {
@@ -335,7 +313,6 @@
             }, 300);
         });
 
-        // ফিক্সড কমেন্ট এবং গেম ফ্রিজ ফাংশন (সিএসএস সেন্টারিং বাগ ফিক্স করা হয়েছে)
         function handleCommentAndFreeze() {
             const btn = document.getElementById('comment-btn');
 
@@ -349,12 +326,10 @@
             if (userComment && userComment.trim() !== "") {
                 isGameFrozen = true; 
 
-                // কমেন্ট বক্সের জন্য একটি ফুল-উইথ র‍্যাপার তৈরি করা হলো যাতে সেন্টারিং পারফেক্ট হয়
                 const commentWrapper = document.createElement('div');
                 commentWrapper.id = 'fixed-comment-wrapper';
                 commentWrapper.className = "absolute bottom-16 left-0 w-full flex justify-center z-40 px-4 pointer-events-none";
 
-                // সেন্টারিংয়ের ক্লাসগুলো সরিয়ে flex এর উপর দায়িত্ব দেওয়া হলো এবং লাফানো বন্ধ করা হলো
                 const commentDiv = document.createElement('div');
                 commentDiv.innerText = userComment;
                 commentDiv.className = "bg-black/85 text-white px-6 py-3 rounded-2xl text-xl md:text-2xl font-extrabold shadow-2xl text-center border-2 border-white/50 break-words drop-shadow-lg max-w-full";
