@@ -1,0 +1,14 @@
+{
+    "title": "Egg Therapy Game",
+    "bgMusic": "music/titlesong.mp3",
+    "splatSound": "music/egg.mp3",
+    "criminals": [
+        { "id": 1, "name": "ফাইল চোর", "image": "image/j.png" },
+        { "id": 2, "name": "চোর কুণাল", "image": "image/kunal.png" },
+        { "id": 3, "name": "মাছ চোর", "image": "images/shakat.jpeg" },
+        { "id": 4, "name": "মহাচোর", "image": "images/abhisek.jpg" },
+       
+        { "id": 5, "name": "ফাইল চোর", "image": "image/j.png" },
+        
+    ]
+}
